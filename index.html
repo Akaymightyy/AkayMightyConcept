@@ -3,34 +3,32 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AkayMightyConcept – Awwal Abdulhakeem</title>
+<title>AkayMightyConcept</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&family=Montserrat:wght@700&display=swap" rel="stylesheet">
 
 <style>
 
 /* RESET */
-*{margin:0;padding:0;box-sizing:border-box;scroll-behavior:smooth;}
-body{font-family:'Poppins',sans-serif;background:#0b0b0b;color:#fff;overflow-x:hidden;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Poppins',sans-serif;background:#0b0b0b;color:#fff;}
 
-/* SEARCH BAR */
+/* SEARCH */
 .search-container{
+  position:fixed;
+  top:0;
   width:100%;
   display:flex;
   justify-content:center;
-  padding:15px 0;
+  padding:15px;
   background:#0b0b0b;
-  position:fixed;
-  top:0;
-  z-index:1001;
+  z-index:1000;
 }
 #searchInput{
-  width:320px;
-  max-width:90%;
-  padding:12px 20px;
-  border-radius:30px;
+  padding:10px 20px;
+  border-radius:25px;
   border:none;
-  outline:none;
+  width:300px;
   background:#111;
   color:#fff;
 }
@@ -43,97 +41,54 @@ nav{
   display:flex;
   justify-content:center;
   align-items:center;
-  gap:30px;
-  background:rgba(0,0,0,0.9);
+  gap:20px;
+  background:#000;
   padding:10px;
-  z-index:1000;
 }
 nav img{height:45px;}
-.nav-links a{
-  color:#fff;
-  margin:0 10px;
-  text-decoration:none;
-  font-weight:500;
-}
-.nav-links a:hover{color:#800000;}
+nav a{color:#fff;text-decoration:none;margin:0 10px;}
+nav a:hover{color:#800000;}
 
-/* HERO */
-.hero{
-  position:relative;
-  height:100vh;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  text-align:center;
+/* HERO IMAGE (LANDSCAPE) */
+.hero-img{
+  margin-top:110px;
+  width:100%;
+  height:50vh; /* reduced height */
   overflow:hidden;
-  margin-top:100px;
-  padding:0 20px;
 }
-.hero img{
-  position:absolute;
+.hero-img img{
   width:100%;
   height:100%;
   object-fit:cover;
 }
-.hero::before{
-  content:"";
-  position:absolute;
-  width:100%;
-  height:100%;
-  background:linear-gradient(to top,#0b0b0b,transparent,#0b0b0b);
-  z-index:2;
-}
 
-/* HERO CONTENT FIXED */
-.hero-content{
-  position:relative;
-  z-index:3;
-  max-width:900px;
-  width:100%;
-  margin:auto;
-  padding:0 20px;
+/* HERO TEXT (NOW BELOW IMAGE) */
+.hero-text{
   text-align:center;
-  animation:fadeUp 1.2s ease;
+  padding:50px 20px;
 }
-
-.hero-content h1{
-  font-family:'Montserrat',sans-serif;
-  font-size:clamp(2rem,6vw,4rem);
-  line-height:1.2;
+.hero-text h1{
+  font-family:'Montserrat';
+  font-size:clamp(2rem,5vw,3.5rem);
   margin-bottom:15px;
 }
-
-.hero-content span{
-  color:#800000;
+.hero-text span{color:#800000;}
+.hero-text p{
+  font-size:1.2rem;
+  opacity:0.8;
+  margin-bottom:20px;
 }
-
-.hero-content p{
-  font-size:clamp(1rem,2.5vw,1.3rem);
-  margin-bottom:25px;
-  opacity:0.9;
-}
-
-.hero-content button{
-  padding:15px 35px;
+.hero-text button{
+  padding:15px 30px;
   border:none;
-  border-radius:30px;
   background:#800000;
   color:#fff;
-  cursor:pointer;
-}
-.hero-content button:hover{
-  background:#a00000;
-}
-
-/* ANIMATION */
-@keyframes fadeUp{
-  from{opacity:0;transform:translateY(40px);}
-  to{opacity:1;transform:translateY(0);}
+  border-radius:25px;
 }
 
 /* SECTIONS */
 section{padding:80px 20px;text-align:center;}
-h2{font-size:2.5rem;margin-bottom:40px;}
+h2{font-size:2.3rem;margin-bottom:30px;}
 
 /* ABOUT */
 .about{
@@ -143,14 +98,8 @@ h2{font-size:2.5rem;margin-bottom:40px;}
   align-items:center;
   gap:40px;
 }
-.about img{
-  width:350px;
-  border-radius:15px;
-}
-.about-text{
-  max-width:600px;
-  text-align:left;
-}
+.about img{width:350px;border-radius:15px;}
+.about-text{max-width:600px;text-align:left;}
 
 /* GRID */
 .grid{
@@ -158,31 +107,31 @@ h2{font-size:2.5rem;margin-bottom:40px;}
   grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
   gap:25px;
 }
+
+/* CARD */
 .card{
-  position:relative;
+  background:#111;
+  padding:10px;
   border-radius:12px;
-  overflow:hidden;
 }
 .card img{
   width:100%;
-  height:100%;
-  object-fit:cover;
+  border-radius:10px;
 }
+
+/* LABEL BELOW IMAGE */
 .card-label{
-  position:absolute;
-  bottom:10px;
-  left:10px;
-  background:#800000;
-  padding:5px 10px;
-  border-radius:5px;
+  margin-top:10px;
+  text-align:center;
+  font-weight:600;
+  color:#ccc;
 }
 
 /* CONTACT */
 #contact a{
   display:block;
-  margin:10px 0;
+  margin:10px;
   color:#800000;
-  text-decoration:none;
 }
 
 /* FOOTER */
@@ -195,13 +144,13 @@ footer{text-align:center;padding:20px;opacity:0.6;}
 
 <!-- SEARCH -->
 <div class="search-container">
-<input type="text" id="searchInput" placeholder="Search...">
+<input type="text" placeholder="Search...">
 </div>
 
 <!-- NAV -->
 <nav>
 <img src="https://cdn.kord.live/serve/0ZrEeq0AoRiU.jpg">
-<div class="nav-links">
+<div>
 <a href="#about">About</a>
 <a href="#services">Design</a>
 <a href="#printing">Printing</a>
@@ -211,14 +160,14 @@ footer{text-align:center;padding:20px;opacity:0.6;}
 </nav>
 
 <!-- HERO -->
-<div class="hero">
+<div class="hero-img">
 <img src="https://cdn.kord.live/serve/p6rY9MStOU36.jpg">
-
-<div class="hero-content">
-<h1>Welcome to <span>AkayMightyConcept</span></h1>
-<p>Transforming ideas into premium designs and professional printing solutions.</p>
-<button onclick="window.open('https://wa.me/2349049541318')">Hire Me</button>
 </div>
+
+<div class="hero-text">
+<h1>Welcome to <span>AkayMightyConcept</span></h1>
+<p>Transforming ideas into premium designs and printing solutions.</p>
+<button onclick="window.open('https://wa.me/2349049541318')">Hire Me</button>
 </div>
 
 <!-- ABOUT -->
@@ -227,19 +176,32 @@ footer{text-align:center;padding:20px;opacity:0.6;}
 <div class="about">
 <img src="https://cdn.kord.live/serve/tmpqcmKFtcjJ.jpg">
 <div class="about-text">
-<p>I’m Awwal Abdulhakeem, a creative graphics designer with 4+ years experience in branding, flyers and print designs.</p>
-<p>I specialize in CorelDRAW, Photoshop and modern visual branding.</p>
+<p>I’m Awwal Abdulhakeem, a professional graphics designer with 4+ years experience.</p>
+<p>I specialize in branding, flyers, and print design.</p>
 </div>
 </div>
 </section>
 
-<!-- SERVICES -->
+<!-- DESIGN -->
 <section id="services">
 <h2>Design Services</h2>
 <div class="grid">
-<div class="card"><img src="https://cdn.kord.live/serve/ZoCtg7SPBWlc.jpg"><div class="card-label">Logo</div></div>
-<div class="card"><img src="https://cdn.kord.live/serve/4cG5RghDuw9w.jpg"><div class="card-label">Ads Flyers</div></div>
-<div class="card"><img src="https://cdn.kord.live/serve/NRlPY4VLxSVG.jpg"><div class="card-label">Food Flyers</div></div>
+
+<div class="card">
+<img src="https://cdn.kord.live/serve/ZoCtg7SPBWlc.jpg">
+<div class="card-label">Logo Designs</div>
+</div>
+
+<div class="card">
+<img src="https://cdn.kord.live/serve/4cG5RghDuw9w.jpg">
+<div class="card-label">Ads Flyer Designs</div>
+</div>
+
+<div class="card">
+<img src="https://cdn.kord.live/serve/NRlPY4VLxSVG.jpg">
+<div class="card-label">Food Flyer Designs</div>
+</div>
+
 </div>
 </section>
 
@@ -247,9 +209,22 @@ footer{text-align:center;padding:20px;opacity:0.6;}
 <section id="printing">
 <h2>Printing Services</h2>
 <div class="grid">
-<div class="card"><img src="https://cdn.kord.live/serve/KWXIC3QcBiFj.jpg"><div class="card-label">Flyers</div></div>
-<div class="card"><img src="https://cdn.kord.live/serve/mH1YnwxDaQUi.jpg"><div class="card-label">Banners</div></div>
-<div class="card"><img src="https://cdn.kord.live/serve/lJJcUHt93XsB.jpg"><div class="card-label">Posters</div></div>
+
+<div class="card">
+<img src="https://cdn.kord.live/serve/KWXIC3QcBiFj.jpg">
+<div class="card-label">Flyers Printing</div>
+</div>
+
+<div class="card">
+<img src="https://cdn.kord.live/serve/mH1YnwxDaQUi.jpg">
+<div class="card-label">Banners Printing</div>
+</div>
+
+<div class="card">
+<img src="https://cdn.kord.live/serve/lJJcUHt93XsB.jpg">
+<div class="card-label">Posters Printing</div>
+</div>
+
 </div>
 </section>
 
