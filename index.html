@@ -4,104 +4,107 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AkayMightyConcept – Awwal Abdulhakeem</title>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&family=Montserrat:wght@700&display=swap" rel="stylesheet">
 <style>
-/* RESET */
-* {margin:0; padding:0; box-sizing:border-box; font-family:'Poppins', sans-serif; scroll-behavior: smooth;}
-body {background:#f8f9fa; color:#111;}
+* {margin:0; padding:0; box-sizing:border-box; scroll-behavior:smooth;}
+body {font-family:'Poppins', sans-serif; background:#0b0b0b; color:#fff;}
 
-/* NAV */
-nav {position:fixed; width:100%; top:0; display:flex; justify-content:space-between; align-items:center; padding:15px 40px; background:rgba(255,255,255,0.95); box-shadow:0 2px 10px rgba(0,0,0,0.05); z-index:1000;}
-nav img {height:50px; border-radius:10px;}
-nav a {margin-left:20px; text-decoration:none; color:#111; font-weight:500; transition:0.3s;}
-nav a:hover {color:#38bdf8;}
+/* NAVIGATION */
+nav {position:fixed; top:0; width:100%; display:flex; justify-content:space-between; align-items:center; padding:20px 50px; background:rgba(0,0,0,0.85); z-index:1000; flex-wrap:wrap;}
+nav img {height:50px;}
+.nav-links {display:flex; align-items:center; gap:20px; flex-wrap:wrap;}
+.nav-links a {color:#fff; text-decoration:none; font-weight:500; transition:0.3s;}
+.nav-links a:hover {color:#800000;}
+#searchInput {padding:8px 14px; border-radius:20px; border:none; outline:none; font-size:0.9rem; background:#111; color:#fff; transition:0.3s;}
+#searchInput:focus {border:2px solid #800000;}
 
 /* HERO */
-.hero {height:100vh; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; padding:20px; background:#f8f9fa;}
-.hero img {width:180px; height:180px; border-radius:50%; object-fit:cover; margin-bottom:20px; border:4px solid #38bdf8;}
-.hero h1 {font-size:3rem; margin-bottom:10px;}
-.hero h1 span {color:#38bdf8;}
-.hero p {max-width:500px; opacity:0.8; margin-bottom:20px;}
-.hero button {padding:14px 30px; border:none; background:#38bdf8; color:#fff; font-weight:600; border-radius:30px; cursor:pointer; transition:0.3s;}
-.hero button:hover {background:#0ea5e9;}
+.hero {position:relative; height:100vh; display:flex; justify-content:center; align-items:center; text-align:center; overflow:hidden;}
+.hero img {position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; z-index:1;}
+.hero::before {content:""; position:absolute; top:0; left:0; width:100%; height:100%; 
+background:linear-gradient(to top, #0b0b0b 0%, rgba(0,0,0,0) 25%, rgba(0,0,0,0) 75%, #0b0b0b 100%); z-index:2;}
+.hero-content {position:relative; z-index:3; max-width:900px;}
+.hero-content h1 {font-family:'Montserrat', sans-serif; font-size:4rem; margin-bottom:20px; line-height:1.2;}
+.hero-content h1 span {color:#800000;}
+.hero-content p {font-size:1.3rem; opacity:0.85; margin-bottom:30px;}
+.hero-content button {padding:18px 40px; background:#800000; border:none; border-radius:30px; font-weight:600; cursor:pointer; transition:0.3s;}
+.hero-content button:hover {background:#a00000; box-shadow:0 0 20px #800000;}
 
 /* SECTION TITLES */
-section {padding:80px 20px; text-align:center;}
-section h2 {font-size:2.5rem; margin-bottom:20px; color:#111;}
+section {padding:100px 20px; text-align:center;}
+section h2 {font-family:'Montserrat', sans-serif; font-size:3rem; margin-bottom:40px; color:#fff;}
 
 /* GRID */
-.grid {display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:25px; margin-top:40px;}
+.grid {display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:30px; margin-top:40px;}
+.card {position:relative; background:#111; border-radius:15px; overflow:hidden; box-shadow:0 5px 25px rgba(0,0,0,0.5); cursor:pointer; transition:0.4s;}
+.card img {width:100%; height:100%; object-fit:cover; transition:0.4s;}
+.card:hover img {transform:scale(1.05);}
+.card-label {position:absolute; bottom:10px; left:10px; color:#fff; font-weight:600; background:rgba(128,0,0,0.8); padding:5px 12px; border-radius:5px; font-size:0.9rem;}
 
-/* CARD */
-.card {background:#fff; border-radius:15px; padding:15px; box-shadow:0 4px 15px rgba(0,0,0,0.1); transition:0.3s; cursor:pointer;}
-.card:hover {transform:translateY(-8px) scale(1.02);}
-.card img {width:100%; border-radius:10px;}
+/* HIGHLIGHT SEARCH MATCH */
+.highlight {box-shadow:0 0 20px #800000; border:2px solid #800000; transition:0.3s;}
 
-/* ABOUT SECTION */
-.about {display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:40px;}
-.about img {width:300px; border-radius:15px; box-shadow:0 4px 15px rgba(0,0,0,0.1);}
+/* ABOUT */
+.about {display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:50px; padding:50px 0;}
+.about img {width:400px; border-radius:15px; box-shadow:0 10px 30px rgba(0,0,0,0.6);}
 .about-text {max-width:600px; text-align:left; line-height:1.6;}
+.about-text p {margin-bottom:15px;}
 
 /* TESTIMONIALS */
-.testimonial img {width:100%; border-radius:15px; box-shadow:0 4px 15px rgba(0,0,0,0.1);}
-
-/* CONTACT */
-#contact a {display:block; margin:10px; color:#38bdf8; text-decoration:none; font-weight:500; transition:0.3s;}
-#contact a:hover {color:#0ea5e9;}
+.testimonial {background:#111; border-radius:15px; padding:40px; box-shadow:0 5px 25px rgba(0,0,0,0.5);}
+.testimonial p {font-style:italic; line-height:1.6;}
 
 /* CTA */
-.cta img {width:100%; border-radius:15px; margin-bottom:20px;}
+.cta {background:#800000; color:#fff; padding:80px 20px; border-radius:15px; margin:50px 20px;}
+.cta h2 {font-size:3rem; margin-bottom:30px;}
+.cta button {padding:18px 40px; background:#0b0b0b; border:none; border-radius:30px; font-weight:600; cursor:pointer; transition:0.3s;}
+.cta button:hover {background:#2b0000; box-shadow:0 0 20px #fff;}
+
+/* CONTACT */
+#contact a {display:block; margin:15px 0; color:#800000; text-decoration:none; font-weight:500; font-size:1.1rem; transition:0.3s;}
+#contact a:hover {color:#a00000;}
 
 /* FOOTER */
-footer {text-align:center; padding:20px; opacity:0.7; font-size:14px;}
+footer {text-align:center; padding:25px; opacity:0.6; font-size:14px;}
 
 /* RESPONSIVE */
-@media(max-width:768px){.about {flex-direction:column; text-align:center;}.about-text{text-align:center;}}
+@media(max-width:900px){.about{flex-direction:column; text-align:center;}.about-text{text-align:center;}.nav-links{flex-direction:column; gap:10px;}}
 </style>
 </head>
 <body>
 
 <!-- NAV -->
 <nav>
-<img src="https://cdn.kord.live/serve/ZiCFvVRTT5k3.jpg" alt="AkayMightyConcept Logo">
-<div>
-<a href="#services">Services</a>
-<a href="#portfolio">Portfolio</a>
-<a href="#about">About</a>
-<a href="#contact">Contact</a>
-</div>
+  <img src="https://cdn.kord.live/serve/ZiCFvVRTT5k3.jpg" alt="AkayMightyConcept Logo">
+  <div class="nav-links">
+    <a href="#services">Services</a>
+    <a href="#portfolio">Portfolio</a>
+    <a href="#about">About</a>
+    <a href="#contact">Contact</a>
+    <input type="text" id="searchInput" placeholder="Search services, portfolio...">
+  </div>
 </nav>
 
 <!-- HERO -->
 <div class="hero">
-<img src="https://cdn.kord.live/serve/lXcwzN14bIvG.jpg" alt="Awwal Abdulhakeem">
-<h1>Awwal <span>Abdulhakeem</span></h1>
-<p>Helping brands communicate visually with high-quality designs. Logos, Flyers, Branding & more.</p>
+<img src="https://cdn.kord.live/serve/lXcwzN14bIvG.jpg" alt="Hero Image">
+<div class="hero-content">
+<h1>Welcome to <span>AkayMightyConcept</span></h1>
+<p>Transforming ideas into high-quality designs & print media. Logos, Flyers, Branding & more.</p>
 <button onclick="window.open('https://wa.me/2349049541318')">Hire Me</button>
 </div>
-
-<!-- SERVICES / SKILLS -->
-<section id="services">
-<h2>My Services</h2>
-<div class="grid">
-<div class="card">Logo Design</div>
-<div class="card">Branding & Visual Identity</div>
-<div class="card">Flyers & Promotional Materials</div>
-<div class="card">Print Media Design</div>
-<div class="card">CorelDRAW & Photoshop Expertise</div>
 </div>
-</section>
 
-<!-- PORTFOLIO -->
-<section id="portfolio">
-<h2>Portfolio</h2>
+<!-- SERVICES -->
+<section id="services">
+<h2>Our Services</h2>
 <div class="grid">
-<div class="card"><img src="https://cdn.kord.live/serve/ZoCtg7SPBWlc.jpg" alt="Logo Designs"></div>
-<div class="card"><img src="https://cdn.kord.live/serve/4cG5RghDuw9w.jpg" alt="Ads Flyer Designs"></div>
-<div class="card"><img src="https://cdn.kord.live/serve/NRlPY4VLxSVG.jpg" alt="Food Flyer Designs"></div>
-<div class="card"><img src="https://cdn.kord.live/serve/KWXIC3QcBiFj.jpg" alt="Business Flyers"></div>
-<div class="card"><img src="https://cdn.kord.live/serve/mH1YnwxDaQUi.jpg" alt="Club Flyers"></div>
-<div class="card"><img src="https://cdn.kord.live/serve/lJJcUHt93XsB.jpg" alt="Web3 Flyers"></div>
+<div class="card"><div class="card-label">Logo Design</div><img src="https://cdn.kord.live/serve/ZoCtg7SPBWlc.jpg" alt="Logo Designs"></div>
+<div class="card"><div class="card-label">Ads Flyers</div><img src="https://cdn.kord.live/serve/4cG5RghDuw9w.jpg" alt="Ads Flyers"></div>
+<div class="card"><div class="card-label">Food Flyers</div><img src="https://cdn.kord.live/serve/NRlPY4VLxSVG.jpg" alt="Food Flyers"></div>
+<div class="card"><div class="card-label">Business Flyers</div><img src="https://cdn.kord.live/serve/KWXIC3QcBiFj.jpg" alt="Business Flyers"></div>
+<div class="card"><div class="card-label">Club Flyers</div><img src="https://cdn.kord.live/serve/mH1YnwxDaQUi.jpg" alt="Club Flyers"></div>
+<div class="card"><div class="card-label">Web3 Flyers</div><img src="https://cdn.kord.live/serve/lJJcUHt93XsB.jpg" alt="Web3 Flyers"></div>
 </div>
 </section>
 
@@ -122,16 +125,13 @@ footer {text-align:center; padding:20px; opacity:0.7; font-size:14px;}
 <section id="testimonials">
 <h2>Client Reviews</h2>
 <div class="grid">
-<div class="card testimonial">
-<img src="https://cdn.kord.live/serve/T0gxq1Vb7Iyp.jpg" alt="Client Reviews">
-</div>
+<div class="card testimonial"><img src="https://cdn.kord.live/serve/T0gxq1Vb7Iyp.jpg" alt="Client Reviews"></div>
 </div>
 </section>
 
-<!-- CTA / THANK YOU -->
+<!-- CTA -->
 <section class="cta">
 <h2>Ready to Work Together?</h2>
-<img src="https://cdn.kord.live/serve/P2Tjv7EITuJL.jpg" alt="Thank You">
 <button onclick="window.open('https://wa.me/2349049541318')">Let’s Start</button>
 </section>
 
@@ -147,6 +147,27 @@ footer {text-align:center; padding:20px; opacity:0.7; font-size:14px;}
 <footer>
 <p>© 2026 AkayMightyConcept – Awwal Abdulhakeem</p>
 </footer>
+
+<script>
+const searchInput = document.getElementById('searchInput');
+searchInput.addEventListener('keyup', function(event){
+    if(event.key === 'Enter'){
+        const query = searchInput.value.toLowerCase();
+        const sections = document.querySelectorAll('section, .card');
+        let found = false;
+
+        sections.forEach(el=>{
+            el.classList.remove('highlight');
+            if(el.innerText.toLowerCase().includes(query)){
+                el.scrollIntoView({behavior:'smooth', block:'start'});
+                el.classList.add('highlight');
+                found = true;
+            }
+        });
+        if(!found) alert('No results found for: ' + query);
+    }
+});
+</script>
 
 </body>
 </html>
