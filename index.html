@@ -4,170 +4,263 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AkayMightyConcept – Awwal Abdulhakeem</title>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&family=Montserrat:wght@700&display=swap" rel="stylesheet">
-<style>
-* {margin:0; padding:0; box-sizing:border-box; scroll-behavior:smooth;}
-body {font-family:'Poppins', sans-serif; background:#0b0b0b; color:#fff;}
 
-/* NAVIGATION */
-nav {position:fixed; top:0; width:100%; display:flex; justify-content:space-between; align-items:center; padding:20px 50px; background:rgba(0,0,0,0.85); z-index:1000; flex-wrap:wrap;}
-nav img {height:50px;}
-.nav-links {display:flex; align-items:center; gap:20px; flex-wrap:wrap;}
-.nav-links a {color:#fff; text-decoration:none; font-weight:500; transition:0.3s;}
-.nav-links a:hover {color:#800000;}
-#searchInput {padding:8px 14px; border-radius:20px; border:none; outline:none; font-size:0.9rem; background:#111; color:#fff; transition:0.3s;}
-#searchInput:focus {border:2px solid #800000;}
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&family=Montserrat:wght@700&display=swap" rel="stylesheet">
+
+<style>
+
+/* RESET */
+*{margin:0;padding:0;box-sizing:border-box;scroll-behavior:smooth;}
+body{font-family:'Poppins',sans-serif;background:#0b0b0b;color:#fff;overflow-x:hidden;}
+
+/* SEARCH BAR */
+.search-container{
+  width:100%;
+  display:flex;
+  justify-content:center;
+  padding:15px 0;
+  background:#0b0b0b;
+  position:fixed;
+  top:0;
+  z-index:1001;
+}
+#searchInput{
+  width:320px;
+  max-width:90%;
+  padding:12px 20px;
+  border-radius:30px;
+  border:none;
+  outline:none;
+  background:#111;
+  color:#fff;
+}
+
+/* NAV */
+nav{
+  position:fixed;
+  top:60px;
+  width:100%;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:30px;
+  background:rgba(0,0,0,0.9);
+  padding:10px;
+  z-index:1000;
+}
+nav img{height:45px;}
+.nav-links a{
+  color:#fff;
+  margin:0 10px;
+  text-decoration:none;
+  font-weight:500;
+}
+.nav-links a:hover{color:#800000;}
 
 /* HERO */
-.hero {position:relative; height:100vh; display:flex; justify-content:center; align-items:center; text-align:center; overflow:hidden;}
-.hero img {position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; z-index:1;}
-.hero::before {content:""; position:absolute; top:0; left:0; width:100%; height:100%; 
-background:linear-gradient(to top, #0b0b0b 0%, rgba(0,0,0,0) 25%, rgba(0,0,0,0) 75%, #0b0b0b 100%); z-index:2;}
-.hero-content {position:relative; z-index:3; max-width:900px;}
-.hero-content h1 {font-family:'Montserrat', sans-serif; font-size:4rem; margin-bottom:20px; line-height:1.2;}
-.hero-content h1 span {color:#800000;}
-.hero-content p {font-size:1.3rem; opacity:0.85; margin-bottom:30px;}
-.hero-content button {padding:18px 40px; background:#800000; border:none; border-radius:30px; font-weight:600; cursor:pointer; transition:0.3s;}
-.hero-content button:hover {background:#a00000; box-shadow:0 0 20px #800000;}
+.hero{
+  position:relative;
+  height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  text-align:center;
+  overflow:hidden;
+  margin-top:100px;
+  padding:0 20px;
+}
+.hero img{
+  position:absolute;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+.hero::before{
+  content:"";
+  position:absolute;
+  width:100%;
+  height:100%;
+  background:linear-gradient(to top,#0b0b0b,transparent,#0b0b0b);
+  z-index:2;
+}
 
-/* SECTION TITLES */
-section {padding:100px 20px; text-align:center;}
-section h2 {font-family:'Montserrat', sans-serif; font-size:3rem; margin-bottom:40px; color:#fff;}
+/* HERO CONTENT FIXED */
+.hero-content{
+  position:relative;
+  z-index:3;
+  max-width:900px;
+  width:100%;
+  margin:auto;
+  padding:0 20px;
+  text-align:center;
+  animation:fadeUp 1.2s ease;
+}
 
-/* GRID */
-.grid {display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:30px; margin-top:40px;}
-.card {position:relative; background:#111; border-radius:15px; overflow:hidden; box-shadow:0 5px 25px rgba(0,0,0,0.5); cursor:pointer; transition:0.4s;}
-.card img {width:100%; height:100%; object-fit:cover; transition:0.4s;}
-.card:hover img {transform:scale(1.05);}
-.card-label {position:absolute; bottom:10px; left:10px; color:#fff; font-weight:600; background:rgba(128,0,0,0.8); padding:5px 12px; border-radius:5px; font-size:0.9rem;}
+.hero-content h1{
+  font-family:'Montserrat',sans-serif;
+  font-size:clamp(2rem,6vw,4rem);
+  line-height:1.2;
+  margin-bottom:15px;
+}
 
-/* HIGHLIGHT SEARCH MATCH */
-.highlight {box-shadow:0 0 20px #800000; border:2px solid #800000; transition:0.3s;}
+.hero-content span{
+  color:#800000;
+}
+
+.hero-content p{
+  font-size:clamp(1rem,2.5vw,1.3rem);
+  margin-bottom:25px;
+  opacity:0.9;
+}
+
+.hero-content button{
+  padding:15px 35px;
+  border:none;
+  border-radius:30px;
+  background:#800000;
+  color:#fff;
+  cursor:pointer;
+}
+.hero-content button:hover{
+  background:#a00000;
+}
+
+/* ANIMATION */
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(40px);}
+  to{opacity:1;transform:translateY(0);}
+}
+
+/* SECTIONS */
+section{padding:80px 20px;text-align:center;}
+h2{font-size:2.5rem;margin-bottom:40px;}
 
 /* ABOUT */
-.about {display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:50px; padding:50px 0;}
-.about img {width:400px; border-radius:15px; box-shadow:0 10px 30px rgba(0,0,0,0.6);}
-.about-text {max-width:600px; text-align:left; line-height:1.6;}
-.about-text p {margin-bottom:15px;}
+.about{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  align-items:center;
+  gap:40px;
+}
+.about img{
+  width:350px;
+  border-radius:15px;
+}
+.about-text{
+  max-width:600px;
+  text-align:left;
+}
 
-/* TESTIMONIALS */
-.testimonial {background:#111; border-radius:15px; padding:40px; box-shadow:0 5px 25px rgba(0,0,0,0.5);}
-.testimonial p {font-style:italic; line-height:1.6;}
-
-/* CTA */
-.cta {background:#800000; color:#fff; padding:80px 20px; border-radius:15px; margin:50px 20px;}
-.cta h2 {font-size:3rem; margin-bottom:30px;}
-.cta button {padding:18px 40px; background:#0b0b0b; border:none; border-radius:30px; font-weight:600; cursor:pointer; transition:0.3s;}
-.cta button:hover {background:#2b0000; box-shadow:0 0 20px #fff;}
+/* GRID */
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+  gap:25px;
+}
+.card{
+  position:relative;
+  border-radius:12px;
+  overflow:hidden;
+}
+.card img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+.card-label{
+  position:absolute;
+  bottom:10px;
+  left:10px;
+  background:#800000;
+  padding:5px 10px;
+  border-radius:5px;
+}
 
 /* CONTACT */
-#contact a {display:block; margin:15px 0; color:#800000; text-decoration:none; font-weight:500; font-size:1.1rem; transition:0.3s;}
-#contact a:hover {color:#a00000;}
+#contact a{
+  display:block;
+  margin:10px 0;
+  color:#800000;
+  text-decoration:none;
+}
 
 /* FOOTER */
-footer {text-align:center; padding:25px; opacity:0.6; font-size:14px;}
+footer{text-align:center;padding:20px;opacity:0.6;}
 
-/* RESPONSIVE */
-@media(max-width:900px){.about{flex-direction:column; text-align:center;}.about-text{text-align:center;}.nav-links{flex-direction:column; gap:10px;}}
 </style>
 </head>
+
 <body>
+
+<!-- SEARCH -->
+<div class="search-container">
+<input type="text" id="searchInput" placeholder="Search...">
+</div>
 
 <!-- NAV -->
 <nav>
-  <img src="https://cdn.kord.live/serve/ZiCFvVRTT5k3.jpg" alt="AkayMightyConcept Logo">
-  <div class="nav-links">
-    <a href="#services">Services</a>
-    <a href="#portfolio">Portfolio</a>
-    <a href="#about">About</a>
-    <a href="#contact">Contact</a>
-    <input type="text" id="searchInput" placeholder="Search services, portfolio...">
-  </div>
+<img src="https://cdn.kord.live/serve/0ZrEeq0AoRiU.jpg">
+<div class="nav-links">
+<a href="#about">About</a>
+<a href="#services">Design</a>
+<a href="#printing">Printing</a>
+<a href="#portfolio">Portfolio</a>
+<a href="#contact">Contact</a>
+</div>
 </nav>
 
 <!-- HERO -->
 <div class="hero">
-<img src="https://cdn.kord.live/serve/lXcwzN14bIvG.jpg" alt="Hero Image">
+<img src="https://cdn.kord.live/serve/p6rY9MStOU36.jpg">
+
 <div class="hero-content">
 <h1>Welcome to <span>AkayMightyConcept</span></h1>
-<p>Transforming ideas into high-quality designs & print media. Logos, Flyers, Branding & more.</p>
+<p>Transforming ideas into premium designs and professional printing solutions.</p>
 <button onclick="window.open('https://wa.me/2349049541318')">Hire Me</button>
 </div>
 </div>
-
-<!-- SERVICES -->
-<section id="services">
-<h2>Our Services</h2>
-<div class="grid">
-<div class="card"><div class="card-label">Logo Design</div><img src="https://cdn.kord.live/serve/ZoCtg7SPBWlc.jpg" alt="Logo Designs"></div>
-<div class="card"><div class="card-label">Ads Flyers</div><img src="https://cdn.kord.live/serve/4cG5RghDuw9w.jpg" alt="Ads Flyers"></div>
-<div class="card"><div class="card-label">Food Flyers</div><img src="https://cdn.kord.live/serve/NRlPY4VLxSVG.jpg" alt="Food Flyers"></div>
-<div class="card"><div class="card-label">Business Flyers</div><img src="https://cdn.kord.live/serve/KWXIC3QcBiFj.jpg" alt="Business Flyers"></div>
-<div class="card"><div class="card-label">Club Flyers</div><img src="https://cdn.kord.live/serve/mH1YnwxDaQUi.jpg" alt="Club Flyers"></div>
-<div class="card"><div class="card-label">Web3 Flyers</div><img src="https://cdn.kord.live/serve/lJJcUHt93XsB.jpg" alt="Web3 Flyers"></div>
-</div>
-</section>
 
 <!-- ABOUT -->
 <section id="about">
 <h2>About Me</h2>
 <div class="about">
-<img src="https://cdn.kord.live/serve/tmpqcmKFtcjJ.jpg" alt="About Me">
+<img src="https://cdn.kord.live/serve/tmpqcmKFtcjJ.jpg">
 <div class="about-text">
-<p>I’m a Creative and detail-oriented Graphics Designer with 4 years of hands-on experience in visual branding, logo design, and promotional materials. Proficient in CorelDRAW, Adobe Photoshop, and mobile design tools like PixelLab, with a proven ability to deliver high-quality designs across digital and print media. Known for strong creative instincts and the ability to bring unique concepts to life under tight deadlines. Passionate about helping brands communicate visually in a powerful and consistent way.</p>
-<p>Work Experience: Graphics Designer at Excel Global Printers, Kaduna (2019-Present)</p>
-<p>Education: Senior Secondary School Certificate, Betty Queen International School, Kaduna, 2020</p>
+<p>I’m Awwal Abdulhakeem, a creative graphics designer with 4+ years experience in branding, flyers and print designs.</p>
+<p>I specialize in CorelDRAW, Photoshop and modern visual branding.</p>
 </div>
 </div>
 </section>
 
-<!-- TESTIMONIALS -->
-<section id="testimonials">
-<h2>Client Reviews</h2>
+<!-- SERVICES -->
+<section id="services">
+<h2>Design Services</h2>
 <div class="grid">
-<div class="card testimonial"><img src="https://cdn.kord.live/serve/T0gxq1Vb7Iyp.jpg" alt="Client Reviews"></div>
+<div class="card"><img src="https://cdn.kord.live/serve/ZoCtg7SPBWlc.jpg"><div class="card-label">Logo</div></div>
+<div class="card"><img src="https://cdn.kord.live/serve/4cG5RghDuw9w.jpg"><div class="card-label">Ads Flyers</div></div>
+<div class="card"><img src="https://cdn.kord.live/serve/NRlPY4VLxSVG.jpg"><div class="card-label">Food Flyers</div></div>
 </div>
 </section>
 
-<!-- CTA -->
-<section class="cta">
-<h2>Ready to Work Together?</h2>
-<button onclick="window.open('https://wa.me/2349049541318')">Let’s Start</button>
+<!-- PRINTING -->
+<section id="printing">
+<h2>Printing Services</h2>
+<div class="grid">
+<div class="card"><img src="https://cdn.kord.live/serve/KWXIC3QcBiFj.jpg"><div class="card-label">Flyers</div></div>
+<div class="card"><img src="https://cdn.kord.live/serve/mH1YnwxDaQUi.jpg"><div class="card-label">Banners</div></div>
+<div class="card"><img src="https://cdn.kord.live/serve/lJJcUHt93XsB.jpg"><div class="card-label">Posters</div></div>
+</div>
 </section>
 
 <!-- CONTACT -->
 <section id="contact">
-<h2>Contact Me</h2>
-<a href="mailto:awwalabdul891@gmail.com">Email: awwalabdul891@gmail.com</a>
-<a href="https://wa.me/2349049541318">WhatsApp: 09049541318</a>
-<a href="https://www.linkedin.com/in/awwal-abdulhakeem-b37283310">LinkedIn</a>
+<h2>Contact</h2>
+<a href="mailto:awwalabdul891@gmail.com">Email</a>
+<a href="https://wa.me/2349049541318">WhatsApp</a>
 </section>
 
-<!-- FOOTER -->
-<footer>
-<p>© 2026 AkayMightyConcept – Awwal Abdulhakeem</p>
-</footer>
-
-<script>
-const searchInput = document.getElementById('searchInput');
-searchInput.addEventListener('keyup', function(event){
-    if(event.key === 'Enter'){
-        const query = searchInput.value.toLowerCase();
-        const sections = document.querySelectorAll('section, .card');
-        let found = false;
-
-        sections.forEach(el=>{
-            el.classList.remove('highlight');
-            if(el.innerText.toLowerCase().includes(query)){
-                el.scrollIntoView({behavior:'smooth', block:'start'});
-                el.classList.add('highlight');
-                found = true;
-            }
-        });
-        if(!found) alert('No results found for: ' + query);
-    }
-});
-</script>
+<footer>© 2026 AkayMightyConcept</footer>
 
 </body>
 </html>
