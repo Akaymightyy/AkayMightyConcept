@@ -3,225 +3,150 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AkayMightyConcept</title>
-
+<title>AkayMightyConcept – Awwal Abdulhakeem</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
-
 <style>
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:'Poppins',sans-serif;
-scroll-behavior:smooth;
-}
+/* RESET */
+* {margin:0; padding:0; box-sizing:border-box; font-family:'Poppins', sans-serif; scroll-behavior: smooth;}
+body {background:#f8f9fa; color:#111;}
 
-body{
-background:#0f172a;
-color:#fff;
-}
-
-/* NAVBAR */
-nav{
-position:sticky;
-top:0;
-background:#020617;
-display:flex;
-justify-content:space-between;
-align-items:center;
-padding:15px 30px;
-z-index:1000;
-}
-
-nav img{
-height:40px;
-border-radius:8px;
-}
-
-nav a{
-color:#fff;
-margin-left:15px;
-text-decoration:none;
-}
+/* NAV */
+nav {position:fixed; width:100%; top:0; display:flex; justify-content:space-between; align-items:center; padding:15px 40px; background:rgba(255,255,255,0.95); box-shadow:0 2px 10px rgba(0,0,0,0.05); z-index:1000;}
+nav img {height:50px; border-radius:10px;}
+nav a {margin-left:20px; text-decoration:none; color:#111; font-weight:500; transition:0.3s;}
+nav a:hover {color:#38bdf8;}
 
 /* HERO */
-.hero{
-height:90vh;
-display:flex;
-flex-direction:column;
-justify-content:center;
-align-items:center;
-text-align:center;
-padding:20px;
-}
+.hero {height:100vh; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; padding:20px; background:#f8f9fa;}
+.hero img {width:180px; height:180px; border-radius:50%; object-fit:cover; margin-bottom:20px; border:4px solid #38bdf8;}
+.hero h1 {font-size:3rem; margin-bottom:10px;}
+.hero h1 span {color:#38bdf8;}
+.hero p {max-width:500px; opacity:0.8; margin-bottom:20px;}
+.hero button {padding:14px 30px; border:none; background:#38bdf8; color:#fff; font-weight:600; border-radius:30px; cursor:pointer; transition:0.3s;}
+.hero button:hover {background:#0ea5e9;}
 
-.hero img{
-width:120px;
-height:120px;
-border-radius:50%;
-object-fit:cover;
-margin-bottom:20px;
-border:3px solid #38bdf8;
-}
+/* SECTION TITLES */
+section {padding:80px 20px; text-align:center;}
+section h2 {font-size:2.5rem; margin-bottom:20px; color:#111;}
 
-.hero h1{
-font-size:2.5rem;
-margin-bottom:10px;
-}
+/* GRID */
+.grid {display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:25px; margin-top:40px;}
 
-.hero p{
-opacity:0.8;
-}
+/* CARD */
+.card {background:#fff; border-radius:15px; padding:15px; box-shadow:0 4px 15px rgba(0,0,0,0.1); transition:0.3s; cursor:pointer;}
+.card:hover {transform:translateY(-8px) scale(1.02);}
+.card img {width:100%; border-radius:10px;}
 
-.hero button{
-margin:10px;
-padding:12px 25px;
-border:none;
-background:#38bdf8;
-cursor:pointer;
-font-weight:bold;
-}
+/* ABOUT SECTION */
+.about {display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:40px;}
+.about img {width:300px; border-radius:15px; box-shadow:0 4px 15px rgba(0,0,0,0.1);}
+.about-text {max-width:600px; text-align:left; line-height:1.6;}
 
-/* SECTIONS */
-section{
-padding:60px 20px;
-text-align:center;
-}
+/* TESTIMONIALS */
+.testimonial img {width:100%; border-radius:15px; box-shadow:0 4px 15px rgba(0,0,0,0.1);}
 
-.grid{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-gap:20px;
-margin-top:20px;
-}
+/* CONTACT */
+#contact a {display:block; margin:10px; color:#38bdf8; text-decoration:none; font-weight:500; transition:0.3s;}
+#contact a:hover {color:#0ea5e9;}
 
-.card{
-background:#1e293b;
-padding:15px;
-border-radius:10px;
-transition:0.3s;
-}
-
-.card:hover{
-transform:translateY(-5px);
-}
-
-.card img{
-width:100%;
-border-radius:10px;
-}
-
-/* CONTACT LINKS */
-#contact a{
-color:#38bdf8;
-text-decoration:none;
-display:block;
-margin:8px 0;
-}
-
-/* WHATSAPP FLOAT */
-.whatsapp{
-position:fixed;
-bottom:20px;
-right:20px;
-background:#25D366;
-color:#fff;
-padding:15px;
-border-radius:50%;
-text-decoration:none;
-font-size:20px;
-}
+/* CTA */
+.cta img {width:100%; border-radius:15px; margin-bottom:20px;}
 
 /* FOOTER */
-footer{
-background:#020617;
-padding:20px;
-text-align:center;
-margin-top:30px;
-}
+footer {text-align:center; padding:20px; opacity:0.7; font-size:14px;}
+
+/* RESPONSIVE */
+@media(max-width:768px){.about {flex-direction:column; text-align:center;}.about-text{text-align:center;}}
 </style>
 </head>
-
 <body>
 
-<!-- NAVBAR -->
+<!-- NAV -->
 <nav>
-<img src="https://i.imgur.com/E6r9IKn.jpg">
+<img src="https://cdn.kord.live/serve/ZiCFvVRTT5k3.jpg" alt="AkayMightyConcept Logo">
 <div>
 <a href="#services">Services</a>
-<a href="#portfolio">Work</a>
+<a href="#portfolio">Portfolio</a>
+<a href="#about">About</a>
 <a href="#contact">Contact</a>
 </div>
 </nav>
 
 <!-- HERO -->
 <div class="hero">
-<img src="https://i.imgur.com/dJLrnaR.jpg">
-
-<h1>AkayMightyConcept</h1>
-<p>Creative Graphics • Branding • Printing</p>
-
-<button onclick="window.open('https://wa.me/2349049541318')">
-Hire Me
-</button>
+<img src="https://cdn.kord.live/serve/lXcwzN14bIvG.jpg" alt="Awwal Abdulhakeem">
+<h1>Awwal <span>Abdulhakeem</span></h1>
+<p>Helping brands communicate visually with high-quality designs. Logos, Flyers, Branding & more.</p>
+<button onclick="window.open('https://wa.me/2349049541318')">Hire Me</button>
 </div>
 
-<!-- SERVICES -->
+<!-- SERVICES / SKILLS -->
 <section id="services">
 <h2>My Services</h2>
-
 <div class="grid">
 <div class="card">Logo Design</div>
-<div class="card">Flyer Design</div>
-<div class="card">Branding</div>
-<div class="card">Printing Services</div>
+<div class="card">Branding & Visual Identity</div>
+<div class="card">Flyers & Promotional Materials</div>
+<div class="card">Print Media Design</div>
+<div class="card">CorelDRAW & Photoshop Expertise</div>
 </div>
-
 </section>
 
 <!-- PORTFOLIO -->
 <section id="portfolio">
-<h2>My Work</h2>
-
+<h2>Portfolio</h2>
 <div class="grid">
-
-<div class="card">
-<img src="images/design1.jpg" alt="Design 1">
+<div class="card"><img src="https://cdn.kord.live/serve/ZoCtg7SPBWlc.jpg" alt="Logo Designs"></div>
+<div class="card"><img src="https://cdn.kord.live/serve/4cG5RghDuw9w.jpg" alt="Ads Flyer Designs"></div>
+<div class="card"><img src="https://cdn.kord.live/serve/NRlPY4VLxSVG.jpg" alt="Food Flyer Designs"></div>
+<div class="card"><img src="https://cdn.kord.live/serve/KWXIC3QcBiFj.jpg" alt="Business Flyers"></div>
+<div class="card"><img src="https://cdn.kord.live/serve/mH1YnwxDaQUi.jpg" alt="Club Flyers"></div>
+<div class="card"><img src="https://cdn.kord.live/serve/lJJcUHt93XsB.jpg" alt="Web3 Flyers"></div>
 </div>
+</section>
 
-<div class="card">
-<img src="images/design2.jpg" alt="Design 2">
+<!-- ABOUT -->
+<section id="about">
+<h2>About Me</h2>
+<div class="about">
+<img src="https://cdn.kord.live/serve/tmpqcmKFtcjJ.jpg" alt="About Me">
+<div class="about-text">
+<p>I’m a Creative and detail-oriented Graphics Designer with 4 years of hands-on experience in visual branding, logo design, and promotional materials. Proficient in CorelDRAW, Adobe Photoshop, and mobile design tools like PixelLab, with a proven ability to deliver high-quality designs across digital and print media. Known for strong creative instincts and the ability to bring unique concepts to life under tight deadlines. Passionate about helping brands communicate visually in a powerful and consistent way.</p>
+<p>Work Experience: Graphics Designer at Excel Global Printers, Kaduna (2019-Present)</p>
+<p>Education: Senior Secondary School Certificate, Betty Queen International School, Kaduna, 2020</p>
 </div>
-
-<div class="card">
-<img src="images/design3.jpg" alt="Design 3">
 </div>
+</section>
 
+<!-- TESTIMONIALS -->
+<section id="testimonials">
+<h2>Client Reviews</h2>
+<div class="grid">
+<div class="card testimonial">
+<img src="https://cdn.kord.live/serve/T0gxq1Vb7Iyp.jpg" alt="Client Reviews">
 </div>
+</div>
+</section>
 
+<!-- CTA / THANK YOU -->
+<section class="cta">
+<h2>Ready to Work Together?</h2>
+<img src="https://cdn.kord.live/serve/P2Tjv7EITuJL.jpg" alt="Thank You">
+<button onclick="window.open('https://wa.me/2349049541318')">Let’s Start</button>
 </section>
 
 <!-- CONTACT -->
 <section id="contact">
 <h2>Contact Me</h2>
-
-<p>📞 +2349049541318</p>
-
-<a href="https://wa.me/2349049541318">💬 Chat on WhatsApp</a>
-
-<a href="#">Facebook: Ak mightyy</a>
-<a href="#">Instagram: Awwal lafia</a>
-<a href="#">Twitter: Akaymightyy</a>
-
+<a href="mailto:awwalabdul891@gmail.com">Email: awwalabdul891@gmail.com</a>
+<a href="https://wa.me/2349049541318">WhatsApp: 09049541318</a>
+<a href="https://www.linkedin.com/in/awwal-abdulhakeem-b37283310">LinkedIn</a>
 </section>
 
 <!-- FOOTER -->
 <footer>
-<p>© 2026 AkayMightyConcept</p>
+<p>© 2026 AkayMightyConcept – Awwal Abdulhakeem</p>
 </footer>
-
-<!-- FLOATING WHATSAPP -->
-<a class="whatsapp" href="https://wa.me/2349049541318">💬</a>
 
 </body>
 </html>
