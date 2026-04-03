@@ -8,144 +8,124 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&family=Montserrat:wght@700&display=swap" rel="stylesheet">
 
 <style>
-
-/* RESET */
-*{margin:0;padding:0;box-sizing:border-box;}
-body{font-family:'Poppins',sans-serif;background:#0b0b0b;color:#fff;}
-
-/* SEARCH */
-.search-container{
-  position:fixed;
-  top:0;
-  width:100%;
-  display:flex;
-  justify-content:center;
-  padding:15px;
+*{margin:0;padding:0;box-sizing:border-box;scroll-behavior:smooth;}
+body{
+  font-family:'Poppins',sans-serif;
   background:#0b0b0b;
-  z-index:1000;
-}
-#searchInput{
-  padding:10px 20px;
-  border-radius:25px;
-  border:none;
-  width:300px;
-  background:#111;
   color:#fff;
 }
 
 /* NAV */
 nav{
   position:fixed;
-  top:60px;
+  top:0;
   width:100%;
   display:flex;
-  justify-content:center;
+  justify-content:space-between;
   align-items:center;
-  gap:20px;
-  background:#000;
-  padding:10px;
+  padding:15px 40px;
+  background:rgba(0,0,0,0.9);
+  backdrop-filter:blur(10px);
+  z-index:1000;
 }
 nav img{height:45px;}
-nav a{color:#fff;text-decoration:none;margin:0 10px;}
+nav a{
+  color:#fff;
+  text-decoration:none;
+  margin:0 15px;
+  transition:0.3s;
+}
 nav a:hover{color:#800000;}
 
-/* HERO IMAGE (LANDSCAPE) */
+/* HERO IMAGE */
 .hero-img{
-  margin-top:110px;
   width:100%;
-  height:50vh; /* reduced height */
+  height:55vh;
   overflow:hidden;
 }
 .hero-img img{
   width:100%;
   height:100%;
   object-fit:cover;
+  filter:brightness(0.7);
 }
 
-/* HERO TEXT (NOW BELOW IMAGE) */
-.hero-text{
+/* HERO TEXT BELOW IMAGE */
+.hero-text-below{
   text-align:center;
-  padding:50px 20px;
+  padding:60px 20px;
+  background:linear-gradient(to top, #0b0b0b 0%, rgba(0,0,0,0) 60%);
 }
-.hero-text h1{
-  font-family:'Montserrat';
-  font-size:clamp(2rem,5vw,3.5rem);
+.hero-text-below .welcome{
+  font-size:clamp(2.2rem,4vw,3rem);
+  font-weight:800;
+  margin-bottom:10px;
+}
+.hero-text-below .brand{
+  font-family:'Montserrat',sans-serif;
+  font-size:clamp(1.8rem,3vw,2.2rem);
+  color:#800000;
+  font-weight:600;
   margin-bottom:15px;
 }
-.hero-text span{color:#800000;}
-.hero-text p{
-  font-size:1.2rem;
-  opacity:0.8;
+.hero-text-below .tagline{
+  font-size:1rem;
+  color:#ccc;
   margin-bottom:20px;
 }
-.hero-text button{
-  padding:15px 30px;
+.hero-text-below button{
+  padding:12px 30px;
   border:none;
   background:#800000;
   color:#fff;
-  border-radius:25px;
+  border-radius:30px;
+  cursor:pointer;
+  font-size:1rem;
+  transition:0.3s;
 }
+.hero-text-below button:hover{background:#a00000; transform:scale(1.05);}
 
-/* SECTIONS */
-section{padding:80px 20px;text-align:center;}
-h2{font-size:2.3rem;margin-bottom:30px;}
-
-/* ABOUT */
-.about{
-  display:flex;
-  flex-wrap:wrap;
-  justify-content:center;
-  align-items:center;
-  gap:40px;
-}
+/* SECTION */
+section{padding:90px 20px;text-align:center;}
+h2{font-size:2.5rem;margin-bottom:40px;}
+.about{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:40px;}
 .about img{width:350px;border-radius:15px;}
-.about-text{max-width:600px;text-align:left;}
+.about-text{max-width:600px;text-align:left;line-height:1.7;}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:25px;}
+.card{background:#111;padding:10px;border-radius:15px;transition:0.3s;opacity:0;transform:translateY(40px);}
+.card.active{opacity:1;transform:translateY(0);}
+.card:hover{transform:translateY(-10px);box-shadow:0 10px 30px rgba(128,0,0,0.4);}
+.card img{width:100%;border-radius:12px;}
+.card-label{margin-top:10px;text-align:center;font-weight:600;color:#ccc;}
 
-/* GRID */
-.grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
-  gap:25px;
-}
-
-/* CARD */
-.card{
-  background:#111;
-  padding:10px;
-  border-radius:12px;
-}
-.card img{
-  width:100%;
-  border-radius:10px;
-}
-
-/* LABEL BELOW IMAGE */
-.card-label{
-  margin-top:10px;
-  text-align:center;
-  font-weight:600;
-  color:#ccc;
-}
+/* ORDER FORM */
+#order form{max-width:500px;margin:auto;display:flex;flex-direction:column;gap:15px;}
+#order input, #order textarea{padding:15px;border:none;border-radius:10px;background:#111;color:#fff;}
+#order button{padding:15px;border:none;background:#800000;color:#fff;border-radius:25px;cursor:pointer;transition:0.3s;}
+#order button:hover{background:#a00000;}
 
 /* CONTACT */
-#contact a{
-  display:block;
-  margin:10px;
-  color:#800000;
-}
+#contact a{display:block;margin:10px;color:#800000;text-decoration:none;}
 
 /* FOOTER */
 footer{text-align:center;padding:20px;opacity:0.6;}
 
+/* WHATSAPP BUTTON */
+.whatsapp{position:fixed;bottom:20px;right:20px;background:#25D366;color:#fff;padding:15px 18px;border-radius:50%;font-size:20px;text-decoration:none;box-shadow:0 5px 20px rgba(0,0,0,0.4);transition:0.3s;}
+.whatsapp:hover{transform:scale(1.1);}
+
+/* SCROLL ANIMATION */
+.reveal{opacity:0;transform:translateY(40px);transition:all 0.8s ease;}
+.reveal.active{opacity:1;transform:translateY(0);}
+
+/* SMALL SCREEN */
+@media(max-width:768px){
+  nav{flex-direction:column;gap:10px;}
+  .about{flex-direction:column;}
+}
 </style>
 </head>
-
 <body>
-
-<!-- SEARCH -->
-<div class="search-container">
-<input type="text" placeholder="Search...">
-</div>
 
 <!-- NAV -->
 <nav>
@@ -154,24 +134,25 @@ footer{text-align:center;padding:20px;opacity:0.6;}
 <a href="#about">About</a>
 <a href="#services">Design</a>
 <a href="#printing">Printing</a>
-<a href="#portfolio">Portfolio</a>
+<a href="#order">Order</a>
 <a href="#contact">Contact</a>
+<a href="#admin">Admin</a>
 </div>
 </nav>
 
-<!-- HERO -->
-<div class="hero-img">
-<img src="https://cdn.kord.live/serve/p6rY9MStOU36.jpg">
-</div>
+<!-- HERO IMAGE -->
+<div class="hero-img"><img src="https://cdn.kord.live/serve/p6rY9MStOU36.jpg" alt="Hero Image"></div>
 
-<div class="hero-text">
-<h1>Welcome to <span>AkayMightyConcept</span></h1>
-<p>Transforming ideas into premium designs and printing solutions.</p>
+<!-- HERO TEXT BELOW IMAGE -->
+<div class="hero-text-below">
+<h1 class="welcome">Welcome to</h1>
+<h2 class="brand">AkayMightyConcept</h2>
+<p class="tagline">Transforming ideas into premium designs and printing solutions.</p>
 <button onclick="window.open('https://wa.me/2349049541318')">Hire Me</button>
 </div>
 
 <!-- ABOUT -->
-<section id="about">
+<section id="about" class="reveal">
 <h2>About Me</h2>
 <div class="about">
 <img src="https://cdn.kord.live/serve/tmpqcmKFtcjJ.jpg">
@@ -182,60 +163,142 @@ footer{text-align:center;padding:20px;opacity:0.6;}
 </div>
 </section>
 
-<!-- DESIGN -->
-<section id="services">
+<!-- DESIGN SERVICES -->
+<section id="services" class="reveal">
 <h2>Design Services</h2>
 <div class="grid">
-
-<div class="card">
-<img src="https://cdn.kord.live/serve/ZoCtg7SPBWlc.jpg">
-<div class="card-label">Logo Designs</div>
-</div>
-
-<div class="card">
-<img src="https://cdn.kord.live/serve/4cG5RghDuw9w.jpg">
-<div class="card-label">Ads Flyer Designs</div>
-</div>
-
-<div class="card">
-<img src="https://cdn.kord.live/serve/NRlPY4VLxSVG.jpg">
-<div class="card-label">Food Flyer Designs</div>
-</div>
-
+<div class="card reveal"><img src="https://cdn.kord.live/serve/ZoCtg7SPBWlc.jpg"><div class="card-label">Logo Designs</div></div>
+<div class="card reveal"><img src="https://cdn.kord.live/serve/4cG5RghDuw9w.jpg"><div class="card-label">Ads Flyer Designs</div></div>
+<div class="card reveal"><img src="https://cdn.kord.live/serve/NRlPY4VLxSVG.jpg"><div class="card-label">Food Flyer Designs</div></div>
+<div class="card reveal"><img src="https://cdn.kord.live/serve/KWXIC3QcBiFj.jpg"><div class="card-label">Business Flyer Designs</div></div>
+<div class="card reveal"><img src="https://cdn.kord.live/serve/mH1YnwxDaQUi.jpg"><div class="card-label">Club Flyer Designs</div></div>
+<div class="card reveal"><img src="https://cdn.kord.live/serve/lJJcUHt93XsB.jpg"><div class="card-label">Web3 Flyer Designs</div></div>
 </div>
 </section>
 
-<!-- PRINTING -->
-<section id="printing">
+<!-- PRINTING SERVICES -->
+<section id="printing" class="reveal">
 <h2>Printing Services</h2>
 <div class="grid">
-
-<div class="card">
-<img src="https://cdn.kord.live/serve/KWXIC3QcBiFj.jpg">
-<div class="card-label">Flyers Printing</div>
+<div class="card reveal"><img src="https://cdn.kord.live/serve/009RDmkmQA0x.jpg"><div class="card-label">Complimentary Card</div></div>
+<div class="card reveal"><img src="https://cdn.kord.live/serve/bmVs49dmCNWa.jpg"><div class="card-label">Leather Printing</div></div>
+<div class="card reveal"><img src="https://cdn.kord.live/serve/ASqKSjkDcDCF.jpg"><div class="card-label">Brown Paper Bag</div></div>
+<div class="card reveal"><img src="https://cdn.kord.live/serve/xk5l1BNebbMK.jpg"><div class="card-label">Paper Bag</div></div>
+<div class="card reveal"><img src="https://cdn.kord.live/serve/kZ3AhQCgS6Yr.jpg"><div class="card-label">Bag Printing</div></div>
 </div>
+</section>
 
-<div class="card">
-<img src="https://cdn.kord.live/serve/mH1YnwxDaQUi.jpg">
-<div class="card-label">Banners Printing</div>
-</div>
-
-<div class="card">
-<img src="https://cdn.kord.live/serve/lJJcUHt93XsB.jpg">
-<div class="card-label">Posters Printing</div>
-</div>
-
-</div>
+<!-- ORDER FORM -->
+<section id="order" class="reveal">
+<h2>Place an Order</h2>
+<form id="orderForm">
+<input type="text" id="name" placeholder="Your Name" required>
+<input type="text" id="service" placeholder="Service (Logo, Flyer, Printing...)" required>
+<input type="number" id="amount" placeholder="Amount (₦)" required>
+<textarea id="details" placeholder="Describe your job..." required></textarea>
+<button type="submit">Submit Order</button>
+</form>
 </section>
 
 <!-- CONTACT -->
-<section id="contact">
+<section id="contact" class="reveal">
 <h2>Contact</h2>
-<a href="mailto:awwalabdul891@gmail.com">Email</a>
-<a href="https://wa.me/2349049541318">WhatsApp</a>
+<a href="mailto:awwalabdul891@gmail.com">Email: awwalabdul891@gmail.com</a>
+<a href="https://wa.me/2349049541318">WhatsApp: 09049541318</a>
+</section>
+
+<!-- ADMIN DASHBOARD -->
+<section id="admin" class="reveal">
+<h2>Admin Dashboard</h2>
+<p>Enter password to view orders:</p>
+<input type="password" id="adminPass" placeholder="Password">
+<button onclick="showDashboard()">Login</button>
+
+<div id="dashboard" style="display:none;margin-top:20px;">
+<h3>Orders</h3>
+<table border="1" style="width:100%;color:#fff;">
+<thead>
+<tr>
+<th>Name</th><th>Service</th><th>Amount</th><th>Details</th><th>Status</th>
+</tr>
+</thead>
+<tbody id="orderList"></tbody>
+</table>
+</div>
 </section>
 
 <footer>© 2026 AkayMightyConcept</footer>
+<a href="https://wa.me/2349049541318" class="whatsapp">💬</a>
+
+<script src="https://js.paystack.co/v1/inline.js"></script>
+<script>
+// SCROLL ANIMATION
+function revealOnScroll(){
+  const reveals = document.querySelectorAll('.reveal');
+  reveals.forEach((el, index) => {
+    const windowHeight = window.innerHeight;
+    const elementTop = el.getBoundingClientRect().top;
+    const delay = index*100;
+    if(elementTop < windowHeight-50){
+      setTimeout(()=>{el.classList.add('active');}, delay);
+    }
+  });
+}
+window.addEventListener('scroll', revealOnScroll);
+window.addEventListener('load', revealOnScroll);
+
+// ORDER FORM + PAYSTACK
+const form = document.getElementById('orderForm');
+form.addEventListener('submit', function(e){
+  e.preventDefault();
+  let name = document.getElementById('name').value;
+  let service = document.getElementById('service').value;
+  let amount = document.getElementById('amount').value;
+  let details = document.getElementById('details').value;
+
+  let orders = JSON.parse(localStorage.getItem('orders') || "[]");
+  orders.push({name,service,amount,details,status:"Pending"});
+  localStorage.setItem('orders',JSON.stringify(orders));
+
+  let handler = PaystackPop.setup({
+    key:'pk_test_xxxxxxxxxxxxxxx', // replace with your key
+    email:name+"@gmail.com",
+    amount:amount*100,
+    currency:"NGN",
+    callback: function(response){
+      let message = `Hello, my name is ${name}%0AService: ${service}%0AAmount: ₦${amount}%0ADetails: ${details}%0APayment Ref: ${response.reference}`;
+      window.open(`https://wa.me/2349049541318?text=${message}`,'_blank');
+    },
+    onClose:function(){alert('Payment cancelled');}
+  });
+  handler.openIframe();
+});
+
+// ADMIN DASHBOARD
+function showDashboard(){
+  const pass = document.getElementById('adminPass').value;
+  if(pass==='AkayAdmin123'){ // change to your password
+    document.getElementById('dashboard').style.display='block';
+    loadOrders();
+  }else{ alert('Incorrect password'); }
+}
+
+function loadOrders(){
+  const orderList = document.getElementById('orderList');
+  orderList.innerHTML='';
+  const orders = JSON.parse(localStorage.getItem('orders') || "[]");
+  orders.forEach(o=>{
+    let row = `<tr>
+      <td>${o.name}</td>
+      <td>${o.service}</td>
+      <td>₦${o.amount}</td>
+      <td>${o.details}</td>
+      <td>${o.status}</td>
+    </tr>`;
+    orderList.innerHTML += row;
+  });
+}
+</script>
 
 </body>
-</html>
+  </html>
