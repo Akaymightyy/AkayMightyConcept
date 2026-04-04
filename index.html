@@ -5,7 +5,7 @@
 <title>AkayMightyConcept</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<!-- Firebase (COMPAT VERSION) -->
+<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
@@ -30,33 +30,40 @@ body{
 .hero-text{
   text-align:center;
   padding:40px 20px;
-  background:linear-gradient(to top,#0b0b0b,transparent);
 }
 .hero-text h1{
   font-size:2.2rem;
-  font-weight:800;
-  margin:0;
 }
 .hero-text h2{
-  font-size:1.6rem;
   color:#800000;
-  margin-top:5px;
-}
-.hero-text p{
-  color:#ccc;
-  margin-top:10px;
 }
 
-/* SEARCH */
-.search{
-  text-align:center;
-  margin:20px;
+/* PRODUCTS */
+.products{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  gap:20px;
+  padding:20px;
 }
-.search input{
-  width:60%;
-  padding:12px;
+.card{
+  background:#111;
+  padding:15px;
+  border-radius:10px;
+  width:250px;
+  text-align:center;
+}
+.card img{
+  width:100%;
+  height:150px;
+  object-fit:cover;
+}
+button{
+  padding:10px;
+  background:#800000;
   border:none;
-  border-radius:5px;
+  color:#fff;
+  cursor:pointer;
 }
 
 /* FORM */
@@ -68,17 +75,9 @@ form{
   gap:10px;
 }
 input,select{
-  padding:12px;
+  padding:10px;
   border:none;
   border-radius:5px;
-}
-button{
-  padding:12px;
-  background:#800000;
-  color:#fff;
-  border:none;
-  border-radius:5px;
-  cursor:pointer;
 }
 
 /* ADMIN */
@@ -89,16 +88,10 @@ button{
 table{
   width:100%;
   border-collapse:collapse;
-  margin-top:20px;
 }
 th,td{
   border:1px solid #333;
   padding:10px;
-  text-align:center;
-}
-select.status{
-  background:#111;
-  color:#fff;
 }
 </style>
 </head>
@@ -107,50 +100,71 @@ select.status{
 
 <!-- HERO -->
 <div class="hero-img">
-  <img src="https://cdn.kord.live/serve/p6rY9MStOU36.jpg">
+<img src="https://cdn.kord.live/serve/p6rY9MStOU36.jpg">
 </div>
 
 <div class="hero-text">
-  <h1>Welcome to</h1>
-  <h2>AkayMightyConcept</h2>
-  <p>Premium Graphics Design & Printing Services</p>
+<h1>Welcome to</h1>
+<h2>AkayMightyConcept</h2>
+<p>Premium Graphics Design & Printing</p>
 </div>
 
-<!-- SEARCH -->
-<div class="search">
-  <input type="text" id="searchOrder" placeholder="Search orders...">
+<!-- PRODUCTS -->
+<h2 style="text-align:center;">Our Services</h2>
+
+<div class="products">
+
+<div class="card">
+<img src="https://cdn.kord.live/serve/p6rY9MStOU36.jpg">
+<h3>Logo Design</h3>
+<p>₦5,000</p>
+<button onclick="selectService('Logo Design',5000)">Order</button>
+</div>
+
+<div class="card">
+<img src="https://cdn.kord.live/serve/p6rY9MStOU36.jpg">
+<h3>Flyer Design</h3>
+<p>₦3,000</p>
+<button onclick="selectService('Flyer Design',3000)">Order</button>
+</div>
+
+<div class="card">
+<img src="https://cdn.kord.live/serve/p6rY9MStOU36.jpg">
+<h3>Printing</h3>
+<p>₦10,000</p>
+<button onclick="selectService('Printing',10000)">Order</button>
+</div>
+
 </div>
 
 <!-- ORDER FORM -->
 <h2 style="text-align:center;">Place Order</h2>
 
 <form id="orderForm">
-<input type="text" id="name" placeholder="Your Name" required>
+<input type="text" id="name" placeholder="Name" required>
 <input type="email" id="email" placeholder="Email" required>
 
 <select id="service">
 <option>Logo Design</option>
 <option>Flyer Design</option>
-<option>Printing Service</option>
+<option>Printing</option>
 </select>
 
-<input type="number" id="price" placeholder="Price (₦)" required>
+<input type="number" id="price" placeholder="Price" required>
 
-<button type="submit">Submit & Pay</button>
+<button type="submit">Pay & Submit</button>
 </form>
 
-<hr>
-
-<!-- ADMIN LOGIN -->
-<h2 style="text-align:center;">Admin Login</h2>
+<!-- ADMIN -->
+<h2 style="text-align:center;">Admin</h2>
 <div style="text-align:center;">
-<input type="password" id="adminPass" placeholder="Enter Password">
+<input type="password" id="adminPass" placeholder="Password">
 <button onclick="login()">Login</button>
 </div>
 
-<!-- DASHBOARD -->
 <div id="adminPanel">
-<h2>Orders Dashboard</h2>
+<h2>Orders</h2>
+<input type="text" id="searchOrder" placeholder="Search...">
 
 <table>
 <thead>
@@ -162,12 +176,11 @@ select.status{
 <th>Status</th>
 </tr>
 </thead>
-
 <tbody id="ordersTable"></tbody>
 </table>
 </div>
 
-<!-- FIREBASE INIT -->
+<!-- FIREBASE -->
 <script>
 const firebaseConfig = {
   apiKey: "AIzaSyBpyyasdx-xwp9vyf-XpcFgXmzAWjGJgvA",
@@ -176,93 +189,83 @@ const firebaseConfig = {
   storageBucket: "akaymightyconcept.firebasestorage.app",
   messagingSenderId: "536093439129",
   appId: "1:536093439129:web:354acfeb1b476318ba3408",
-  measurementId: "G-EZXTQLZ91K"
 };
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 </script>
 
-<!-- MAIN SCRIPT -->
+<!-- SCRIPT -->
 <script>
 
-// SAVE ORDER
-document.getElementById("orderForm").addEventListener("submit", async (e)=>{
+function selectService(service, price){
+  document.getElementById("service").value = service;
+  document.getElementById("price").value = price;
+  window.scrollTo({top:document.getElementById("orderForm").offsetTop,behavior:"smooth"});
+}
+
+document.getElementById("orderForm").addEventListener("submit", async e=>{
 e.preventDefault();
 
-const order = {
-  name: name.value,
-  email: email.value,
-  service: service.value,
-  price: price.value,
-  status: "Pending",
-  createdAt: new Date()
+const order={
+  name:name.value,
+  email:email.value,
+  service:service.value,
+  price:price.value,
+  status:"Pending",
+  createdAt:new Date()
 };
 
 await db.collection("orders").add(order);
 
-// PAYSTACK
-let handler = PaystackPop.setup({
-  key: "YOUR_PAYSTACK_PUBLIC_KEY",
-  email: order.email,
-  amount: order.price * 100,
-  currency: "NGN",
-  callback: function(){
-    alert("Payment Successful!");
-  }
-});
-handler.openIframe();
-
+PaystackPop.setup({
+key:"YOUR_PAYSTACK_PUBLIC_KEY",
+email:order.email,
+amount:order.price*100,
+callback:function(){alert("Payment Successful");}
+}).openIframe();
 });
 
-// LOGIN
 function login(){
-if(adminPass.value === "AkayAdmin123"){
-  adminPanel.style.display = "block";
+if(adminPass.value==="AkayAdmin123"){
+  adminPanel.style.display="block";
   loadOrders();
-}else{
-  alert("Wrong password");
-}
+}else alert("Wrong password");
 }
 
-// LOAD ORDERS
 function loadOrders(){
 db.collection("orders").orderBy("createdAt","desc")
 .onSnapshot(snapshot=>{
 let html="";
 snapshot.forEach(doc=>{
-let o = doc.data();
-
-html += `
+let o=doc.data();
+html+=`
 <tr>
 <td>${o.name}</td>
 <td>${o.email}</td>
 <td>${o.service}</td>
 <td>₦${o.price}</td>
 <td>
-<select class="status" onchange="updateStatus('${doc.id}', this.value)">
+<select onchange="updateStatus('${doc.id}',this.value)">
 <option ${o.status=="Pending"?"selected":""}>Pending</option>
 <option ${o.status=="In Progress"?"selected":""}>In Progress</option>
 <option ${o.status=="Completed"?"selected":""}>Completed</option>
 </select>
 </td>
-</tr>
-`;
+</tr>`;
 });
-ordersTable.innerHTML = html;
+ordersTable.innerHTML=html;
 });
 }
 
-// UPDATE STATUS
-function updateStatus(id, status){
+function updateStatus(id,status){
 db.collection("orders").doc(id).update({status});
 }
 
-// SEARCH
 document.getElementById("searchOrder").addEventListener("input", e=>{
-let filter = e.target.value.toLowerCase();
+let val=e.target.value.toLowerCase();
 document.querySelectorAll("#ordersTable tr").forEach(row=>{
-row.style.display = row.innerText.toLowerCase().includes(filter) ? "" : "none";
+row.style.display=row.innerText.toLowerCase().includes(val)?"":"none";
 });
 });
 
