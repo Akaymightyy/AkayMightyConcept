@@ -1,0 +1,1756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Akay Mighty Concept | Graphics Design Studio</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;900&family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    /* =============================================
+       RESET & BASE
+    ============================================= */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --red: #ff1a1a;
+      --red-dark: #cc0000;
+      --red-glow: rgba(255, 26, 26, 0.15);
+      --bg: #0a0a0a;
+      --bg2: #111111;
+      --bg3: #161616;
+      --bg4: #1c1c1c;
+      --text: #f0f0f0;
+      --text-muted: #888;
+      --text-dim: #555;
+      --border: rgba(255,255,255,0.07);
+      --border-red: rgba(255,26,26,0.3);
+      --font-body: 'Poppins', sans-serif;
+      --font-heading: 'Montserrat', sans-serif;
+      --radius: 12px;
+      --radius-lg: 20px;
+      --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
+      color: var(--text);
+      overflow-x: hidden;
+      line-height: 1.7;
+    }
+
+    img { display: block; width: 100%; object-fit: cover; }
+    a { text-decoration: none; color: inherit; }
+    ul { list-style: none; }
+
+    /* =============================================
+       TYPOGRAPHY
+    ============================================= */
+    h1, h2, h3, h4 { font-family: var(--font-heading); line-height: 1.2; }
+
+    .section-label {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--red);
+      margin-bottom: 12px;
+    }
+
+    .section-title {
+      font-size: clamp(28px, 4vw, 48px);
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 16px;
+    }
+
+    .section-title span { color: var(--red); }
+
+    .section-desc {
+      font-size: 16px;
+      color: var(--text-muted);
+      max-width: 560px;
+      line-height: 1.8;
+    }
+
+    /* =============================================
+       LAYOUT
+    ============================================= */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    section { padding: 100px 0; }
+
+    .section-header {
+      margin-bottom: 60px;
+    }
+
+    /* =============================================
+       BUTTONS
+    ============================================= */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 32px;
+      border-radius: 50px;
+      font-family: var(--font-body);
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: var(--transition);
+      letter-spacing: 0.5px;
+    }
+
+    .btn-primary {
+      background: var(--red);
+      color: #fff;
+      box-shadow: 0 0 30px var(--red-glow);
+    }
+
+    .btn-primary:hover {
+      background: var(--red-dark);
+      box-shadow: 0 0 50px rgba(255,26,26,0.35);
+      transform: translateY(-2px);
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--red);
+      border: 1.5px solid var(--red);
+    }
+
+    .btn-outline:hover {
+      background: var(--red);
+      color: #fff;
+      box-shadow: 0 0 30px var(--red-glow);
+      transform: translateY(-2px);
+    }
+
+    /* =============================================
+       GLOW BACKGROUNDS
+    ============================================= */
+    .glow-bg {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .glow-bg::before {
+      content: '';
+      position: absolute;
+      width: 600px;
+      height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,26,26,0.06) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    /* =============================================
+       NAVBAR
+    ============================================= */
+    #navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      padding: 20px 0;
+      transition: var(--transition);
+    }
+
+    #navbar.scrolled {
+      background: rgba(10,10,10,0.95);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 0;
+    }
+
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* REPLACE: swap the <img> src with your actual logo path */
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .nav-logo-img {
+      width: 44px;
+      height: 44px;
+      border-radius: 8px;
+      object-fit: cover;
+      background: var(--bg3);
+      border: 1px solid var(--border-red);
+    }
+
+    .nav-logo-text {
+      font-family: var(--font-heading);
+      font-weight: 800;
+      font-size: 18px;
+      line-height: 1.1;
+    }
+
+    .nav-logo-text span { color: var(--red); }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 36px;
+    }
+
+    .nav-links a {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-muted);
+      transition: color var(--transition);
+      position: relative;
+    }
+
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: var(--red);
+      transition: width var(--transition);
+    }
+
+    .nav-links a:hover { color: var(--text); }
+    .nav-links a:hover::after { width: 100%; }
+
+    .nav-cta { margin-left: 8px; }
+
+    /* Hamburger */
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      cursor: pointer;
+      padding: 4px;
+      background: none;
+      border: none;
+    }
+
+    .hamburger span {
+      display: block;
+      width: 24px;
+      height: 2px;
+      background: var(--text);
+      border-radius: 2px;
+      transition: var(--transition);
+    }
+
+    .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .hamburger.open span:nth-child(2) { opacity: 0; }
+    .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+    /* Mobile nav */
+    .mobile-nav {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(10,10,10,0.98);
+      backdrop-filter: blur(20px);
+      z-index: 999;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 32px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity var(--transition);
+    }
+
+    .mobile-nav.open {
+      display: flex;
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .mobile-nav a {
+      font-family: var(--font-heading);
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--text-muted);
+      transition: color var(--transition);
+    }
+
+    .mobile-nav a:hover { color: var(--red); }
+
+    /* =============================================
+       HERO
+    ============================================= */
+    #hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    /* REPLACE: Change the background-image URL to your hero image path */
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      background-image: url('https://cdn.kord.live/serve/p6rY9MStOU36.jpg');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+
+    .hero-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(10,10,10,0.92) 0%, rgba(10,10,10,0.75) 50%, rgba(10,10,10,0.85) 100%);
+    }
+
+    .hero-glow {
+      position: absolute;
+      bottom: -200px;
+      left: -200px;
+      width: 700px;
+      height: 700px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,26,26,0.08) 0%, transparent 65%);
+      pointer-events: none;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 1;
+      max-width: 720px;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255,26,26,0.1);
+      border: 1px solid var(--border-red);
+      color: var(--red);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      padding: 8px 20px;
+      border-radius: 50px;
+      margin-bottom: 28px;
+    }
+
+    .hero-badge::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--red);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.4); }
+    }
+
+    .hero-title {
+      font-size: clamp(40px, 7vw, 80px);
+      font-weight: 900;
+      line-height: 1.05;
+      color: var(--text);
+      margin-bottom: 24px;
+    }
+
+    .hero-title .line-red { color: var(--red); }
+
+    .hero-tagline {
+      font-size: clamp(16px, 2vw, 20px);
+      color: var(--text-muted);
+      line-height: 1.7;
+      margin-bottom: 44px;
+      max-width: 520px;
+    }
+
+    .hero-btns {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .hero-scroll {
+      position: absolute;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-dim);
+      font-size: 12px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      z-index: 1;
+    }
+
+    .scroll-line {
+      width: 1px;
+      height: 50px;
+      background: linear-gradient(to bottom, var(--red), transparent);
+      animation: scrollAnim 2s infinite;
+    }
+
+    @keyframes scrollAnim {
+      0% { transform: scaleY(0); transform-origin: top; }
+      50% { transform: scaleY(1); transform-origin: top; }
+      50.1% { transform: scaleY(1); transform-origin: bottom; }
+      100% { transform: scaleY(0); transform-origin: bottom; }
+    }
+
+    /* =============================================
+       ABOUT
+    ============================================= */
+    #about {
+      background: var(--bg);
+    }
+
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: center;
+    }
+
+    .about-img-wrap {
+      position: relative;
+    }
+
+    /* REPLACE: about image */
+    .about-img {
+      width: 100%;
+      height: 520px;
+      object-fit: cover;
+      border-radius: var(--radius-lg);
+      background: var(--bg3);
+      border: 1px solid var(--border);
+    }
+
+    .about-img-placeholder {
+      width: 100%;
+      height: 520px;
+      border-radius: var(--radius-lg);
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-dim);
+      font-size: 14px;
+      gap: 12px;
+    }
+
+    .about-img-placeholder svg { opacity: 0.3; }
+
+    .about-badge {
+      position: absolute;
+      bottom: -20px;
+      right: -20px;
+      background: var(--red);
+      color: #fff;
+      font-family: var(--font-heading);
+      font-weight: 800;
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      text-align: center;
+      box-shadow: 0 0 40px rgba(255,26,26,0.3);
+    }
+
+    .about-badge .num {
+      font-size: 36px;
+      line-height: 1;
+      display: block;
+    }
+
+    .about-badge .label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      opacity: 0.85;
+    }
+
+    .about-content .section-desc {
+      max-width: 100%;
+      margin-bottom: 24px;
+    }
+
+    .about-skills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 32px;
+    }
+
+    .skill-tag {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 500;
+      padding: 8px 18px;
+      border-radius: 50px;
+      transition: var(--transition);
+    }
+
+    .skill-tag:hover {
+      border-color: var(--red);
+      color: var(--red);
+    }
+
+    /* =============================================
+       SERVICES (shared)
+    ============================================= */
+    #design-services { background: var(--bg2); }
+    #print-services  { background: var(--bg);  }
+
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 24px;
+    }
+
+    .service-card {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      transition: var(--transition);
+      cursor: default;
+    }
+
+    .service-card:hover {
+      border-color: var(--border-red);
+      transform: translateY(-6px);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4), 0 0 30px var(--red-glow);
+    }
+
+    /* REPLACE: service card image */
+    .service-img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      background: var(--bg4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-dim);
+      font-size: 12px;
+      letter-spacing: 1px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .service-img-placeholder {
+      width: 100%;
+      height: 180px;
+      background: var(--bg4);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-dim);
+      gap: 8px;
+      font-size: 12px;
+    }
+
+    .service-card-body {
+      padding: 20px 22px 24px;
+    }
+
+    .service-icon {
+      width: 40px;
+      height: 40px;
+      background: rgba(255,26,26,0.1);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 14px;
+    }
+
+    .service-icon svg { width: 20px; height: 20px; color: var(--red); }
+
+    .service-title {
+      font-family: var(--font-heading);
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+
+    .service-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.7;
+    }
+
+    /* =============================================
+       PORTFOLIO
+    ============================================= */
+    #portfolio { background: var(--bg2); }
+
+    .portfolio-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: auto;
+      gap: 16px;
+    }
+
+    .portfolio-grid .item:nth-child(1) { grid-column: span 2; }
+    .portfolio-grid .item:nth-child(5) { grid-column: span 2; }
+
+    .portfolio-item {
+      position: relative;
+      border-radius: var(--radius);
+      overflow: hidden;
+      cursor: pointer;
+      background: var(--bg4);
+    }
+
+    /* REPLACE: portfolio images */
+    .portfolio-img {
+      width: 100%;
+      height: 260px;
+      object-fit: cover;
+      background: var(--bg4);
+      transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .portfolio-img-placeholder {
+      width: 100%;
+      height: 260px;
+      background: var(--bg4);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-dim);
+      gap: 8px;
+      font-size: 12px;
+      transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .portfolio-item:hover .portfolio-img-placeholder,
+    .portfolio-item:hover .portfolio-img { transform: scale(1.06); }
+
+    .portfolio-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(10,10,10,0.9) 0%, rgba(10,10,10,0.3) 50%, transparent 100%);
+      opacity: 0;
+      transition: opacity var(--transition);
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 24px;
+    }
+
+    .portfolio-item:hover .portfolio-overlay { opacity: 1; }
+
+    .portfolio-tag {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--red);
+      margin-bottom: 6px;
+    }
+
+    .portfolio-name {
+      font-family: var(--font-heading);
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    /* =============================================
+       ORDER FORM
+    ============================================= */
+    #order { background: var(--bg3); position: relative; overflow: hidden; }
+
+    #order::before {
+      content: '';
+      position: absolute;
+      top: -300px;
+      right: -200px;
+      width: 700px;
+      height: 700px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,26,26,0.05) 0%, transparent 65%);
+      pointer-events: none;
+    }
+
+    .order-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.3fr;
+      gap: 80px;
+      align-items: start;
+    }
+
+    .order-info .section-desc { margin-bottom: 40px; }
+
+    .order-feature {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+
+    .order-feature-icon {
+      width: 36px;
+      height: 36px;
+      min-width: 36px;
+      border-radius: 8px;
+      background: rgba(255,26,26,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .order-feature-icon svg { width: 16px; height: 16px; color: var(--red); }
+
+    .order-feature-text h4 {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 2px;
+    }
+
+    .order-feature-text p { font-size: 13px; color: var(--text-muted); }
+
+    .order-form-wrap {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 40px;
+    }
+
+    .form-group { margin-bottom: 20px; }
+
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      letter-spacing: 0.5px;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 18px;
+      font-family: var(--font-body);
+      font-size: 14px;
+      color: var(--text);
+      transition: border-color var(--transition), box-shadow var(--transition);
+      outline: none;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      border-color: var(--red);
+      box-shadow: 0 0 0 3px rgba(255,26,26,0.1);
+    }
+
+    .form-group select option { background: var(--bg3); }
+
+    .form-group textarea {
+      height: 120px;
+      resize: vertical;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .form-submit {
+      width: 100%;
+      padding: 16px;
+      background: var(--red);
+      color: #fff;
+      border: none;
+      border-radius: 50px;
+      font-family: var(--font-heading);
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 8px;
+      box-shadow: 0 0 30px var(--red-glow);
+    }
+
+    .form-submit:hover {
+      background: var(--red-dark);
+      box-shadow: 0 0 50px rgba(255,26,26,0.35);
+      transform: translateY(-2px);
+    }
+
+    /* =============================================
+       CONTACT
+    ============================================= */
+    #contact { background: var(--bg); }
+
+    .contact-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      align-items: start;
+    }
+
+    .contact-item {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      padding: 24px;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      transition: var(--transition);
+      margin-bottom: 16px;
+      text-decoration: none;
+    }
+
+    .contact-item:hover {
+      border-color: var(--border-red);
+      transform: translateX(6px);
+    }
+
+    .contact-item-icon {
+      width: 48px;
+      height: 48px;
+      min-width: 48px;
+      border-radius: 12px;
+      background: rgba(255,26,26,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .contact-item-icon svg { width: 22px; height: 22px; color: var(--red); }
+
+    .contact-item-text h4 {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .contact-item-text p {
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    .social-links {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    .social-link {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition);
+    }
+
+    .social-link svg { width: 18px; height: 18px; color: var(--text-muted); transition: color var(--transition); }
+
+    .social-link:hover {
+      border-color: var(--red);
+      background: rgba(255,26,26,0.08);
+    }
+
+    .social-link:hover svg { color: var(--red); }
+
+    .contact-map {
+      height: 340px;
+      background: var(--bg3);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-dim);
+      font-size: 14px;
+      text-align: center;
+      padding: 24px;
+    }
+
+    /* =============================================
+       FLOATING WHATSAPP
+    ============================================= */
+    /* REPLACE: 2349049541318 in the link below (e.g. +2348012345678) */
+    .float-wa {
+      position: fixed;
+      bottom: 32px;
+      right: 32px;
+      z-index: 900;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: #25d366;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 20px rgba(37,211,102,0.4);
+      transition: var(--transition);
+      animation: floatIn 0.5s 1s both;
+    }
+
+    .float-wa:hover {
+      transform: scale(1.1);
+      box-shadow: 0 6px 30px rgba(37,211,102,0.5);
+    }
+
+    .float-wa svg { width: 28px; height: 28px; color: #fff; }
+
+    @keyframes floatIn {
+      from { opacity: 0; transform: translateY(20px) scale(0.8); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* =============================================
+       FOOTER
+    ============================================= */
+    footer {
+      background: var(--bg2);
+      border-top: 1px solid var(--border);
+      padding: 40px 0;
+    }
+
+    .footer-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .footer-logo {
+      font-family: var(--font-heading);
+      font-size: 16px;
+      font-weight: 800;
+    }
+
+    .footer-logo span { color: var(--red); }
+
+    .footer-copy {
+      font-size: 13px;
+      color: var(--text-dim);
+    }
+
+    .footer-copy a { color: var(--red); transition: opacity var(--transition); }
+    .footer-copy a:hover { opacity: 0.8; }
+
+    /* =============================================
+       SCROLL REVEAL
+    ============================================= */
+    .reveal {
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .reveal-delay-1 { transition-delay: 0.1s; }
+    .reveal-delay-2 { transition-delay: 0.2s; }
+    .reveal-delay-3 { transition-delay: 0.3s; }
+    .reveal-delay-4 { transition-delay: 0.4s; }
+    .reveal-delay-5 { transition-delay: 0.5s; }
+
+    /* =============================================
+       RESPONSIVE
+    ============================================= */
+    @media (max-width: 900px) {
+      .nav-links, .nav-cta { display: none; }
+      .hamburger { display: flex; }
+
+      .about-grid { grid-template-columns: 1fr; gap: 48px; }
+      .about-img-placeholder { height: 360px; }
+      .about-badge { bottom: -16px; right: 16px; }
+
+      .order-grid { grid-template-columns: 1fr; gap: 48px; }
+      .contact-grid { grid-template-columns: 1fr; gap: 40px; }
+
+      .portfolio-grid { grid-template-columns: 1fr 1fr; }
+      .portfolio-grid .item:nth-child(1),
+      .portfolio-grid .item:nth-child(5) { grid-column: span 1; }
+    }
+
+    @media (max-width: 600px) {
+      section { padding: 70px 0; }
+      .portfolio-grid { grid-template-columns: 1fr; }
+      .form-row { grid-template-columns: 1fr; }
+      .hero-btns { flex-direction: column; }
+      .footer-inner { flex-direction: column; text-align: center; }
+      .order-form-wrap { padding: 24px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- =============================================
+       NAVBAR
+  ============================================= -->
+  <nav id="navbar">
+    <div class="container">
+      <div class="nav-inner">
+
+        <!-- REPLACE: src="YOUR_LOGO_IMAGE_HERE.png" with your actual logo path -->
+        <a href="#hero" class="nav-logo">
+          <img src="YOUR_LOGO_IMAGE_HERE.png" alt="Akay Mighty Concept Logo" class="nav-logo-img" style="display:none;" />
+          <div class="nav-logo-text">AKAY <span>MIGHTY</span><br>CONCEPT</div>
+        </a>
+
+        <ul class="nav-links">
+          <li><a href="#about">About</a></li>
+          <li><a href="#design-services">Design</a></li>
+          <li><a href="#print-services">Print</a></li>
+          <li><a href="#portfolio">Portfolio</a></li>
+          <li><a href="#contact">Contact</a></li>
+        </ul>
+
+        <!-- REPLACE: 2349049541318 e.g. 2348012345678 -->
+        <a href="https://wa.me/2349049541318" target="_blank" class="btn btn-primary nav-cta">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          Order Now
+        </a>
+
+        <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Mobile Nav -->
+  <div class="mobile-nav" id="mobileNav">
+    <a href="#about"           onclick="closeMobile()">About</a>
+    <a href="#design-services" onclick="closeMobile()">Design Services</a>
+    <a href="#print-services"  onclick="closeMobile()">Print Services</a>
+    <a href="#portfolio"       onclick="closeMobile()">Portfolio</a>
+    <a href="#order"           onclick="closeMobile()">Order</a>
+    <a href="#contact"         onclick="closeMobile()">Contact</a>
+  </div>
+
+
+  <!-- =============================================
+       HERO SECTION
+  ============================================= -->
+  <section id="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-overlay"></div>
+    <div class="hero-glow"></div>
+
+    <div class="container">
+      <div class="hero-content">
+        <div class="hero-badge">Creative Design Studio</div>
+
+        <!-- REPLACE: Headline text below -->
+        <h1 class="hero-title">
+          We Design<br>
+          <span class="line-red">Bold Ideas</span><br>
+          Into Reality.
+        </h1>
+
+        <!-- REPLACE: Tagline text below -->
+        <p class="hero-tagline">
+          Transforming ideas into premium designs and printing solutions. We help businesses stand out with clean, bold, and powerful visuals.
+        </p>
+
+        <div class="hero-btns">
+          <!-- REPLACE: 2349049541318 -->
+          <a href="https://wa.me/2349049541318?text=Hi%2C%20I%20want%20to%20place%20an%20order" target="_blank" class="btn btn-primary">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+            Start a Project
+          </a>
+          <a href="#portfolio" class="btn btn-outline">View Our Work</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-scroll">
+      <div class="scroll-line"></div>
+      <span>Scroll</span>
+    </div>
+  </section>
+
+
+  <!-- =============================================
+       ABOUT SECTION
+  ============================================= -->
+  <section id="about" class="glow-bg">
+    <div class="container">
+      <div class="about-grid">
+
+        <div class="about-img-wrap reveal">
+          <!-- REPLACE: src="YOUR_ABOUT_IMAGE_HERE.jpg" with your team/studio photo -->
+<img src="https://cdn.kord.live/serve/tmpqcmKFtcjJ.jpg" alt="Awwal Abdulhakeem - Akay Mighty Concept" class="about-img" />
+
+          <!-- REPLACE: years of experience number -->
+          <div class="about-badge">
+            <span class="num">4+</span>
+            <span class="label">Years of<br>Excellence</span>
+          </div>
+        </div>
+
+        <div class="about-content">
+          <p class="section-label reveal">About Us</p>
+
+          <!-- REPLACE: Studio name and description -->
+          <h2 class="section-title reveal reveal-delay-1">Hi, I'm <span>Awwal</span> Abdulhakeem</h2>
+
+          <p class="section-desc reveal reveal-delay-2">
+            I'm Awwal Abdulhakeem, a professional graphics designer with 4+ years experience. I specialize in branding, flyer designs, and print design, helping businesses stand out with clean and premium visuals.
+          </p>
+          <p class="section-desc reveal reveal-delay-3">
+            At Akay Mighty Concept, every project is treated with precision and passion. From startups to established businesses, we craft designs that communicate, inspire, and convert — delivered fast, with quality that speaks for itself.
+          </p>
+
+          <div class="about-skills reveal reveal-delay-4">
+            <!-- REPLACE: Add or remove skill tags as needed -->
+            <span class="skill-tag">Brand Identity</span>
+            <span class="skill-tag">Logo Design</span>
+            <span class="skill-tag">Flyer Design</span>
+            <span class="skill-tag">Banners</span>
+            <span class="skill-tag">Social Media Graphics</span>
+            <span class="skill-tag">Large Format Print</span>
+            <span class="skill-tag">Business Cards</span>
+            <span class="skill-tag">Packaging</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- =============================================
+       DESIGN SERVICES SECTION
+  ============================================= -->
+  <section id="design-services">
+    <div class="container">
+      <div class="section-header">
+        <p class="section-label reveal">What We Do</p>
+        <h2 class="section-title reveal reveal-delay-1">Design <span>Services</span></h2>
+        <p class="section-desc reveal reveal-delay-2">
+          Creative solutions that build powerful brands. Every pixel crafted with purpose.
+        </p>
+      </div>
+
+      <div class="services-grid">
+
+        <!-- DESIGN SERVICE CARD 1 -->
+        <!-- REPLACE: image src, title, and description for each card -->
+        <div class="service-card reveal">
+          <img src="https://cdn.kord.live/serve/ZoCtg7SPBWlc.jpg" alt="Logo & Brand Identity" class="about-img" style="height:180px;border-radius:0;" />
+          <div class="service-card-body">
+            <div class="service-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+            </div>
+            <h3 class="service-title">Logo & Brand Identity</h3>
+            <p class="service-desc">Unique logos and complete brand identity kits that tell your story at a glance.</p>
+          </div>
+        </div>
+
+        <!-- DESIGN SERVICE CARD 2 -->
+        <div class="service-card reveal reveal-delay-1">
+          <img src="https://cdn.kord.live/serve/4cG5RghDuw9w.jpg" alt="Flyer & Poster Design" class="about-img" style="height:180px;border-radius:0;" />
+          <div class="service-card-body">
+            <div class="service-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            </div>
+            <h3 class="service-title">Flyer & Poster Design</h3>
+            <p class="service-desc">Eye-catching flyers and posters designed to grab attention and drive action.</p>
+          </div>
+        </div>
+
+        <!-- DESIGN SERVICE CARD 3 -->
+        <div class="service-card reveal reveal-delay-2">
+          <div class="service-img-placeholder">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>
+            <span>service-social-media.jpg</span>
+          </div>
+          <div class="service-card-body">
+            <div class="service-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            </div>
+            <h3 class="service-title">Social Media Graphics</h3>
+            <p class="service-desc">Scroll-stopping content for Instagram, Facebook, Twitter, and more.</p>
+          </div>
+        </div>
+
+        <!-- DESIGN SERVICE CARD 4 -->
+        <div class="service-card reveal">
+          <div class="service-img-placeholder">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>
+            <span>service-business-card.jpg</span>
+          </div>
+          <div class="service-card-body">
+            <div class="service-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>
+            </div>
+            <h3 class="service-title">Business Card Design</h3>
+            <p class="service-desc">Professional business cards that leave a lasting first impression.</p>
+          </div>
+        </div>
+
+        <!-- DESIGN SERVICE CARD 5 -->
+        <div class="service-card reveal reveal-delay-1">
+          <div class="service-img-placeholder">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>
+            <span>service-packaging.jpg</span>
+          </div>
+          <div class="service-card-body">
+            <div class="service-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
+            </div>
+            <h3 class="service-title">Packaging Design</h3>
+            <p class="service-desc">Product packaging that protects, promotes, and sells on shelves.</p>
+          </div>
+        </div>
+
+        <!-- DESIGN SERVICE CARD 6 -->
+        <div class="service-card reveal reveal-delay-2">
+          <div class="service-img-placeholder">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>
+            <span>service-brochure.jpg</span>
+          </div>
+          <div class="service-card-body">
+            <div class="service-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+            </div>
+            <h3 class="service-title">Brochure & Catalogue</h3>
+            <p class="service-desc">Beautifully designed brochures and catalogues for your products and services.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+
+  <!-- =============================================
+       PRINTING SERVICES SECTION
+  ============================================= -->
+  <section id="print-services">
+    <div class="container">
+      <div class="section-header">
+        <p class="section-label reveal">Physical Products</p>
+        <h2 class="section-title reveal reveal-delay-1">Printing <span>Services</span></h2>
+        <p class="section-desc reveal reveal-delay-2">
+          High-quality printing services delivered with precision, speed, and colour accuracy.
+        </p>
+      </div>
+
+      <div class="services-grid">
+
+        <!-- PRINT SERVICE CARD 1 -->
+        <div class="service-card reveal">
+          <img src="https://cdn.kord.live/serve/009RDmkmQA0x.jpg" alt="Banner & Flex Printing" class="about-img" style="height:180px;border-radius:0;" />
+          <div class="service-card-body">
+            <div class="service-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h18v4H3zM3 10h18v4H3zM3 17h18v4H3z"/></svg>
+            </div>
+            <h3 class="service-title">Banner & Flex Printing</h3>
+            <p class="service-desc">Large-format banners and flex prints for events, shops, and outdoor advertising.</p>
+          </div>
+        </div>
+
+        <!-- PRINT SERVICE CARD 2 -->
+        <div class="service-card reveal reveal-delay-1">
+          <img src="https://cdn.kord.live/serve/bmVs49dmCNWa.jpg" alt="T-Shirt & Apparel Printing" class="about-img" style="height:180px;border-radius:0;" />
+          <div class="service-card-body">
+            <div class="service-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.38 3.46L16 2a4 4 0 01-8 0L3.62 3.46a2 2 0 00-1.34 2.23l.58 3.57a1 1 0 00.99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 002-2V10h2.15a1 1 0 00.99-.84l.58-3.57a2 2 0 00-1.34-2.23z"/></svg>
+            </div>
+            <h3 class="service-title">T-Shirt & Apparel Printing</h3>
+            <p class="service-desc">Custom branded apparel — t-shirts, caps, uniforms, and more with crisp prints.</p>
+          </div>
+        </div>
+
+        <!-- PRINT SERVICE CARD 3 -->
+        <div class="service-card reveal reveal-delay-2">
+          <img src="https://cdn.kord.live/serve/ASqKSjkDcDCF.jpg" alt="Business Card Printing" class="about-img" style="height:180px;border-radius:0;" />
+          <div class="service-card-body">
+            <div class="service-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+            </div>
+            <h3 class="service-title">Business Card Printing</h3>
+            <p class="service-desc">Premium matte, glossy, or embossed business cards printed to perfection.</p>
+          </div>
+        </div>
+
+        <!-- PRINT SERVICE CARD 4 -->
+        <div class="service-card reveal">
+          <img src="https://cdn.kord.live/serve/xk5l1BNebbMK.jpg" alt="Sticker & Label Printing" class="about-img" style="height:180px;border-radius:0;" />
+          <div class="service-card-body">
+            <div class="service-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/></svg>
+            </div>
+            <h3 class="service-title">Sticker & Label Printing</h3>
+            <p class="service-desc">Custom stickers and product labels in any shape, size, or finish.</p>
+          </div>
+        </div>
+
+        <!-- PRINT SERVICE CARD 5 -->
+        <div class="service-card reveal reveal-delay-1">
+          <img src="https://cdn.kord.live/serve/kZ3AhQCgS6Yr.jpg" alt="Branded Merchandise" class="about-img" style="height:180px;border-radius:0;" />
+          <div class="service-card-body">
+            <div class="service-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            </div>
+            <h3 class="service-title">Branded Merchandise</h3>
+            <p class="service-desc">Mugs, bags, pens, and branded promotional items for events and giveaways.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+
+  <!-- =============================================
+       PORTFOLIO SHOWCASE
+  ============================================= -->
+  <section id="portfolio">
+    <div class="container">
+      <div class="section-header">
+        <p class="section-label reveal">Our Work</p>
+        <h2 class="section-title reveal reveal-delay-1">Portfolio <span>Showcase</span></h2>
+        <p class="section-desc reveal reveal-delay-2">
+          A glimpse of our finest work — every project delivered with passion.
+        </p>
+      </div>
+
+      <div class="portfolio-grid">
+
+        <!-- REPLACE: Each src="YOUR_PORTFOLIO_IMAGE_N_HERE.jpg" with actual image paths -->
+        <!-- REPLACE: Tag and Title text for each item -->
+
+        <div class="portfolio-item item reveal">
+          <div class="portfolio-img-placeholder">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>
+            <span>portfolio-image-1.jpg</span>
+          </div>
+          <div class="portfolio-overlay">
+            <span class="portfolio-tag">Brand Identity</span>
+            <h3 class="portfolio-name">Project Title One</h3>
+          </div>
+        </div>
+
+        <div class="portfolio-item item reveal reveal-delay-1">
+          <div class="portfolio-img-placeholder">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>
+            <span>portfolio-image-2.jpg</span>
+          </div>
+          <div class="portfolio-overlay">
+            <span class="portfolio-tag">Flyer Design</span>
+            <h3 class="portfolio-name">Project Title Two</h3>
+          </div>
+        </div>
+
+        <div class="portfolio-item item reveal reveal-delay-2">
+          <div class="portfolio-img-placeholder">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>
+            <span>portfolio-image-3.jpg</span>
+          </div>
+          <div class="portfolio-overlay">
+            <span class="portfolio-tag">Social Media</span>
+            <h3 class="portfolio-name">Project Title Three</h3>
+          </div>
+        </div>
+
+        <div class="portfolio-item item reveal">
+          <div class="portfolio-img-placeholder">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>
+            <span>portfolio-image-4.jpg</span>
+          </div>
+          <div class="portfolio-overlay">
+            <span class="portfolio-tag">Print</span>
+            <h3 class="portfolio-name">Project Title Four</h3>
+          </div>
+        </div>
+
+        <div class="portfolio-item item reveal reveal-delay-1">
+          <div class="portfolio-img-placeholder">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>
+            <span>portfolio-image-5.jpg</span>
+          </div>
+          <div class="portfolio-overlay">
+            <span class="portfolio-tag">Packaging</span>
+            <h3 class="portfolio-name">Project Title Five</h3>
+          </div>
+        </div>
+
+        <div class="portfolio-item item reveal reveal-delay-2">
+          <div class="portfolio-img-placeholder">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>
+            <span>portfolio-image-6.jpg</span>
+          </div>
+          <div class="portfolio-overlay">
+            <span class="portfolio-tag">Logo Design</span>
+            <h3 class="portfolio-name">Project Title Six</h3>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+
+  <!-- =============================================
+       ORDER FORM
+  ============================================= -->
+  <section id="order">
+    <div class="container">
+      <div class="order-grid">
+
+        <div class="order-info">
+          <p class="section-label reveal">Place an Order</p>
+          <h2 class="section-title reveal reveal-delay-1">Let's Build<br><span>Something Great</span></h2>
+          <p class="section-desc reveal reveal-delay-2">
+            Fill in the form and your message will be sent directly to our WhatsApp for a quick response. We typically reply within 30 minutes.
+          </p>
+
+          <div style="margin-top: 40px;">
+            <div class="order-feature reveal reveal-delay-2">
+              <div class="order-feature-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              </div>
+              <div class="order-feature-text">
+                <h4>Fast Turnaround</h4>
+                <!-- REPLACE: delivery time -->
+                <p>Most projects delivered within 24–72 hours</p>
+              </div>
+            </div>
+
+            <div class="order-feature reveal reveal-delay-3">
+              <div class="order-feature-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+              </div>
+              <div class="order-feature-text">
+                <h4>Unlimited Revisions</h4>
+                <p>We refine until you're 100% satisfied</p>
+              </div>
+            </div>
+
+            <div class="order-feature reveal reveal-delay-4">
+              <div class="order-feature-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              </div>
+              <div class="order-feature-text">
+                <h4>Source Files Included</h4>
+                <p>All projects come with editable source files</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="order-form-wrap reveal reveal-delay-1">
+          <!-- ORDER FORM — sends via WhatsApp -->
+          <div class="form-row">
+            <div class="form-group">
+              <label for="f-name">Full Name *</label>
+              <input type="text" id="f-name" placeholder="John Doe" required />
+            </div>
+            <div class="form-group">
+              <label for="f-phone">Phone / WhatsApp *</label>
+              <input type="tel" id="f-phone" placeholder="+234 800 000 0000" required />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="f-service">Service Required *</label>
+            <select id="f-service" required>
+              <option value="" disabled selected>-- Select a service --</option>
+              <!-- REPLACE: Add/remove service options as needed -->
+              <option>Logo & Brand Identity</option>
+              <option>Flyer / Poster Design</option>
+              <option>Social Media Graphics</option>
+              <option>Business Card Design</option>
+              <option>Packaging Design</option>
+              <option>Brochure / Catalogue</option>
+              <option>Banner / Flex Printing</option>
+              <option>T-Shirt & Apparel Printing</option>
+              <option>Business Card Printing</option>
+              <option>Sticker & Label Printing</option>
+              <option>Branded Merchandise</option>
+              <option>Other (describe below)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="f-budget">Budget Range</label>
+            <select id="f-budget">
+              <option value="" disabled selected>-- Select budget --</option>
+              <!-- REPLACE: Adjust budget ranges to match your pricing -->
+              <option>Under ₦5,000</option>
+              <option>₦5,000 – ₦20,000</option>
+              <option>₦20,000 – ₦50,000</option>
+              <option>₦50,000 – ₦100,000</option>
+              <option>Above ₦100,000</option>
+              <option>Let's discuss</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="f-desc">Project Description *</label>
+            <textarea id="f-desc" placeholder="Describe your project — colours, style, deadline, any references..." required></textarea>
+          </div>
+
+          <!-- REPLACE: 2349049541318 with your actual number e.g. 2348012345678 -->
+          <button class="form-submit" onclick="sendToWhatsApp()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+            Send Order via WhatsApp
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+
+  <!-- =============================================
+       CONTACT SECTION
+  ============================================= -->
+  <section id="contact">
+    <div class="container">
+      <div class="section-header">
+        <p class="section-label reveal">Get In Touch</p>
+        <h2 class="section-title reveal reveal-delay-1">Contact <span>Us</span></h2>
+        <p class="section-desc reveal reveal-delay-2">We're always happy to hear from you. Reach out via any channel below.</p>
+      </div>
+
+      <div class="contact-grid">
+        <div class="reveal">
+
+          
+          <a href="mailto:awwalabdul891@gmail.com" class="contact-item">
+            <div class="contact-item-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            </div>
+            <div class="contact-item-text">
+              <h4>Email</h4>
+              
+              <p>awwalabdul891@gmail.com</p>
+            </div>
+          </a>
+
+          <!-- REPLACE: 2349049541318 -->
+          <a href="https://wa.me/2349049541318" target="_blank" class="contact-item">
+            <div class="contact-item-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+            </div>
+            <div class="contact-item-text">
+              <h4>WhatsApp</h4>
+              <!-- REPLACE: phone number display -->
+              <p>+234 904 954 1318</p>
+            </div>
+          </a>
+
+          <!-- REPLACE: location text -->
+          <div class="contact-item" style="cursor: default;">
+            <div class="contact-item-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            </div>
+            <div class="contact-item-text">
+              <h4>Location</h4>
+              <!-- REPLACE: your city/address -->
+              <p>Nigeria</p>
+            </div>
+          </div>
+
+          <!-- Social Links -->
+          <div style="margin-top: 24px; padding: 24px; background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-lg);">
+            <p style="font-size: 13px; font-weight: 600; color: var(--text-muted); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 16px;">Follow Us</p>
+            <div class="social-links">
+              <!-- REPLACE: href links for each social platform -->
+              <a href="#" target="_blank" class="social-link" title="Instagram">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+              </a>
+              <a href="#" target="_blank" class="social-link" title="Facebook">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg>
+              </a>
+              <a href="#" target="_blank" class="social-link" title="Twitter / X">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+              </a>
+              <a href="#" target="_blank" class="social-link" title="TikTok">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.27 6.27 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.78 1.52V6.73a4.85 4.85 0 01-1.01-.04z"/></svg>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Optional: Replace with an embedded Google Map or remove -->
+        <div class="contact-map reveal reveal-delay-1">
+          <div>
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" style="color: var(--text-dim); margin: 0 auto 16px;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            <p style="color: var(--text-dim); font-size: 14px;">
+              <!-- REPLACE: To embed a Google Map, replace this div contents with an <iframe> from Google Maps -->
+              Replace this with your Google Maps embed<br>
+              <span style="font-size: 12px; margin-top: 8px; display: inline-block;">Get embed code from maps.google.com → Share → Embed a map</span>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- =============================================
+       FLOATING WHATSAPP BUTTON
+  ============================================= -->
+  <!-- REPLACE: 2349049541318 -->
+  <a href="https://wa.me/2349049541318?text=Hi%2C%20I%20need%20a%20design%20service" target="_blank" class="float-wa" title="Chat on WhatsApp">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+  </a>
+
+
+  <!-- =============================================
+       FOOTER
+  ============================================= -->
+  <footer>
+    <div class="container">
+      <div class="footer-inner">
+        <div class="footer-logo">AKAY <span>MIGHTY</span> CONCEPT</div>
+
+        <!-- REPLACE: year updates automatically via JS; update studio name if needed -->
+        <p class="footer-copy">
+          &copy; <span id="year"></span> Akay Mighty Concept. Crafted with ❤️ — All rights reserved.
+        </p>
+
+        <div style="display:flex; gap: 16px;">
+          <a href="#hero" style="font-size:13px; color: var(--text-dim); transition: color 0.3s;" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--text-dim)'">Back to top ↑</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+
+  <!-- =============================================
+       JAVASCRIPT
+  ============================================= -->
+  <script>
+    /* ---- Copyright Year ---- */
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    /* ---- Navbar scroll effect ---- */
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+      navbar.classList.toggle('scrolled', window.scrollY > 60);
+    });
+
+    /* ---- Hamburger / Mobile Nav ---- */
+    const hamburger = document.getElementById('hamburger');
+    const mobileNav = document.getElementById('mobileNav');
+
+    hamburger.addEventListener('click', () => {
+      hamburger.classList.toggle('open');
+      mobileNav.classList.toggle('open');
+      document.body.style.overflow = mobileNav.classList.contains('open') ? 'hidden' : '';
+    });
+
+    function closeMobile() {
+      hamburger.classList.remove('open');
+      mobileNav.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    /* ---- Scroll Reveal ---- */
+    const revealEls = document.querySelectorAll('.reveal');
+
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          revealObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1 });
+
+    revealEls.forEach(el => revealObserver.observe(el));
+
+    /* ---- WhatsApp Order Form ---- */
+    function sendToWhatsApp() {
+      const name    = document.getElementById('f-name').value.trim();
+      const phone   = document.getElementById('f-phone').value.trim();
+      const service = document.getElementById('f-service').value;
+      const budget  = document.getElementById('f-budget').value;
+      const desc    = document.getElementById('f-desc').value.trim();
+
+      if (!name || !service || !desc) {
+        alert('Please fill in your name, service, and project description.');
+        return;
+      }
+
+      const message =
+        `*New Order — Akay Mighty Concept*\n\n` +
+        `👤 *Name:* ${name}\n` +
+        `📱 *Phone:* ${phone || 'Not provided'}\n` +
+        `🎨 *Service:* ${service}\n` +
+        `💰 *Budget:* ${budget || 'Not specified'}\n` +
+        `📝 *Description:*\n${desc}`;
+
+      /* REPLACE: 2349049541318 with your actual WhatsApp number e.g. 2348012345678 */
+      const waNumber = '2349049541318';
+      const waURL = `https://wa.me/${waNumber}?text=${encodeURIComponent(message)}`;
+      window.open(waURL, '_blank');
+    }
+
+    /* ---- Smooth scroll for all anchor links ---- */
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function(e) {
+ 
