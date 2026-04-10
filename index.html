@@ -935,4 +935,10 @@
         `👤 *Name:* ${name}\n` +
         `📱 *Phone:* ${phone || 'Not provided'}\n` +
         `🎨 *Service:* ${service}\n` +
-    
+        `💰 *Budget:* ${budget || 'Not specified'}\n` +
+        `📝 *Description:*\n${desc}`;
+      window.open(`https://wa.me/2349049541318?text=${encodeURIComponent(message)}`, '_blank');
+    }
+  </script>
+</body>
+</html>
