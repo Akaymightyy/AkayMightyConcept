@@ -27,6 +27,7 @@
       padding: 16px 20px;
       margin-bottom: 12px;
     }
+    .card--alert { border-color: #5a1a1a; background: rgba(90, 26, 26, .15); }
     .pill {
       display: inline-block;
       padding: 3px 10px;
@@ -53,6 +54,7 @@
       color: #b0b0b0;
       white-space: pre-wrap;
       word-break: break-word;
+      margin-top: 10px;
     }
     .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 8px; }
     .row strong { color: #fff; min-width: 140px; }
@@ -61,7 +63,7 @@
       background: #ff1a1a;
       color: #fff;
       border: none;
-      padding: 8px 16px;
+      padding: 9px 18px;
       border-radius: 6px;
       font: 600 13px/1 'Poppins', sans-serif;
       cursor: pointer;
@@ -69,6 +71,7 @@
     }
     .btn--ghost { background: transparent; border: 1px solid #2a2a2a; color: #fff; }
     .btn:hover { opacity: .85; }
+    .btn:disabled { opacity: .5; cursor: not-allowed; }
     a { color: #ff8a8a; }
     .img-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
     .img-grid figure { margin: 0; }
@@ -76,12 +79,42 @@
     .img-grid figcaption { font-size: 10px; color: #8a8a8a; margin-top: 4px; word-break: break-all; font-family: 'JetBrains Mono', monospace; }
     .empty { color: #5a5a5a; font-style: italic; }
     .back { display: inline-block; margin-top: 32px; color: #8a8a8a; text-decoration: none; }
+    .alert-banner {
+      background: rgba(255, 213, 79, .12);
+      border: 1px solid rgba(255, 213, 79, .3);
+      border-radius: 10px;
+      padding: 14px 18px;
+      margin-bottom: 24px;
+      color: #ffd54f;
+    }
+    .alert-banner strong { color: #fff; }
+    .alert-banner--err {
+      background: rgba(255, 82, 82, .12);
+      border-color: rgba(255, 82, 82, .3);
+      color: #ff5252;
+    }
+    .alert-banner--ok {
+      background: rgba(46, 204, 113, .12);
+      border-color: rgba(46, 204, 113, .3);
+      color: #2ecc71;
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>Debug Console</h1>
     <p class="sub">Diagnostic page for troubleshooting image upload issues. Share a screenshot of this page if you need help.</p>
+
+    <div class="alert-banner" id="netBanner">
+      <strong>Network check:</strong> <span id="netStatus">checking…</span>
+    </div>
+
+    <h2>0. Quick actions</h2>
+    <div class="card">
+      <p>Force Firestore to reconnect and reload data.</p>
+      <button class="btn" id="reconnectBtn">⟳ Force reconnect</button>
+      <button class="btn btn--ghost" id="reloadBtn">↻ Reload page</button>
+    </div>
 
     <h2>1. Firebase Auth State</h2>
     <div class="card" id="authCard">Checking…</div>
@@ -109,9 +142,9 @@
   </div>
 
   <script type="module">
-    import { auth, db } from "./firebase-config.js";
+    import { auth, db, forceOnline, waitForServer } from "./firebase-config.js";
     import {
-      doc, getDoc, setDoc, serverTimestamp
+      doc, getDoc, setDoc, serverTimestamp, onSnapshot
     } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
     import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
 
@@ -119,10 +152,42 @@
     function logError(msg) {
       errors.push(`${new Date().toLocaleTimeString()} — ${msg}`);
       const el = document.getElementById('errorsCard');
-      el.innerHTML = `<pre>${errors.join('\n')}</pre>`;
+      el.innerHTML = `<pre>${errors.map(e => e.replace(/</g,'&lt;')).join('\n')}</pre>`;
     }
     window.addEventListener('error', e => logError(`${e.message} @ ${e.filename}:${e.lineno}`));
     window.addEventListener('unhandledrejection', e => logError(`Unhandled promise: ${e.reason?.message || e.reason}`));
+
+    // Update network banner
+    function updateNetBanner() {
+      const online = navigator.onLine;
+      const banner = document.getElementById('netBanner');
+      const status = document.getElementById('netStatus');
+      if (online) {
+        banner.className = 'alert-banner alert-banner--ok';
+        status.textContent = 'Browser reports ONLINE — Firestore should be able to connect. If still failing, the issue is Firebase-specific (rules or auth).';
+      } else {
+        banner.className = 'alert-banner alert-banner--err';
+        status.textContent = 'Browser reports OFFLINE — your device has no internet. Connect to WiFi or check your mobile data and reload.';
+      }
+    }
+    updateNetBanner();
+    window.addEventListener('online', updateNetBanner);
+    window.addEventListener('offline', updateNetBanner);
+
+    // Reconnect button
+    document.getElementById('reconnectBtn').addEventListener('click', async () => {
+      const btn = document.getElementById('reconnectBtn');
+      btn.disabled = true;
+      btn.textContent = 'Reconnecting…';
+      await forceOnline();
+      // Wait a moment for connection to establish
+      await new Promise(r => setTimeout(r, 1500));
+      btn.disabled = false;
+      btn.textContent = '⟳ Force reconnect';
+      loadFirestoreData();
+      updateNetBanner();
+    });
+    document.getElementById('reloadBtn').addEventListener('click', () => location.reload());
 
     // 1. Auth state
     onAuthStateChanged(auth, user => {
@@ -156,18 +221,21 @@
         if (imgSnap.exists()) {
           const data = imgSnap.data();
           delete data._updatedAt;
-          const keys = Object.keys(data);
+          // Filter out test fields
+          const realKeys = Object.keys(data).filter(k => !k.startsWith('_test'));
+          const customizedKeys = realKeys.filter(k => data[k] && data[k].length > 0);
           imgCard.innerHTML = `
             <div class="row"><strong>Status</strong> <span class="pill pill--ok">Document exists</span></div>
-            <div class="row"><strong>Slots saved</strong> <span>${keys.length}</span></div>
-            <div class="row"><strong>Customized slots</strong> <span>${keys.filter(k => data[k] && data[k].length > 0).length}</span></div>
-            <div class="row"><strong>Empty/reset slots</strong> <span>${keys.filter(k => !data[k] || data[k].length === 0).length}</span></div>
+            <div class="row"><strong>Total slots</strong> <span>${realKeys.length}</span></div>
+            <div class="row"><strong>Customized (non-empty)</strong> <span style="color:#2ecc71;font-weight:700;">${customizedKeys.length}</span></div>
+            <div class="row"><strong>Reset/empty</strong> <span>${realKeys.length - customizedKeys.length}</span></div>
+            ${customizedKeys.length === 0 ? '<div class="row"><strong>⚠️</strong> <span style="color:#ffd54f">No image overrides have been saved. Either you never saved any, OR your writes are being rejected (see write test below).</span></div>' : ''}
           `;
           const grid = document.getElementById('imagesGrid');
-          grid.innerHTML = keys.map(k => `
+          grid.innerHTML = customizedKeys.map(k => `
             <figure>
-              <img src="${data[k] || 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 75%22%3E%3Crect width=%22100%22 height=%2275%22 fill=%22%23141414%22/%3E%3Ctext x=%2250%22 y=%2245%22 font-size=%2212%22 fill=%22%23555%22 text-anchor=%22middle%22%3Eempty%3C/text%3E%3C/svg%3E'}" alt="${k}" onerror="this.alt='load failed'" />
-              <figcaption><strong style="color:#ff1a1a">${k}</strong><br>${(data[k] || '(empty)').slice(0, 60)}</figcaption>
+              <img src="${data[k]}" alt="${k}" onerror="this.alt='load failed'; this.style.background='#1a1a1a';" />
+              <figcaption><strong style="color:#ff1a1a">${k}</strong><br>${(data[k] || '').slice(0, 60)}</figcaption>
             </figure>
           `).join('');
         } else {
@@ -181,18 +249,29 @@
         if (textSnap.exists()) {
           const data = textSnap.data();
           delete data._updatedAt;
-          const keys = Object.keys(data);
+          const keys = Object.keys(data).filter(k => !k.startsWith('_test'));
           textCard.innerHTML = `
             <div class="row"><strong>Status</strong> <span class="pill pill--ok">Document exists</span></div>
             <div class="row"><strong>Text slots saved</strong> <span>${keys.length}</span></div>
-            <pre>${JSON.stringify(data, null, 2)}</pre>
+            <pre>${JSON.stringify(data, null, 2).replace(/</g,'&lt;')}</pre>
           `;
         } else {
           textCard.innerHTML = `<div class="row"><strong>Status</strong> <span class="pill pill--err">Document does NOT exist</span></div>`;
         }
       } catch (e) {
         logError('Firestore read failed: ' + e.message);
-        document.getElementById('imagesCard').innerHTML = `<div class="row"><strong>Status</strong> <span class="pill pill--err">Read failed</span></div><div class="row"><strong>Error</strong> <span>${e.message}</span></div>`;
+        const isOffline = /offline|network|unreachable/i.test(e.message);
+        const isPermission = /permission|denied/i.test(e.message);
+        const banner = document.getElementById('netBanner');
+        if (isOffline) {
+          banner.className = 'alert-banner alert-banner--err';
+          banner.innerHTML = `<strong>NETWORK ERROR:</strong> Firestore cannot reach the server. Your writes/reads are failing. <strong>Click "Force reconnect" above</strong>, or switch to a different network (WiFi ↔ mobile data) and reload. If this keeps failing, your ISP may be blocking Firebase — try a VPN or different network.`;
+        } else if (isPermission) {
+          banner.className = 'alert-banner alert-banner--err';
+          banner.innerHTML = `<strong>PERMISSION ERROR:</strong> Firestore rules are denying access. Open Firebase console → Firestore → Rules → paste the rules from <code>firestore.rules</code> → Publish.`;
+        }
+        document.getElementById('imagesCard').innerHTML = `<div class="row"><strong>Status</strong> <span class="pill pill--err">Read failed</span></div><div class="row"><strong>Error</strong> <span>${e.message}</span></div><div class="row"><strong>Code</strong> <span>${e.code || 'none'}</span></div>`;
+        document.getElementById('textsCard').innerHTML = `<div class="row"><strong>Status</strong> <span class="pill pill--err">Read failed</span></div>`;
       }
     }
 
@@ -210,46 +289,55 @@
         await setDoc(doc(db, 'content', 'images'),
           { '_testWrite': testValue, _updatedAt: serverTimestamp() },
           { merge: true });
-        // verify
+
+        // Wait for the write to actually reach the server
+        await waitForServer(15000);
+
+        // Verify
         const snap = await getDoc(doc(db, 'content', 'images'));
         const data = snap.data() || {};
         if (data._testWrite === testValue) {
           card.innerHTML = `
-            <div class="row"><strong>Result</strong> <span class="pill pill--ok">Write succeeded</span></div>
-            <div class="row"><strong>Conclusion</strong> <span>Firestore writes work. If images still revert on refresh, the bug is elsewhere (likely in how the page reads data on load).</span></div>
+            <div class="row"><strong>Result</strong> <span class="pill pill--ok">✓ Write SUCCEEDED</span></div>
+            <div class="row"><strong>Conclusion</strong> <span>Firestore writes work AND reach the server. If images still revert on refresh, the bug is in <code>applyImage</code> or <code>onSnapshot</code> in <code>admin.js</code>. Send a screenshot of this debug page so I can investigate.</span></div>
             <button class="btn btn--ghost" onclick="location.reload()">Re-run test</button>
           `;
         } else {
           card.innerHTML = `
-            <div class="row"><strong>Result</strong> <span class="pill pill--err">Write FAILED verification</span></div>
-            <div class="row"><strong>Conclusion</strong> <span>Your writes are being silently rejected by Firestore rules. Re-check the deployed rules — see firestore.rules file. The rules should allow <code>request.auth != null</code> to write to <code>content/{docName}</code>.</span></div>
+            <div class="row"><strong>Result</strong> <span class="pill pill--err">✗ Write FAILED verification</span></div>
+            <div class="row"><strong>Conclusion</strong> <span>Your writes are being silently rejected by Firestore rules. Re-check the deployed rules — see <code>firestore.rules</code> file. The rules should allow <code>request.auth != null</code> to write to <code>content/{docName}</code>.</span></div>
+            <button class="btn btn--ghost" onclick="location.reload()">Re-run test</button>
           `;
         }
       } catch (e) {
+        const isOffline = /offline|network|timed out|unreachable/i.test(e.message);
+        const isPermission = /permission|denied/i.test(e.message);
         card.innerHTML = `
-          <div class="row"><strong>Result</strong> <span class="pill pill--err">Error</span></div>
+          <div class="row"><strong>Result</strong> <span class="pill pill--err">${isOffline ? 'NETWORK ERROR' : isPermission ? 'PERMISSION DENIED' : 'Error'}</span></div>
           <div class="row"><strong>Error</strong> <span>${e.message}</span></div>
           <div class="row"><strong>Code</strong> <span>${e.code || 'none'}</span></div>
+          ${isOffline ? '<div class="row"><strong>Fix</strong> <span>Click "Force reconnect" at the top, or switch networks (WiFi ↔ mobile data) and reload. If still failing, your ISP may be blocking Firebase — try a VPN.</span></div>' : ''}
+          ${isPermission ? '<div class="row"><strong>Fix</strong> <span>Open Firebase console → Firestore → Rules → paste <code>firestore.rules</code> → Publish.</span></div>' : ''}
           <button class="btn btn--ghost" onclick="location.reload()">Re-run test</button>
         `;
       }
     });
 
-    // 5. List all data-img-slot attributes
-    const slots = [...document.querySelectorAll('[data-img-slot]')].map(el => ({
-      slot: el.getAttribute('data-img-slot'),
-      tag: el.tagName.toLowerCase(),
-      currentSrc: el.tagName === 'IMG' ? el.src : (el.querySelector('img')?.src || '')
-    }));
-    const uniqueSlots = [...new Set(slots.map(s => s.slot))];
+    // 5. List all data-img-slot attributes (note: this is debug.html,
+    //    which has none — count will always be 0. To check the main
+    //    site's slots, visit / instead.)
+    const slots = [...document.querySelectorAll('[data-img-slot]')];
     document.getElementById('slotsCard').innerHTML = `
-      <div class="row"><strong>Unique slots</strong> <span>${uniqueSlots.length}</span></div>
-      <div class="row"><strong>Total elements</strong> <span>${slots.length}</span></div>
-      <pre>${uniqueSlots.map(s => {
-        const count = slots.filter(x => x.slot === s).length;
-        return `${s}  (${count} element${count > 1 ? 's' : ''})`;
-      }).join('\n')}</pre>
+      <div class="row"><strong>Note</strong> <span>This debug page itself doesn't contain image slots. To verify the main site's slots, visit <a href="./">the homepage</a> and check the browser console for the <code>[admin]</code> log messages.</span></div>
+      <div class="row"><strong>This page</strong> <span>${slots.length} data-img-slot elements</span></div>
     `;
+
+    // Live-listen for Firestore changes (so the page auto-updates if the
+    // admin dashboard makes a change in another tab)
+    onSnapshot(doc(db, 'content', 'images'), () => {
+      console.log('[debug] images doc changed, reloading...');
+      loadFirestoreData();
+    }, err => logError('onSnapshot images error: ' + err.message));
   </script>
 </body>
 </html>

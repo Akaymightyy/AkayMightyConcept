@@ -12,7 +12,7 @@
 //    • Auto-redirects to dashboard UI immediately after sign-in
 // =====================================================================
 
-import { auth, db } from "./firebase-config.js";
+import { auth, db, forceOnline, waitForServer } from "./firebase-config.js";
 import {
   cloudinaryConfig,
   cloudinaryUploadUrl,
@@ -595,6 +595,8 @@ async function saveCustomImages(arr) {
     await setDoc(doc(db, 'content', 'custom-images'),
       { items: arr, _updatedAt: serverTimestamp() },
       { merge: true });
+    // Wait for server ack
+    await waitForServer(15000);
     // Verify
     const snap = await getDoc(doc(db, 'content', 'custom-images'));
     if (!snap.exists()) throw new Error('Verification failed');
@@ -608,6 +610,8 @@ async function saveCustomImages(arr) {
       toast('SAVE FAILED — Firestore rules not deployed. See Settings tab.', 'error');
       state.rulesOk = false;
       renderRulesStatus();
+    } else if (/offline|network|timed out|unreachable/i.test(e.message)) {
+      toast('NETWORK — cannot reach Firestore. Check connection. Visit /debug.html', 'error');
     } else {
       toast('Save failed: ' + e.message, 'error');
     }
@@ -765,22 +769,29 @@ async function saveImage(slot, url) {
       { [slot]: url, _updatedAt: serverTimestamp() },
       { merge: true });
 
-    // Verify the write actually landed on the server
+    // CRITICAL: wait for the write to actually reach the server.
+    // This catches "fake saves" where the offline cache accepts the write
+    // but the server never receives it (network issue / rules rejection).
+    await waitForServer(15000);
+
+    // Verify the value actually landed
     const verify = await getDoc(doc(db, 'content', 'images'));
     if (!verify.exists()) {
       throw new Error('Verification failed — doc does not exist on server');
     }
     const data = verify.data();
     if (data[slot] !== url) {
-      throw new Error('Verification failed — server has stale value. Check Firestore rules.');
+      throw new Error('PERMISSION_DENIED — write rejected by Firestore rules. Deploy firestore.rules.');
     }
     return true;
   } catch (e) {
     console.error('[dash] saveImage failed:', e);
     if (e.code === 'permission-denied' || /permission|denied/i.test(e.message)) {
-      toast('SAVE FAILED — Firestore rules not deployed. Open Settings tab for instructions.', 'error');
+      toast('SAVE FAILED — Firestore rules rejected the write. Open Settings → Rules.', 'error');
       state.rulesOk = false;
       renderRulesStatus();
+    } else if (/offline|network|timed out|unreachable/i.test(e.message)) {
+      toast('NETWORK — cannot reach Firestore. Check your connection and retry. Visit /debug.html', 'error');
     } else {
       toast('Save failed: ' + e.message, 'error');
     }
@@ -793,13 +804,16 @@ async function saveText(slot, text) {
     await setDoc(doc(db, 'content', 'texts'),
       { [slot]: text, _updatedAt: serverTimestamp() },
       { merge: true });
+    await waitForServer(15000);
     return true;
   } catch (e) {
     console.error('[dash] saveText failed:', e);
     if (e.code === 'permission-denied' || /permission|denied/i.test(e.message)) {
-      toast('SAVE FAILED — Firestore rules not deployed. See Settings tab.', 'error');
+      toast('SAVE FAILED — Firestore rules rejected the write. See Settings tab.', 'error');
       state.rulesOk = false;
       renderRulesStatus();
+    } else if (/offline|network|timed out|unreachable/i.test(e.message)) {
+      toast('NETWORK — cannot reach Firestore. Check connection and retry. Visit /debug.html', 'error');
     } else {
       toast('Save failed: ' + e.message, 'error');
     }
