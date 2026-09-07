@@ -164,6 +164,7 @@ function startSync() {
   if (state.unsubTexts)  state.unsubTexts();
 
   state.unsubImages = onSnapshot(doc(db, 'content', 'images'), snap => {
+    console.log('[admin] images snapshot:', snap.exists() ? Object.keys(snap.data()).length + ' fields' : 'doc does not exist');
     if (!snap.exists()) {
       state.images = {};
       return;
@@ -177,7 +178,11 @@ function startSync() {
     });
   }, err => {
     console.error('[admin] images sync error:', err);
-    toast('Image sync failed — check Firestore rules', 'error');
+    if (err.code === 'permission-denied') {
+      toast('READ FAILED — Firestore rules deny read. Deploy firestore.rules. Visit /debug.html for details.', 'error');
+    } else {
+      toast('Image sync failed: ' + err.message, 'error');
+    }
   });
 
   state.unsubTexts = onSnapshot(doc(db, 'content', 'texts'), snap => {

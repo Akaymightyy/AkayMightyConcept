@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Debug — Akay Mighty Concept</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #0a0a0a;
+      color: #fff;
+      font-family: 'Poppins', system-ui, sans-serif;
+      padding: 24px;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+    .container { max-width: 900px; margin: 0 auto; }
+    h1 { font-size: 28px; margin-bottom: 8px; color: #ff1a1a; }
+    h2 { font-size: 18px; margin: 28px 0 12px; padding-bottom: 8px; border-bottom: 1px solid #2a2a2a; }
+    .sub { color: #8a8a8a; margin-bottom: 24px; font-size: 14px; }
+    .card {
+      background: #141414;
+      border: 1px solid #2a2a2a;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 12px;
+    }
+    .pill {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .3px;
+      text-transform: uppercase;
+      margin-right: 6px;
+    }
+    .pill--ok    { background: rgba(46, 204, 113, .15); color: #2ecc71; }
+    .pill--err   { background: rgba(255, 82, 82, .15); color: #ff5252; }
+    .pill--warn  { background: rgba(255, 213, 79, .15); color: #ffd54f; }
+    .pill--mute  { background: #1f1f1f; color: #8a8a8a; }
+    pre {
+      background: #0a0a0a;
+      border: 1px solid #2a2a2a;
+      border-radius: 6px;
+      padding: 14px 16px;
+      font-family: 'JetBrains Mono', Menlo, monospace;
+      font-size: 12px;
+      line-height: 1.5;
+      overflow-x: auto;
+      color: #b0b0b0;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 8px; }
+    .row strong { color: #fff; min-width: 140px; }
+    .row span { color: #b0b0b0; word-break: break-all; }
+    .btn {
+      background: #ff1a1a;
+      color: #fff;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font: 600 13px/1 'Poppins', sans-serif;
+      cursor: pointer;
+      margin-right: 8px;
+    }
+    .btn--ghost { background: transparent; border: 1px solid #2a2a2a; color: #fff; }
+    .btn:hover { opacity: .85; }
+    a { color: #ff8a8a; }
+    .img-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
+    .img-grid figure { margin: 0; }
+    .img-grid img { width: 100%; aspect-ratio: 4/3; object-fit: cover; border-radius: 6px; border: 1px solid #2a2a2a; }
+    .img-grid figcaption { font-size: 10px; color: #8a8a8a; margin-top: 4px; word-break: break-all; font-family: 'JetBrains Mono', monospace; }
+    .empty { color: #5a5a5a; font-style: italic; }
+    .back { display: inline-block; margin-top: 32px; color: #8a8a8a; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Debug Console</h1>
+    <p class="sub">Diagnostic page for troubleshooting image upload issues. Share a screenshot of this page if you need help.</p>
+
+    <h2>1. Firebase Auth State</h2>
+    <div class="card" id="authCard">Checking…</div>
+
+    <h2>2. Firestore <code>content/images</code> document</h2>
+    <div class="card" id="imagesCard">Loading…</div>
+    <div class="img-grid" id="imagesGrid"></div>
+
+    <h2>3. Firestore <code>content/texts</code> document</h2>
+    <div class="card" id="textsCard">Loading…</div>
+
+    <h2>4. Write permission test</h2>
+    <div class="card" id="writeCard">
+      <p>Click the button to test if Firestore writes work for your account.</p>
+      <button class="btn" id="testWriteBtn">Test write</button>
+    </div>
+
+    <h2>5. Page image slots (data-img-slot attributes found in HTML)</h2>
+    <div class="card" id="slotsCard">Loading…</div>
+
+    <h2>6. Errors (from console)</h2>
+    <div class="card" id="errorsCard"><p class="empty">No errors captured yet. Interact with the page to populate this.</p></div>
+
+    <a href="./" class="back">← Back to site</a>
+  </div>
+
+  <script type="module">
+    import { auth, db } from "./firebase-config.js";
+    import {
+      doc, getDoc, setDoc, serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+
+    const errors = [];
+    function logError(msg) {
+      errors.push(`${new Date().toLocaleTimeString()} — ${msg}`);
+      const el = document.getElementById('errorsCard');
+      el.innerHTML = `<pre>${errors.join('\n')}</pre>`;
+    }
+    window.addEventListener('error', e => logError(`${e.message} @ ${e.filename}:${e.lineno}`));
+    window.addEventListener('unhandledrejection', e => logError(`Unhandled promise: ${e.reason?.message || e.reason}`));
+
+    // 1. Auth state
+    onAuthStateChanged(auth, user => {
+      const card = document.getElementById('authCard');
+      if (user) {
+        card.innerHTML = `
+          <div class="row"><strong>Status</strong> <span class="pill pill--ok">Signed in</span></div>
+          <div class="row"><strong>Email</strong> <span>${user.email}</span></div>
+          <div class="row"><strong>Email verified</strong> <span>${user.emailVerified ? '✓ yes' : '✗ no'}</span></div>
+          <div class="row"><strong>UID</strong> <span>${user.uid}</span></div>
+          <div class="row"><strong>Sign-in time</strong> <span>${new Date(user.metadata.lastSignInTime).toLocaleString()}</span></div>
+        `;
+      } else {
+        card.innerHTML = `
+          <div class="row"><strong>Status</strong> <span class="pill pill--warn">Not signed in</span></div>
+          <div class="row"><strong>Note</strong> <span>You can still READ Firestore data without signing in (rules allow public read), but you cannot WRITE. To test writes, <a href="./admin.html">sign in at the admin dashboard</a> first, then come back here.</span></div>
+        `;
+      }
+      loadFirestoreData();
+    });
+
+    // 2. & 3. Load Firestore data
+    async function loadFirestoreData() {
+      try {
+        const [imgSnap, textSnap] = await Promise.all([
+          getDoc(doc(db, 'content', 'images')),
+          getDoc(doc(db, 'content', 'texts'))
+        ]);
+
+        const imgCard = document.getElementById('imagesCard');
+        if (imgSnap.exists()) {
+          const data = imgSnap.data();
+          delete data._updatedAt;
+          const keys = Object.keys(data);
+          imgCard.innerHTML = `
+            <div class="row"><strong>Status</strong> <span class="pill pill--ok">Document exists</span></div>
+            <div class="row"><strong>Slots saved</strong> <span>${keys.length}</span></div>
+            <div class="row"><strong>Customized slots</strong> <span>${keys.filter(k => data[k] && data[k].length > 0).length}</span></div>
+            <div class="row"><strong>Empty/reset slots</strong> <span>${keys.filter(k => !data[k] || data[k].length === 0).length}</span></div>
+          `;
+          const grid = document.getElementById('imagesGrid');
+          grid.innerHTML = keys.map(k => `
+            <figure>
+              <img src="${data[k] || 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 75%22%3E%3Crect width=%22100%22 height=%2275%22 fill=%22%23141414%22/%3E%3Ctext x=%2250%22 y=%2245%22 font-size=%2212%22 fill=%22%23555%22 text-anchor=%22middle%22%3Eempty%3C/text%3E%3C/svg%3E'}" alt="${k}" onerror="this.alt='load failed'" />
+              <figcaption><strong style="color:#ff1a1a">${k}</strong><br>${(data[k] || '(empty)').slice(0, 60)}</figcaption>
+            </figure>
+          `).join('');
+        } else {
+          imgCard.innerHTML = `
+            <div class="row"><strong>Status</strong> <span class="pill pill--err">Document does NOT exist</span></div>
+            <div class="row"><strong>Explanation</strong> <span>No image overrides have ever been saved to Firestore. Either you've never successfully saved an edit, or your Firestore writes are being rejected. Check the write test below.</span></div>
+          `;
+        }
+
+        const textCard = document.getElementById('textsCard');
+        if (textSnap.exists()) {
+          const data = textSnap.data();
+          delete data._updatedAt;
+          const keys = Object.keys(data);
+          textCard.innerHTML = `
+            <div class="row"><strong>Status</strong> <span class="pill pill--ok">Document exists</span></div>
+            <div class="row"><strong>Text slots saved</strong> <span>${keys.length}</span></div>
+            <pre>${JSON.stringify(data, null, 2)}</pre>
+          `;
+        } else {
+          textCard.innerHTML = `<div class="row"><strong>Status</strong> <span class="pill pill--err">Document does NOT exist</span></div>`;
+        }
+      } catch (e) {
+        logError('Firestore read failed: ' + e.message);
+        document.getElementById('imagesCard').innerHTML = `<div class="row"><strong>Status</strong> <span class="pill pill--err">Read failed</span></div><div class="row"><strong>Error</strong> <span>${e.message}</span></div>`;
+      }
+    }
+
+    // 4. Write test
+    document.getElementById('testWriteBtn').addEventListener('click', async () => {
+      const card = document.getElementById('writeCard');
+      const btn = card.querySelector('button');
+      btn.disabled = true;
+      btn.textContent = 'Testing…';
+      try {
+        if (!auth.currentUser) {
+          throw new Error('Not signed in. Open admin.html, log in, then come back.');
+        }
+        const testValue = `test-${Date.now()}`;
+        await setDoc(doc(db, 'content', 'images'),
+          { '_testWrite': testValue, _updatedAt: serverTimestamp() },
+          { merge: true });
+        // verify
+        const snap = await getDoc(doc(db, 'content', 'images'));
+        const data = snap.data() || {};
+        if (data._testWrite === testValue) {
+          card.innerHTML = `
+            <div class="row"><strong>Result</strong> <span class="pill pill--ok">Write succeeded</span></div>
+            <div class="row"><strong>Conclusion</strong> <span>Firestore writes work. If images still revert on refresh, the bug is elsewhere (likely in how the page reads data on load).</span></div>
+            <button class="btn btn--ghost" onclick="location.reload()">Re-run test</button>
+          `;
+        } else {
+          card.innerHTML = `
+            <div class="row"><strong>Result</strong> <span class="pill pill--err">Write FAILED verification</span></div>
+            <div class="row"><strong>Conclusion</strong> <span>Your writes are being silently rejected by Firestore rules. Re-check the deployed rules — see firestore.rules file. The rules should allow <code>request.auth != null</code> to write to <code>content/{docName}</code>.</span></div>
+          `;
+        }
+      } catch (e) {
+        card.innerHTML = `
+          <div class="row"><strong>Result</strong> <span class="pill pill--err">Error</span></div>
+          <div class="row"><strong>Error</strong> <span>${e.message}</span></div>
+          <div class="row"><strong>Code</strong> <span>${e.code || 'none'}</span></div>
+          <button class="btn btn--ghost" onclick="location.reload()">Re-run test</button>
+        `;
+      }
+    });
+
+    // 5. List all data-img-slot attributes
+    const slots = [...document.querySelectorAll('[data-img-slot]')].map(el => ({
+      slot: el.getAttribute('data-img-slot'),
+      tag: el.tagName.toLowerCase(),
+      currentSrc: el.tagName === 'IMG' ? el.src : (el.querySelector('img')?.src || '')
+    }));
+    const uniqueSlots = [...new Set(slots.map(s => s.slot))];
+    document.getElementById('slotsCard').innerHTML = `
+      <div class="row"><strong>Unique slots</strong> <span>${uniqueSlots.length}</span></div>
+      <div class="row"><strong>Total elements</strong> <span>${slots.length}</span></div>
+      <pre>${uniqueSlots.map(s => {
+        const count = slots.filter(x => x.slot === s).length;
+        return `${s}  (${count} element${count > 1 ? 's' : ''})`;
+      }).join('\n')}</pre>
+    `;
+  </script>
+</body>
+</html>

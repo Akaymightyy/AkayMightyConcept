@@ -36,22 +36,40 @@ Open your site → **triple-click the nav logo** → log in → click any image 
 
 Both methods sync to the same Firestore docs in real-time.
 
-## What's new in this build (v5)
+## What's new in this build (v6)
+
+### CRITICAL diagnostic tool
+
+**New: `/debug.html`** — open this page on your live site to see exactly what's in Firestore. It shows:
+- Your auth state (signed in? email verified?)
+- The contents of the `content/images` Firestore doc (with preview thumbnails)
+- The contents of the `content/texts` Firestore doc
+- A **"Test write"** button that writes a test value to Firestore and verifies it landed
+- All `data-img-slot` attributes found in the HTML
+- Any JavaScript errors captured
+
+**If your images are reverting on refresh, open `/debug.html` and screenshot what you see.** If the `content/images` doc is empty or doesn't exist, your writes are being rejected — even if the upload to Cloudinary succeeded. Click "Test write" to confirm.
+
+### New features
+
+1. **Search bar on the dashboard** — filter image slots by name or label. Type "logo" to find all logo slots, "web-3" to find a specific showcase card, etc.
+
+2. **"Custom Images" tab** — upload additional images that aren't tied to a fixed slot. Each one:
+   - Gets uploaded to Cloudinary
+   - Gets saved to Firestore (doc `content/custom-images`, array of items)
+   - Appears automatically in a new "More Work · Recent Additions" section on the live site
+   - Has an editable caption
+   - Can be hard-deleted (removes from Cloudinary too)
+
+3. **"More Work" gallery section** — new section on the site between Portfolio and Behind-the-Scenes. Renders dynamically from Firestore. Hidden when empty (so if you haven't uploaded any custom images, the section doesn't show).
 
 ### Bug fixes
 
-1. **Fixed: uploads reverted on refresh (root cause found)** — Firestore's `enableIndexedDbPersistence()` was the silent killer. When Firestore rules reject a write, the offline cache accepts it locally so the image LOOKS saved, but on refresh the cache gets out of sync with the (empty) server state and reverts to defaults. **Removed offline persistence entirely** — now writes either succeed on the server (and survive refresh) or fail with a clear error toast.
+1. **Showcase swipe fixed** — removed the JS pointer event handlers that were interfering with native touch scrolling. Now you can swipe directly on the images to scroll horizontally. Vertical swipes still pass through to the page (touch-action: pan-x). Auto-play still works via `requestAnimationFrame`.
 
-2. **Fixed: silent save failures** — added write verification to BOTH `admin.js` (inline edit mode) AND `admin-dashboard.js`. After every `setDoc`, we re-read the doc to confirm the server actually has the new value. If verification fails, you see a red toast: `"SAVE FAILED — Firestore rules not deployed. Open Firebase console → Firestore → Rules → paste firestore.rules → Publish."`
+2. **More visible errors** — if Firestore reads fail with permission-denied, you now see a clear toast telling you to deploy rules and visit `/debug.html`. Console logs also show when snapshots arrive.
 
-3. **Fixed: site can't be scrolled vertically on mobile when finger is on the showcase** — added `touch-action: pan-x` to `.showcase-track-wrap`. Now horizontal swipes scroll the showcase, vertical swipes pass through to the page.
-
-4. **Web Showcase now scrollable manually + auto-play** — converted from pure CSS animation to a real scrollable container. Users can now:
-   - Drag with mouse / finger / pen to scroll horizontally (with momentum)
-   - Use shift+wheel on desktop for horizontal scroll
-   - Watch the auto-play loop (smooth, ~24 px/sec) which pauses on hover/touch/drag
-   - Auto-play resumes 2 seconds after the user stops interacting
-   - Auto-play pauses when the section scrolls offscreen (perf)
+3. **Write verification in inline edit mode** — same protection as the dashboard: after `setDoc`, we re-read the doc to confirm the server accepted the write. If not, you see a clear error.
 
 ### Architecture clarification
 
