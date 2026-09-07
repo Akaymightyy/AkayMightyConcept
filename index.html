@@ -713,26 +713,40 @@
     }
 
     .showcase-track-wrap {
-      overflow: hidden;
+      overflow-x: auto;
+      overflow-y: hidden;
       width: 100%;
       position: relative;
-      mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
-      -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+      scrollbar-width: none;                    /* Firefox: hide scrollbar */
+      -ms-overflow-style: none;
+      mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+      -webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+      scroll-behavior: auto;                    /* we drive scrolling via JS */
+      -webkit-overflow-scrolling: touch;        /* iOS momentum */
+      touch-action: pan-x;                      /* allow horizontal pan, pass vertical up to page */
+      scroll-snap-type: x proximity;
     }
+    .showcase-track-wrap::-webkit-scrollbar { display: none; }   /* Chrome/Safari: hide */
     .showcase-track-wrap + .showcase-track-wrap { margin-top: 24px; }
 
     .showcase-strip {
       display: flex;
       gap: 24px;
       width: max-content;
-      will-change: transform;
+      padding: 0 24px;
+      will-change: scroll-position;
     }
-    .showcase-strip.forward { animation: akayScrollLeft 60s linear infinite; }
-    .showcase-strip.reverse { animation: akayScrollRight 60s linear infinite; }
-    .showcase-strip:hover   { animation-play-state: paused; }
+    .showcase-card { scroll-snap-align: center; }
 
-    @keyframes akayScrollLeft  { from { transform: translateX(0); }      to { transform: translateX(-50%); } }
-    @keyframes akayScrollRight { from { transform: translateX(-50%); }  to { transform: translateX(0); } }
+    /* Auto-play is driven by JS — we toggle .is-autoplaying on the wrap */
+    .showcase-track-wrap.is-autoplaying { scroll-snap-type: none; }
+    .showcase-track-wrap:hover .showcase-card { transition: none; }
+
+    /* When the user is dragging (pointer-down), pause snap and disable hover effects */
+    .showcase-track-wrap.is-dragging { cursor: grabbing; scroll-snap-type: none; }
+    .showcase-track-wrap.is-dragging .showcase-card { pointer-events: none; }
+    .showcase-track-wrap { cursor: grab; }
+    .showcase-track-wrap:not(.is-autoplaying):not(.is-dragging) { cursor: default; }
 
     .showcase-card {
       width: 360px;
@@ -743,12 +757,16 @@
       border: 1px solid #1f1f1f;
       transition: transform .35s cubic-bezier(.2,.8,.2,1), border-color .25s, box-shadow .25s;
       cursor: pointer;
+      user-select: none;
+      -webkit-user-drag: none;
     }
+    .showcase-card img { pointer-events: none; }   /* let drag start on card, not image */
     .showcase-card:hover {
       transform: translateY(-6px);
       border-color: rgba(255, 26, 26, .35);
       box-shadow: 0 18px 40px rgba(0, 0, 0, .55), 0 0 0 1px rgba(255, 26, 26, .15);
     }
+    .showcase-track-wrap.is-dragging .showcase-card:hover { transform: none; box-shadow: none; }
     .showcase-card-img {
       position: relative;
       aspect-ratio: 16/10;
@@ -786,7 +804,8 @@
       margin: 0;
     }
 
-    body.akay-edit-mode .showcase-strip { animation-play-state: paused !important; }
+    /* In edit mode, pause auto-play */
+    body.akay-edit-mode .showcase-track-wrap.is-autoplaying { scroll-snap-type: none; }
     body.akay-edit-mode .showcase-card-img { outline: 2px dashed rgba(255,26,26,.45); outline-offset: 2px; }
 
     @media (max-width: 640px) {
@@ -1042,14 +1061,14 @@
       </div>
 
       <div class="showcase-track-wrap">
-        <div class="showcase-strip forward">
+        <div class="showcase-strip" data-direction="left">
       <div class="showcase-card reveal">        <div class="showcase-card-img" data-img-slot="img:web-1">          <img src="https://cdn.kord.live/serve/ZoCtg7SPBWlc.jpg" alt="Chardonic Oil & Gas — website screenshot" loading="lazy" data-img-slot="img:web-1" />        </div>        <div class="showcase-card-meta">          <span class="showcase-card-tag" data-text-slot="text:web-1-tag">Corporate</span>          <h4 class="showcase-card-title" data-text-slot="text:web-1-title">Chardonic Oil & Gas</h4>          <p class="showcase-card-cat" data-text-slot="text:web-1-cat">Web design · UI/UX</p>        </div>      </div>      <div class="showcase-card reveal">        <div class="showcase-card-img" data-img-slot="img:web-2">          <img src="https://cdn.kord.live/serve/4cG5RghDuw9w.jpg" alt="Gochez Logistics — website screenshot" loading="lazy" data-img-slot="img:web-2" />        </div>        <div class="showcase-card-meta">          <span class="showcase-card-tag" data-text-slot="text:web-2-tag">Corporate</span>          <h4 class="showcase-card-title" data-text-slot="text:web-2-title">Gochez Logistics</h4>          <p class="showcase-card-cat" data-text-slot="text:web-2-cat">Web design · Branding</p>        </div>      </div>      <div class="showcase-card reveal">        <div class="showcase-card-img" data-img-slot="img:web-3">          <img src="https://cdn.kord.live/serve/KWXIC3QcBiFj.jpg" alt="iLoad App — website screenshot" loading="lazy" data-img-slot="img:web-3" />        </div>        <div class="showcase-card-meta">          <span class="showcase-card-tag" data-text-slot="text:web-3-tag">Landing Page</span>          <h4 class="showcase-card-title" data-text-slot="text:web-3-title">iLoad App</h4>          <p class="showcase-card-cat" data-text-slot="text:web-3-cat">Web · Motion</p>        </div>      </div>      <div class="showcase-card reveal">        <div class="showcase-card-img" data-img-slot="img:web-4">          <img src="https://cdn.kord.live/serve/NRlPY4VLxSVG.jpg" alt="AfriMart Store — website screenshot" loading="lazy" data-img-slot="img:web-4" />        </div>        <div class="showcase-card-meta">          <span class="showcase-card-tag" data-text-slot="text:web-4-tag">E-commerce</span>          <h4 class="showcase-card-title" data-text-slot="text:web-4-title">AfriMart Store</h4>          <p class="showcase-card-cat" data-text-slot="text:web-4-cat">Shopify · UI/UX</p>        </div>      </div>      <div class="showcase-card reveal">        <div class="showcase-card-img" data-img-slot="img:web-5">          <img src="https://cdn.kord.live/serve/mH1YnwxDaQUi.jpg" alt="Studio Maya — website screenshot" loading="lazy" data-img-slot="img:web-5" />        </div>        <div class="showcase-card-meta">          <span class="showcase-card-tag" data-text-slot="text:web-5-tag">Portfolio</span>          <h4 class="showcase-card-title" data-text-slot="text:web-5-title">Studio Maya</h4>          <p class="showcase-card-cat" data-text-slot="text:web-5-cat">Web · Branding</p>        </div>      </div>      <div class="showcase-card reveal">        <div class="showcase-card-img" data-img-slot="img:web-6">          <img src="https://cdn.kord.live/serve/lJJcUHt93XsB.jpg" alt="PayFlow Dashboard — website screenshot" loading="lazy" data-img-slot="img:web-6" />        </div>        <div class="showcase-card-meta">          <span class="showcase-card-tag" data-text-slot="text:web-6-tag">SaaS</span>          <h4 class="showcase-card-title" data-text-slot="text:web-6-title">PayFlow Dashboard</h4>          <p class="showcase-card-cat" data-text-slot="text:web-6-cat">Web app · UI/UX</p>        </div>      </div>
       <div class="showcase-card reveal">        <div class="showcase-card-img" data-img-slot="img:web-1">          <img src="https://cdn.kord.live/serve/ZoCtg7SPBWlc.jpg" alt="Chardonic Oil & Gas — website screenshot" loading="lazy" data-img-slot="img:web-1" />        </div>        <div class="showcase-card-meta">          <span class="showcase-card-tag" data-text-slot="text:web-1-tag">Corporate</span>          <h4 class="showcase-card-title" data-text-slot="text:web-1-title">Chardonic Oil & Gas</h4>          <p class="showcase-card-cat" data-text-slot="text:web-1-cat">Web design · UI/UX</p>        </div>      </div>      <div class="showcase-card reveal">        <div class="showcase-card-img" data-img-slot="img:web-2">          <img src="https://cdn.kord.live/serve/4cG5RghDuw9w.jpg" alt="Gochez Logistics — website screenshot" loading="lazy" data-img-slot="img:web-2" />        </div>        <div class="showcase-card-meta">          <span class="showcase-card-tag" data-text-slot="text:web-2-tag">Corporate</span>          <h4 class="showcase-card-title" data-text-slot="text:web-2-title">Gochez Logistics</h4>          <p class="showcase-card-cat" data-text-slot="text:web-2-cat">Web design · Branding</p>        </div>      </div>      <div class="showcase-card reveal">        <div class="showcase-card-img" data-img-slot="img:web-3">          <img src="https://cdn.kord.live/serve/KWXIC3QcBiFj.jpg" alt="iLoad App — website screenshot" loading="lazy" data-img-slot="img:web-3" />        </div>        <div class="showcase-card-meta">          <span class="showcase-card-tag" data-text-slot="text:web-3-tag">Landing Page</span>          <h4 class="showcase-card-title" data-text-slot="text:web-3-title">iLoad App</h4>          <p class="showcase-card-cat" data-text-slot="text:web-3-cat">Web · Motion</p>        </div>      </div>      <div class="showcase-card reveal">        <div class="showcase-card-img" data-img-slot="img:web-4">          <img src="https://cdn.kord.live/serve/NRlPY4VLxSVG.jpg" alt="AfriMart Store — website screenshot" loading="lazy" data-img-slot="img:web-4" />        </div>        <div class="showcase-card-meta">          <span class="showcase-card-tag" data-text-slot="text:web-4-tag">E-commerce</span>          <h4 class="showcase-card-title" data-text-slot="text:web-4-title">AfriMart Store</h4>          <p class="showcase-card-cat" data-text-slot="text:web-4-cat">Shopify · UI/UX</p>        </div>      </div>      <div class="showcase-card reveal">        <div class="showcase-card-img" data-img-slot="img:web-5">          <img src="https://cdn.kord.live/serve/mH1YnwxDaQUi.jpg" alt="Studio Maya — website screenshot" loading="lazy" data-img-slot="img:web-5" />        </div>        <div class="showcase-card-meta">          <span class="showcase-card-tag" data-text-slot="text:web-5-tag">Portfolio</span>          <h4 class="showcase-card-title" data-text-slot="text:web-5-title">Studio Maya</h4>          <p class="showcase-card-cat" data-text-slot="text:web-5-cat">Web · Branding</p>        </div>      </div>      <div class="showcase-card reveal">        <div class="showcase-card-img" data-img-slot="img:web-6">          <img src="https://cdn.kord.live/serve/lJJcUHt93XsB.jpg" alt="PayFlow Dashboard — website screenshot" loading="lazy" data-img-slot="img:web-6" />        </div>        <div class="showcase-card-meta">          <span class="showcase-card-tag" data-text-slot="text:web-6-tag">SaaS</span>          <h4 class="showcase-card-title" data-text-slot="text:web-6-title">PayFlow Dashboard</h4>          <p class="showcase-card-cat" data-text-slot="text:web-6-cat">Web app · UI/UX</p>        </div>      </div>  <!-- duplicate for seamless loop -->
         </div>
       </div>
 
       <div class="showcase-track-wrap">
-        <div class="showcase-strip reverse">
+        <div class="showcase-strip" data-direction="right">
       <div class="showcase-card reveal">        <div class="showcase-card-img" data-img-slot="img:web-7">          <img src="https://cdn.kord.live/serve/009RDmkmQA0x.jpg" alt="Suya Republic — website screenshot" loading="lazy" data-img-slot="img:web-7" />        </div>        <div class="showcase-card-meta">          <span class="showcase-card-tag" data-text-slot="text:web-7-tag">Restaurant</span>          <h4 class="showcase-card-title" data-text-slot="text:web-7-title">Suya Republic</h4>          <p class="showcase-card-cat" data-text-slot="text:web-7-cat">Web · Branding</p>        </div>      </div>      <div class="showcase-card reveal">        <div class="showcase-card-img" data-img-slot="img:web-8">          <img src="https://cdn.kord.live/serve/bmVs49dmCNWa.jpg" alt="LuxVilla Listings — website screenshot" loading="lazy" data-img-slot="img:web-8" />        </div>        <div class="showcase-card-meta">          <span class="showcase-card-tag" data-text-slot="text:web-8-tag">Real Estate</span>          <h4 class="showcase-card-title" data-text-slot="text:web-8-title">LuxVilla Listings</h4>          <p class="showcase-card-cat" data-text-slot="text:web-8-cat">Web · SEO</p>        </div>      </div>      <div class="showcase-card reveal">        <div class="showcase-card-img" data-img-slot="img:web-9">          <img src="https://cdn.kord.live/serve/ASqKSjkDcDCF.jpg" alt="Grace Cathedral — website screenshot" loading="lazy" data-img-slot="img:web-9" />        </div>        <div class="showcase-card-meta">          <span class="showcase-card-tag" data-text-slot="text:web-9-tag">Ministry</span>          <h4 class="showcase-card-title" data-text-slot="text:web-9-title">Grace Cathedral</h4>          <p class="showcase-card-cat" data-text-slot="text:web-9-cat">Web · Branding</p>        </div>      </div>      <div class="showcase-card reveal">        <div class="showcase-card-img" data-img-slot="img:web-10">          <img src="https://cdn.kord.live/serve/xk5l1BNebbMK.jpg" alt="HaulPro Fleet — website screenshot" loading="lazy" data-img-slot="img:web-10" />        </div>        <div class="showcase-card-meta">          <span class="showcase-card-tag" data-text-slot="text:web-10-tag">Logistics</span>          <h4 class="showcase-card-title" data-text-slot="text:web-10-title">HaulPro Fleet</h4>          <p class="showcase-card-cat" data-text-slot="text:web-10-cat">Web app · UI</p>        </div>      </div>      <div class="showcase-card reveal">        <div class="showcase-card-img" data-img-slot="img:web-11">          <img src="https://cdn.kord.live/serve/kZ3AhQCgS6Yr.jpg" alt="LearnHub Academy — website screenshot" loading="lazy" data-img-slot="img:web-11" />        </div>        <div class="showcase-card-meta">          <span class="showcase-card-tag" data-text-slot="text:web-11-tag">Education</span>          <h4 class="showcase-card-title" data-text-slot="text:web-11-title">LearnHub Academy</h4>          <p class="showcase-card-cat" data-text-slot="text:web-11-cat">Web · LMS</p>        </div>      </div>      <div class="showcase-card reveal">        <div class="showcase-card-img" data-img-slot="img:web-12">          <img src="https://cdn.kord.live/serve/ZoCtg7SPBWlc.jpg" alt="Nova Creatives — website screenshot" loading="lazy" data-img-slot="img:web-12" />        </div>        <div class="showcase-card-meta">          <span class="showcase-card-tag" data-text-slot="text:web-12-tag">Agency</span>          <h4 class="showcase-card-title" data-text-slot="text:web-12-title">Nova Creatives</h4>          <p class="showcase-card-cat" data-text-slot="text:web-12-cat">Web · Branding</p>        </div>      </div>
       <div class="showcase-card reveal">        <div class="showcase-card-img" data-img-slot="img:web-7">          <img src="https://cdn.kord.live/serve/009RDmkmQA0x.jpg" alt="Suya Republic — website screenshot" loading="lazy" data-img-slot="img:web-7" />        </div>        <div class="showcase-card-meta">          <span class="showcase-card-tag" data-text-slot="text:web-7-tag">Restaurant</span>          <h4 class="showcase-card-title" data-text-slot="text:web-7-title">Suya Republic</h4>          <p class="showcase-card-cat" data-text-slot="text:web-7-cat">Web · Branding</p>        </div>      </div>      <div class="showcase-card reveal">        <div class="showcase-card-img" data-img-slot="img:web-8">          <img src="https://cdn.kord.live/serve/bmVs49dmCNWa.jpg" alt="LuxVilla Listings — website screenshot" loading="lazy" data-img-slot="img:web-8" />        </div>        <div class="showcase-card-meta">          <span class="showcase-card-tag" data-text-slot="text:web-8-tag">Real Estate</span>          <h4 class="showcase-card-title" data-text-slot="text:web-8-title">LuxVilla Listings</h4>          <p class="showcase-card-cat" data-text-slot="text:web-8-cat">Web · SEO</p>        </div>      </div>      <div class="showcase-card reveal">        <div class="showcase-card-img" data-img-slot="img:web-9">          <img src="https://cdn.kord.live/serve/ASqKSjkDcDCF.jpg" alt="Grace Cathedral — website screenshot" loading="lazy" data-img-slot="img:web-9" />        </div>        <div class="showcase-card-meta">          <span class="showcase-card-tag" data-text-slot="text:web-9-tag">Ministry</span>          <h4 class="showcase-card-title" data-text-slot="text:web-9-title">Grace Cathedral</h4>          <p class="showcase-card-cat" data-text-slot="text:web-9-cat">Web · Branding</p>        </div>      </div>      <div class="showcase-card reveal">        <div class="showcase-card-img" data-img-slot="img:web-10">          <img src="https://cdn.kord.live/serve/xk5l1BNebbMK.jpg" alt="HaulPro Fleet — website screenshot" loading="lazy" data-img-slot="img:web-10" />        </div>        <div class="showcase-card-meta">          <span class="showcase-card-tag" data-text-slot="text:web-10-tag">Logistics</span>          <h4 class="showcase-card-title" data-text-slot="text:web-10-title">HaulPro Fleet</h4>          <p class="showcase-card-cat" data-text-slot="text:web-10-cat">Web app · UI</p>        </div>      </div>      <div class="showcase-card reveal">        <div class="showcase-card-img" data-img-slot="img:web-11">          <img src="https://cdn.kord.live/serve/kZ3AhQCgS6Yr.jpg" alt="LearnHub Academy — website screenshot" loading="lazy" data-img-slot="img:web-11" />        </div>        <div class="showcase-card-meta">          <span class="showcase-card-tag" data-text-slot="text:web-11-tag">Education</span>          <h4 class="showcase-card-title" data-text-slot="text:web-11-title">LearnHub Academy</h4>          <p class="showcase-card-cat" data-text-slot="text:web-11-cat">Web · LMS</p>        </div>      </div>      <div class="showcase-card reveal">        <div class="showcase-card-img" data-img-slot="img:web-12">          <img src="https://cdn.kord.live/serve/ZoCtg7SPBWlc.jpg" alt="Nova Creatives — website screenshot" loading="lazy" data-img-slot="img:web-12" />        </div>        <div class="showcase-card-meta">          <span class="showcase-card-tag" data-text-slot="text:web-12-tag">Agency</span>          <h4 class="showcase-card-title" data-text-slot="text:web-12-title">Nova Creatives</h4>          <p class="showcase-card-cat" data-text-slot="text:web-12-cat">Web · Branding</p>        </div>      </div>  <!-- duplicate for seamless loop -->
         </div>
@@ -2781,5 +2800,6 @@
   <script type="module" src="./firebase-config.js"></script>
   <script type="module" src="./cloudinary-config.js"></script>
   <script type="module" src="./admin.js"></script>
+  <script type="module" src="./showcase-scroll.js"></script>
 </body>
 </html>

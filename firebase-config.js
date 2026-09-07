@@ -8,6 +8,14 @@
 //  client-side code. Security is enforced by Firestore Rules (see
 //  firestore.rules) and Firebase Authentication, not by hiding these
 //  values.
+//
+//  IMPORTANT (v5 fix): we intentionally do NOT call enableIndexedDbPersistence().
+//  Offline persistence was the root cause of the "uploads revert on refresh"
+//  bug — when Firestore rules reject a write, the offline cache accepts it
+//  locally so the image LOOKS saved, but on refresh the cache gets out of
+//  sync with the empty server state and reverts to defaults. Without
+//  persistence, writes either succeed on the server (and survive refresh)
+//  or fail with a clear error the admin can see.
 // =====================================================================
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
@@ -16,14 +24,7 @@ import {
   setPersistence,
   browserLocalPersistence
 } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
-import {
-  getFirestore,
-  enableIndexedDbPersistence
-} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
-
-// TODO (optional): getAnalytics was in your snippet — left out here because
-// it pulls an extra ~30KB and isn't needed for the admin dashboard. Add it
-// back if you want page-view analytics.
+import { getFirestore } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDVU0NiXklVK0XSBSzT418GiLrW1lz0uhw",
@@ -38,24 +39,14 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-// Keep the admin logged in across reloads/tabs (within this browser)
+// Keep the admin logged in across reloads/tabs (within this browser).
+// This only persists the AUTH SESSION, not data — totally safe.
 setPersistence(auth, browserLocalPersistence).catch(err => {
   console.warn("[firebase] auth persistence failed:", err.message);
 });
 
 const db = getFirestore(app);
 
-// Offline cache so edits the admin already loaded still render if the
-// network drops mid-session. Failures are non-fatal.
-enableIndexedDbPersistence(db).catch(err => {
-  if (err.code === 'failed-precondition') {
-    // Multiple tabs open — fine, just skip persistence.
-  } else if (err.code === 'unimplemented') {
-    // Browser doesn't support it — fine.
-  } else {
-    console.warn("[firebase] firestore persistence failed:", err.message);
-  }
-});
+// NO enableIndexedDbPersistence() — see header comment for why.
 
-// Export as ES module — admin.js will import these.
 export { app, auth, db };

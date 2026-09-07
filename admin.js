@@ -433,9 +433,25 @@ async function saveText(slot, text) {
     await setDoc(doc(db, 'content', 'texts'),
       { [slot]: text, _updatedAt: serverTimestamp() },
       { merge: true });
+
+    // VERIFY the write landed on the server
+    const verify = await getDoc(doc(db, 'content', 'texts'));
+    if (!verify.exists()) {
+      throw new Error('Verification failed — Firestore doc does not exist. Rules likely not deployed.');
+    }
+    const data = verify.data();
+    if (data[slot] !== text) {
+      throw new Error('PERMISSION_DENIED — write was rejected by Firestore rules. Deploy firestore.rules.');
+    }
+
     state.texts[slot] = text;
   } catch (e) {
-    toast('Save failed: ' + e.message, 'error');
+    console.error('[admin] saveText failed:', e);
+    if (e.code === 'permission-denied' || /permission|denied|rules/i.test(e.message)) {
+      toast('SAVE FAILED — Firestore rules not deployed. Open Firebase console → Firestore → Rules → paste firestore.rules → Publish.', 'error');
+    } else {
+      toast('Save failed: ' + e.message, 'error');
+    }
   } finally {
     setSaving(false);
   }
@@ -600,10 +616,28 @@ async function saveImage(slot, url) {
     await setDoc(doc(db, 'content', 'images'),
       { [slot]: url, _updatedAt: serverTimestamp() },
       { merge: true });
+
+    // VERIFY the write actually landed on the server (not just the
+    // local cache). This catches the "fake save" bug where rules
+    // reject the write but it appears to succeed locally.
+    const verify = await getDoc(doc(db, 'content', 'images'));
+    if (!verify.exists()) {
+      throw new Error('Verification failed — Firestore doc does not exist. Rules likely not deployed.');
+    }
+    const data = verify.data();
+    if (data[slot] !== url) {
+      throw new Error('PERMISSION_DENIED — write was rejected by Firestore rules. Deploy firestore.rules.');
+    }
+
     state.images[slot] = url;
     applyImage(slot, url);
   } catch (e) {
-    toast('Save failed: ' + e.message, 'error');
+    console.error('[admin] saveImage failed:', e);
+    if (e.code === 'permission-denied' || /permission|denied|rules/i.test(e.message)) {
+      toast('SAVE FAILED — Firestore rules not deployed. Open Firebase console → Firestore → Rules → paste firestore.rules → Publish.', 'error');
+    } else {
+      toast('Save failed: ' + e.message, 'error');
+    }
     throw e;
   } finally {
     setSaving(false);

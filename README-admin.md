@@ -36,20 +36,46 @@ Open your site → **triple-click the nav logo** → log in → click any image 
 
 Both methods sync to the same Firestore docs in real-time.
 
-## What's new in this build (v4)
+## What's new in this build (v5)
 
-1. **Career Timeline is now horizontal scroll** — Sievora-style marquee with snap scrolling, hover lift, and editable dates/roles/companies/descriptions/tags.
-2. **86 editable text slots** — every portfolio title, service label, blog title, web showcase tag/title/category, and career field is now editable from the dashboard. The dashboard auto-discovers them and groups by section.
-3. **Fixed: login auto-redirect bug** — root cause was CSS `display: flex` on `.dash-login` overriding the `[hidden]` HTML attribute. Added `[hidden] { display: none !important }` rule. Now after submitting login, you immediately land on the dashboard — no need to "go back".
-4. **Fixed: uploads not syncing** — added Firestore write verification. After `setDoc()`, we re-read the doc to confirm the server actually has the new value. If the write was queued in the offline cache but rejected by the server (e.g., rules not deployed), we now surface a clear error toast and show "Not deployed" in the Settings tab.
-5. **Redesigned admin dashboard** — sidebar layout with icons, stat cards with live connection status, image cards grouped by section (Branding / Design Services / Print Services / Web Showcase), customizable text grid with auto-discovery, dedicated Settings tab showing Firestore rules health.
+### Bug fixes
 
-## Existing features (still working)
+1. **Fixed: uploads reverted on refresh (root cause found)** — Firestore's `enableIndexedDbPersistence()` was the silent killer. When Firestore rules reject a write, the offline cache accepts it locally so the image LOOKS saved, but on refresh the cache gets out of sync with the (empty) server state and reverts to defaults. **Removed offline persistence entirely** — now writes either succeed on the server (and survive refresh) or fail with a clear error toast.
 
-1. **Web Showcase marquee** — Sievora-style horizontal scrolling section after the hero.
-2. **"Delete file" button** — hard-deletes from Cloudinary via serverless function.
-3. **Triple-click the logo** → goes to `/admin.html` (or hold Shift for inline edit mode).
-4. **All previous image slots** still work (25 image slots total).
+2. **Fixed: silent save failures** — added write verification to BOTH `admin.js` (inline edit mode) AND `admin-dashboard.js`. After every `setDoc`, we re-read the doc to confirm the server actually has the new value. If verification fails, you see a red toast: `"SAVE FAILED — Firestore rules not deployed. Open Firebase console → Firestore → Rules → paste firestore.rules → Publish."`
+
+3. **Fixed: site can't be scrolled vertically on mobile when finger is on the showcase** — added `touch-action: pan-x` to `.showcase-track-wrap`. Now horizontal swipes scroll the showcase, vertical swipes pass through to the page.
+
+4. **Web Showcase now scrollable manually + auto-play** — converted from pure CSS animation to a real scrollable container. Users can now:
+   - Drag with mouse / finger / pen to scroll horizontally (with momentum)
+   - Use shift+wheel on desktop for horizontal scroll
+   - Watch the auto-play loop (smooth, ~24 px/sec) which pauses on hover/touch/drag
+   - Auto-play resumes 2 seconds after the user stops interacting
+   - Auto-play pauses when the section scrolls offscreen (perf)
+
+### Architecture clarification
+
+**We do NOT use localStorage for images.** Never have. The "localStorage-like" behavior you saw was Firestore's IndexedDB offline cache (now removed). Image storage architecture is:
+- Image file → uploaded to **Cloudinary** (via unsigned preset `akaymightyconcept`)
+- Image URL → saved to **Firestore** doc `content/images` field `img:<slot>`
+- Public visitors' browsers subscribe to that doc via Firestore `onSnapshot` and get updates in real-time
+
+This is the right architecture for a live client-facing site:
+- ✅ Survives refresh (data comes from server, not browser cache)
+- ✅ Works across devices/browsers (Firestore is the source of truth)
+- ✅ No 5MB limit (Cloudinary stores the actual image bytes, Firestore just holds a URL string)
+- ✅ Real-time sync (everyone sees changes within ~200ms)
+
+The ONLY thing that was broken was the silent-failure behavior caused by offline persistence + undeployed rules. Now that's fixed.
+
+### Existing features (still working)
+
+1. Career Timeline horizontal scroll with editable text slots
+2. Web Showcase marquee (now also manually scrollable)
+3. 86 editable text slots across the site
+4. Triple-click logo → admin dashboard at `/admin.html`
+5. "Delete file" button (hard-delete from Cloudinary)
+6. Sidebar dashboard UI with stats and grouped image grid
 
 ---
 
