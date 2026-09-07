@@ -1,0 +1,256 @@
+/* =====================================================================
+   admin.css  —  styling for the inline admin layer
+   ---------------------------------------------------------------------
+   Public visitors load this file too (it's linked from index.html) but
+   they never see any of these styles applied because the corresponding
+   DOM nodes only exist while .akay-edit-mode is on <body>, or are only
+   ever injected by admin.js after login.
+   ===================================================================== */
+
+:root {
+  --akay-red:        #ff1a1a;
+  --akay-red-dark:   #c41414;
+  --akay-bg:         #0a0a0a;
+  --akay-bg-2:       #141414;
+  --akay-bg-3:       #1f1f1f;
+  --akay-text:       #ffffff;
+  --akay-text-mute:  #8a8a8a;
+  --akay-border:     #2a2a2a;
+  --akay-ok:         #2ecc71;
+  --akay-err:        #ff5252;
+  --akay-radius:     10px;
+  --akay-shadow:     0 12px 36px rgba(0, 0, 0, .55);
+}
+
+/* ===== floating toolbar (only in edit mode) ========================== */
+body.akay-edit-mode #akayToolbar {
+  position: fixed;
+  z-index: 2147483640;
+  bottom: 18px;
+  right: 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 14px;
+  background: var(--akay-bg-2);
+  border: 1px solid var(--akay-border);
+  border-radius: 999px;
+  box-shadow: var(--akay-shadow);
+  font-family: 'Poppins', system-ui, sans-serif;
+  font-size: 13px;
+  color: var(--akay-text);
+}
+
+#akayToolbar .akay-tb__status {
+  padding-left: 6px;
+  color: var(--akay-text-mute);
+  font-size: 12px;
+  letter-spacing: .3px;
+}
+#akayToolbar .akay-tb__status.is-saving { color: #ffd54f; }
+#akayToolbar .akay-tb__status:not(.is-saving)::before {
+  content: "●";
+  color: var(--akay-ok);
+  margin-right: 6px;
+}
+#akayToolbar .akay-tb__status.is-saving::before {
+  content: "●";
+  color: #ffd54f;
+  margin-right: 6px;
+  animation: akayPulse 1s infinite;
+}
+@keyframes akayPulse { 50% { opacity: .3; } }
+
+#akayToolbar .akay-tb__actions { display: flex; gap: 6px; }
+
+/* ===== generic buttons ============================================== */
+.akay-btn {
+  font: 600 13px/1 'Poppins', system-ui, sans-serif;
+  padding: 9px 14px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  letter-spacing: .3px;
+  transition: background .15s, border .15s, color .15s, transform .08s;
+  color: #fff;
+}
+.akay-btn:active { transform: translateY(1px); }
+.akay-btn:disabled { opacity: .55; cursor: not-allowed; }
+
+.akay-btn--primary { background: var(--akay-red); border-color: var(--akay-red); }
+.akay-btn--primary:hover:not(:disabled) { background: var(--akay-red-dark); border-color: var(--akay-red-dark); }
+
+.akay-btn--ghost { background: transparent; border-color: var(--akay-border); color: var(--akay-text); }
+.akay-btn--ghost:hover { background: var(--akay-bg-3); }
+
+.akay-btn--danger { background: transparent; border-color: #5a1a1a; color: #ff6b6b; }
+.akay-btn--danger:hover { background: #2a0d0d; border-color: var(--akay-err); color: #fff; }
+
+.akay-btn--mini { font-size: 11px; padding: 5px 9px; }
+
+/* ===== login modal =================================================== */
+.akay-modal {
+  position: fixed; inset: 0;
+  background: rgba(0, 0, 0, .75);
+  backdrop-filter: blur(4px);
+  display: none;
+  align-items: center; justify-content: center;
+  z-index: 2147483645;
+  font-family: 'Poppins', system-ui, sans-serif;
+}
+.akay-modal.is-open { display: flex; animation: akayFade .18s ease; }
+@keyframes akayFade { from { opacity: 0; } to { opacity: 1; } }
+
+.akay-modal__panel {
+  width: 360px;
+  max-width: calc(100vw - 32px);
+  background: var(--akay-bg-2);
+  border: 1px solid var(--akay-border);
+  border-radius: var(--akay-radius);
+  box-shadow: var(--akay-shadow);
+  padding: 28px 26px;
+  position: relative;
+}
+.akay-modal__close {
+  position: absolute; top: 10px; right: 14px;
+  background: none; border: none; color: var(--akay-text-mute);
+  font-size: 28px; line-height: 1; cursor: pointer;
+}
+.akay-modal__close:hover { color: #fff; }
+
+.akay-modal__title {
+  font: 800 22px/1.1 'Montserrat', sans-serif;
+  margin: 0 0 4px;
+  color: #fff;
+}
+.akay-modal__sub {
+  font-size: 12px; color: var(--akay-text-mute);
+  margin: 0 0 22px;
+  letter-spacing: .4px;
+  text-transform: uppercase;
+}
+
+.akay-form { display: flex; flex-direction: column; gap: 14px; }
+.akay-field { display: flex; flex-direction: column; gap: 6px; }
+.akay-field > span {
+  font-size: 11px; color: var(--akay-text-mute);
+  letter-spacing: .6px; text-transform: uppercase;
+}
+.akay-field input {
+  background: var(--akay-bg);
+  border: 1px solid var(--akay-border);
+  border-radius: 6px;
+  padding: 11px 12px;
+  color: #fff;
+  font: 500 14px/1 'Poppins', sans-serif;
+  outline: none;
+  transition: border .15s;
+}
+.akay-field input:focus { border-color: var(--akay-red); }
+
+.akay-form__err {
+  font-size: 12px; color: var(--akay-err);
+  min-height: 14px; margin: 0;
+}
+
+#akayLoginBtn { margin-top: 6px; width: 100%; padding: 12px; font-size: 14px; }
+
+/* ===== edit-mode text slots ========================================= */
+body.akay-edit-mode [data-text-slot] {
+  outline: 1px dashed rgba(255, 26, 26, .35);
+  outline-offset: 3px;
+  cursor: text;
+  border-radius: 2px;
+  transition: outline-color .15s, background .15s;
+}
+body.akay-edit-mode [data-text-slot]:hover {
+  outline-color: var(--akay-red);
+  background: rgba(255, 26, 26, .04);
+}
+body.akay-edit-mode [data-text-slot]:focus {
+  outline: 2px solid var(--akay-red);
+  background: rgba(255, 26, 26, .08);
+}
+
+/* ===== edit-mode image overlays ===================================== */
+body.akay-edit-mode [data-img-slot] {
+  outline: 2px dashed rgba(255, 26, 26, .45);
+  outline-offset: 2px;
+}
+
+.akay-img-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: rgba(10, 10, 10, .55);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .15s;
+  border-radius: 4px;
+  z-index: 5;
+}
+body.akay-edit-mode [data-img-slot]:hover ~ .akay-img-overlay,
+.akay-img-overlay:hover {
+  opacity: 1;
+  pointer-events: auto;
+}
+/* keep overlay visible when its buttons are focused */
+.akay-img-overlay:focus-within { opacity: 1; pointer-events: auto; }
+
+.akay-img-overlay__label {
+  font: 600 10px/1 'Montserrat', sans-serif;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--akay-red);
+  background: rgba(0, 0, 0, .55);
+  padding: 4px 8px;
+  border-radius: 3px;
+}
+.akay-img-overlay__btns {
+  display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; padding: 0 6px;
+}
+
+/* ===== toast ======================================================== */
+#akayToast {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--akay-bg-2);
+  color: #fff;
+  font: 500 13px/1.3 'Poppins', system-ui, sans-serif;
+  padding: 11px 18px;
+  border-radius: 6px;
+  border: 1px solid var(--akay-border);
+  box-shadow: var(--akay-shadow);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .2s, transform .2s;
+  z-index: 2147483646;
+  max-width: 90vw;
+}
+#akayToast.is-visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+#akayToast.akay-toast--success { border-color: var(--akay-ok); }
+#akayToast.akay-toast--error   { border-color: var(--akay-err); }
+#akayToast.akay-toast--info    { border-color: var(--akay-red); }
+
+/* ===== mobile tweaks for the toolbar =============================== */
+@media (max-width: 640px) {
+  body.akay-edit-mode #akayToolbar {
+    bottom: 10px; right: 10px; left: 10px;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    border-radius: 12px;
+    padding: 8px 10px;
+  }
+  #akayToolbar .akay-tb__status { font-size: 11px; }
+  .akay-btn--mini { padding: 4px 7px; font-size: 10px; }
+  .akay-img-overlay__btns { gap: 4px; }
+}
