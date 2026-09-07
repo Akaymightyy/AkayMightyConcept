@@ -9,19 +9,32 @@ You now have a complete inline admin dashboard. Triple-click the nav logo → lo
 ```
 akay-site/
 ├── index.html              ← your refactored site, every image has data-img-slot
+├── admin.html              ← ⭐ dedicated admin dashboard page (full grid view)
+├── admin-dashboard.js      ← logic for admin.html
+├── admin-dashboard.css     ← styling for admin.html
 ├── firebase-config.js      ← YOUR Firebase config (modular, ESM)
 ├── cloudinary-config.js    ← Cloudinary cloud name + unsigned preset
-├── admin.js                ← the brain (login, edit mode, sync, uploads, hard-delete)
-├── admin.css               ← admin UI styling (dark/red, matches your theme)
+├── admin.js                ← inline edit layer (loaded from index.html)
+├── admin.css               ← inline edit UI styling
 ├── firestore.rules         ← security rules — DEPLOY THESE
 ├── api/
-│   └── delete-image.js     ← serverless function for Cloudinary hard-delete (Vercel/Netlify)
-├── vercel.json             ← Vercel config (deploys the /api function automatically)
+│   └── delete-image.js     ← serverless function for Cloudinary hard-delete
+├── vercel.json             ← Vercel config (deploys the /api function)
 ├── package.json
-├── akay-logo.jpg           ← default logo (kept as fallback)
+├── akay-logo.jpg           ← default logo
 ├── akay-headshot.png       ← default headshot
 └── Akay-CV.jpg             ← your CV
 ```
+
+## ⭐ TWO WAYS TO EDIT — pick whichever you prefer
+
+### A. Dedicated dashboard (RECOMMENDED)
+Open `https://your-site/admin.html` → log in → see a clean grid of ALL 25 image slots with previews, plus tabs for Text and Settings. Best for managing many images at once.
+
+### B. Inline editing on the live site
+Open your site → **triple-click the nav logo** → log in → click any image or text directly on the page to edit. Best for quick single edits. (Hold **Shift** while triple-clicking to force this mode instead of going to the dashboard.)
+
+Both methods sync to the same Firestore docs in real-time.
 
 ## What's new in this build (v2)
 

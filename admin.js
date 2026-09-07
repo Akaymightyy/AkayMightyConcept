@@ -197,16 +197,21 @@ function startSync() {
 }
 
 // =====================================================================
-//  STEP 4 — Triple-click on the nav logo opens the login modal
+//  STEP 4 — Triple-click on the nav logo opens the admin dashboard
+//  ---------------------------------------------------------------------
+//  If the user is already logged in, we enter inline edit mode.
+//  If not, we navigate to /admin.html (the dedicated dashboard page)
+//  where they can log in and manage all content from a single grid.
+//
+//  Hold Shift while triple-clicking to force the inline login modal
+//  (kept as a fallback for when /admin.html isn't reachable).
 // =====================================================================
 function initTripleClick() {
-  // The nav logo is the <img> inside #navbar with data-img-slot="img:logo"
   const navLogo = $('#navbar [data-img-slot="img:logo"]');
   if (!navLogo) {
     console.warn('[admin] nav logo not found');
     return;
   }
-  // triple-click detector — works for clicks on the img itself OR its parent <a>
   const clickTarget = navLogo.closest('a') || navLogo;
   clickTarget.addEventListener('click', e => {
     state.loginClicks++;
@@ -216,10 +221,14 @@ function initTripleClick() {
       e.preventDefault();
       state.loginClicks = 0;
       if (state.isAdmin) {
-        // already logged in — toggle edit mode instead
+        // already logged in — toggle inline edit mode on this page
         toggleEditMode();
-      } else {
+      } else if (e.shiftKey) {
+        // fallback: inline login modal
         openLoginModal();
+      } else {
+        // default: go to the dedicated dashboard
+        window.location.href = './admin.html';
       }
     }
   });
@@ -648,12 +657,13 @@ function init() {
   startSync();
   initTripleClick();
 
-  // Hidden keyboard shortcut: Ctrl+Shift+A also opens the login modal
+  // Hidden keyboard shortcut: Ctrl+Shift+A also opens the admin dashboard
   document.addEventListener('keydown', e => {
     if (e.ctrlKey && e.shiftKey && (e.key === 'A' || e.key === 'a')) {
       e.preventDefault();
       if (state.isAdmin) toggleEditMode();
-      else openLoginModal();
+      else if (e.altKey) openLoginModal();
+      else window.location.href = './admin.html';
     }
   });
 

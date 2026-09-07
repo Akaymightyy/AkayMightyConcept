@@ -1,6 +1,4 @@
 {
-  "version": 2,
-  "public": true,
   "functions": {
     "api/**/*.js": {
       "memory": 128,

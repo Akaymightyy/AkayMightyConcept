@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+  <title>Admin Dashboard — Akay Mighty Concept</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;900&family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./admin.css" />
+  <link rel="stylesheet" href="./admin-dashboard.css" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%230a0a0a'/%3E%3Ctext x='50' y='68' font-family='Montserrat,Arial,sans-serif' font-size='52' font-weight='900' fill='%23ff1a1a' text-anchor='middle'%3EA%3C/text%3E%3C/svg%3E" />
+</head>
+<body class="akay-dash">
+
+  <!-- ============ Login gate (shown when not authed) ============ -->
+  <div id="dashLogin" class="dash-login">
+    <div class="dash-login__panel">
+      <div class="dash-login__logo">A</div>
+      <h1 class="dash-login__title">Akay Mighty Concept</h1>
+      <p class="dash-login__sub">Admin Dashboard — sign in to manage content</p>
+      <form id="dashLoginForm" class="dash-form">
+        <label class="dash-field">
+          <span>Email</span>
+          <input type="email" id="dashEmail" required autocomplete="username" placeholder="akay@concept.com" />
+        </label>
+        <label class="dash-field">
+          <span>Password</span>
+          <input type="password" id="dashPass" required autocomplete="current-password" placeholder="••••••••" />
+        </label>
+        <button type="submit" class="dash-btn dash-btn--primary" id="dashLoginBtn">
+          <span class="dash-btn-label">Log in</span>
+        </button>
+        <p class="dash-form__err" id="dashLoginErr"></p>
+      </form>
+      <a href="./" class="dash-login__back">← Back to site</a>
+    </div>
+  </div>
+
+  <!-- ============ Main dashboard (shown when authed) ============ -->
+  <div id="dashApp" class="dash-app" hidden>
+
+    <!-- Header -->
+    <header class="dash-header">
+      <div class="dash-header__brand">
+        <div class="dash-header__logo">A</div>
+        <div>
+          <h1 class="dash-header__title">Akay Mighty Concept</h1>
+          <p class="dash-header__sub">Content management dashboard</p>
+        </div>
+      </div>
+      <div class="dash-header__actions">
+        <a href="./" target="_blank" class="dash-btn dash-btn--ghost">View site ↗</a>
+        <button type="button" class="dash-btn dash-btn--danger" id="dashSignOut">Sign out</button>
+      </div>
+    </header>
+
+    <!-- Stats bar -->
+    <section class="dash-stats">
+      <div class="dash-stat">
+        <span class="dash-stat__label">Image slots</span>
+        <span class="dash-stat__value" id="statSlots">—</span>
+      </div>
+      <div class="dash-stat">
+        <span class="dash-stat__label">Customized</span>
+        <span class="dash-stat__value" id="statCustom">—</span>
+      </div>
+      <div class="dash-stat">
+        <span class="dash-stat__label">Using defaults</span>
+        <span class="dash-stat__value" id="statDefaults">—</span>
+      </div>
+      <div class="dash-stat">
+        <span class="dash-stat__label">Last save</span>
+        <span class="dash-stat__value" id="statSaved">—</span>
+      </div>
+    </section>
+
+    <!-- Tab nav -->
+    <nav class="dash-tabs">
+      <button class="dash-tab is-active" data-tab="images">Images</button>
+      <button class="dash-tab" data-tab="texts">Text</button>
+      <button class="dash-tab" data-tab="settings">Settings</button>
+    </nav>
+
+    <!-- ============ Images tab ============ -->
+    <section class="dash-panel is-active" id="tab-images">
+      <div class="dash-panel__head">
+        <h2 class="dash-panel__title">All image slots</h2>
+        <div class="dash-panel__actions">
+          <button class="dash-btn dash-btn--ghost" id="btnRefresh">↻ Refresh</button>
+          <button class="dash-btn dash-btn--danger" id="btnResetAll">Reset ALL to defaults</button>
+        </div>
+      </div>
+      <p class="dash-panel__hint">
+        Each slot controls every place that image appears on the site.
+        Click <strong>Replace</strong> to upload a new image (goes to Cloudinary),
+        <strong>Paste URL</strong> to use any URL, or
+        <strong>Delete file</strong> to permanently remove from Cloudinary.
+      </p>
+      <div class="dash-grid" id="imgGrid"><!-- rendered by JS --></div>
+    </section>
+
+    <!-- ============ Text tab ============ -->
+    <section class="dash-panel" id="tab-texts" hidden>
+      <div class="dash-panel__head">
+        <h2 class="dash-panel__title">Editable text slots</h2>
+      </div>
+      <p class="dash-panel__hint">
+        Text slots are added by tagging elements on the site with
+        <code>data-text-slot="text:slot-name"</code>. See
+        <code>README-admin.md</code> for how to add more.
+      </p>
+      <div class="dash-grid dash-grid--text" id="textGrid"><!-- rendered by JS --></div>
+    </section>
+
+    <!-- ============ Settings tab ============ -->
+    <section class="dash-panel" id="tab-settings" hidden>
+      <div class="dash-panel__head">
+        <h2 class="dash-panel__title">Settings</h2>
+      </div>
+      <div class="dash-settings">
+        <div class="dash-settings__row">
+          <div>
+            <strong>Cloudinary cloud name</strong>
+            <p>dfd1bgdam</p>
+          </div>
+        </div>
+        <div class="dash-settings__row">
+          <div>
+            <strong>Upload preset</strong>
+            <p>akaymightyconcept (unsigned)</p>
+          </div>
+        </div>
+        <div class="dash-settings__row">
+          <div>
+            <strong>Firebase project</strong>
+            <p>akaymightyconcept-6ea63</p>
+          </div>
+        </div>
+        <div class="dash-settings__row">
+          <div>
+            <strong>Admin email</strong>
+            <p>akay@concept.com</p>
+          </div>
+        </div>
+        <div class="dash-settings__row">
+          <div>
+            <strong>Delete endpoint</strong>
+            <p id="settingsDeleteEndpoint">/api/delete-image</p>
+            <small>If "Delete file" buttons fail, this is where the function needs to live. Deploy on Vercel for it to work out-of-the-box.</small>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <script type="module" src="./admin-dashboard.js"></script>
+</body>
+</html>
