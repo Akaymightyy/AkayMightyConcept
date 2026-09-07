@@ -8,16 +8,26 @@ You now have a complete inline admin dashboard. Triple-click the nav logo → lo
 
 ```
 akay-site/
-├── index.html              ← your refactored site, every image now has a data-img-slot
+├── index.html              ← your refactored site, every image has data-img-slot
 ├── firebase-config.js      ← YOUR Firebase config (modular, ESM)
 ├── cloudinary-config.js    ← Cloudinary cloud name + unsigned preset
-├── admin.js                ← the brain (login, edit mode, sync, uploads)
+├── admin.js                ← the brain (login, edit mode, sync, uploads, hard-delete)
 ├── admin.css               ← admin UI styling (dark/red, matches your theme)
 ├── firestore.rules         ← security rules — DEPLOY THESE
+├── api/
+│   └── delete-image.js     ← serverless function for Cloudinary hard-delete (Vercel/Netlify)
+├── vercel.json             ← Vercel config (deploys the /api function automatically)
+├── package.json
 ├── akay-logo.jpg           ← default logo (kept as fallback)
 ├── akay-headshot.png       ← default headshot
 └── Akay-CV.jpg             ← your CV
 ```
+
+## What's new in this build (v2)
+
+1. **New "Web Showcase" section** — Sievora-style horizontal marquee right after the hero. Two rows scrolling opposite directions, 12 editable website-screenshot slots (`img:web-1` through `img:web-12`), pauses on hover, pauses in edit mode.
+2. **"Delete file" button** on every image overlay — hard-deletes the file from your Cloudinary account (frees up storage quota). Requires deploying the `/api/delete-image.js` serverless function (see step 4 below).
+3. Existing image + text editing all still works.
 
 ---
 
@@ -25,16 +35,22 @@ akay-site/
 
 ### 1. Create the Cloudinary unsigned upload preset (REQUIRED for image uploads)
 
+✅ **You already did this** — your preset is named `akaymightyconcept`, signing mode = Unsigned. It's already configured in `cloudinary-config.js`. Skip to step 2.
+
+<details>
+<summary>Reference — how to create another preset</summary>
+
 1. Go to <https://console.cloudinary.com> → your cloud `dfd1bgdam`
 2. **Settings ⚙️ → Upload** tab → scroll to **Upload presets**
 3. Click **Add upload preset**
 4. Set:
-   - **Name**: `akay_unsigned`  ← must match what's in `cloudinary-config.js`
+   - **Name**: anything you like (your current one is `akaymightyconcept`)
    - **Signing mode**: **Unsigned**  ← critical
    - **Folder**: `akay-site` (optional)
 5. **Save**
 
-If you name it something else, open `cloudinary-config.js` and change line `unsignedPreset: "akay_unsigned"` to your name.
+If you rename or create a different preset, open `cloudinary-config.js` and change `unsignedPreset: "akaymightyconcept"` to match.
+</details>
 
 ### 2. Deploy the Firestore security rules (REQUIRED or nobody can save edits)
 
@@ -58,6 +74,30 @@ firebase deploy --only firestore:rules
 1. Firebase console → **Authentication → Users**
 2. You should see `akay@concept.com`. If not, click **Add user** and create it with password `Termux123` (or whatever you want — just make sure you remember it).
 
+### 4. Deploy the site WITH the serverless function (REQUIRED for "Delete file" button)
+
+The "Delete file" button on each image overlay hard-deletes the image from your Cloudinary account. This needs a tiny server-side function (`/api/delete-image.js`) because Cloudinary deletes require your API secret which can never live in the browser.
+
+**Easiest: Vercel (recommended, free)**
+
+1. Create a GitHub repo and push the entire `akay-site/` folder to it (including the `api/` subfolder)
+2. Go to <https://vercel.com> → **Add New → Project** → import your repo
+3. Vercel auto-detects the `api/` folder and `vercel.json` — no config needed
+4. Open **Settings → Environment Variables** and add these 3:
+   ```
+   CLOUDINARY_CLOUD_NAME   =  dfd1bgdam
+   CLOUDINARY_API_KEY      =  365594332316261
+   CLOUDINARY_API_SECRET   =  Nz5Vv7rsLyLy4O6LL9bMl3bd3wo
+   ```
+5. Click **Deploy** — your site is live at `https://<your-project>.vercel.app`
+6. (Optional) Add your custom domain in **Settings → Domains**
+
+**If you can't use Vercel** (cPanel, GitHub Pages, etc.):
+
+- The site itself works fine on any static host — just upload all files except the `api/` folder
+- The "Delete file" button will return an error when clicked, but everything else (Replace, Paste URL, Reset, text editing) works
+- If you want the delete button to work, deploy just the function elsewhere and update `cloudinaryDeleteEndpoint` in `cloudinary-config.js` to the full URL
+
 ---
 
 ## How to use the admin dashboard
@@ -77,10 +117,11 @@ firebase deploy --only firestore:rules
 - Look at the bottom-right toolbar — it says "Saving…" then "All changes saved"
 
 ### Replace images
-- Hover any image → 3 buttons appear:
+- Hover any image → 4 buttons appear:
   - **Replace** → opens file picker → uploads to Cloudinary → applies to all matching images instantly
   - **Paste URL** → paste any image URL (Cloudinary, Imgur, your own host) → applies instantly
-  - **Reset** → reverts to the original default image
+  - **Delete file** → permanently deletes the file from Cloudinary (frees storage) AND resets the slot to its default. Only works for Cloudinary URLs and only if you deployed the `/api/delete-image.js` function (step 4 above).
+  - **Reset** → reverts to the original default image (file stays in Cloudinary)
 
 When you change an image, **every occurrence on the page updates** (e.g. updating "logo-design" updates the service card, portfolio item, behind-the-scenes grid, and blog post all at once).
 
@@ -108,6 +149,8 @@ When you change an image, **every occurrence on the page updates** (e.g. updatin
 | `img:paper-bag` | (CDN url) | Print Services #3, Portfolio #7 |
 | `img:custom-bag` | (CDN url) | Print Services #4, Portfolio #9 |
 | `img:branded-merch` | (CDN url) | Print Services #5 |
+| `img:web-1` … `img:web-6` | (CDN url) | Web Showcase row 1 (forward scroll) |
+| `img:web-7` … `img:web-12` | (CDN url) | Web Showcase row 2 (reverse scroll) |
 
 The CDN URLs (`cdn.kord.live`) will still load as defaults until you replace them. Once you click "Replace" or "Paste URL", your new URL is saved to Firestore and used everywhere.
 
@@ -152,7 +195,7 @@ This is a 100% static site (HTML/CSS/JS). Upload the **entire `akay-site/` folde
 
 **"Save failed: PERMISSION_DENIED"** — you haven't deployed the Firestore rules yet. See step 2 above.
 
-**Upload fails with "Cloudinary 401" or "404"** — the unsigned preset name doesn't match. Open `cloudinary-config.js` and verify `unsignedPreset` matches exactly what you created in Cloudinary (case-sensitive).
+**Upload fails with "Cloudinary 401" or "404"** — the unsigned preset name doesn't match. Open `cloudinary-config.js` and verify `unsignedPreset: "akaymightyconcept"` matches exactly what's in your Cloudinary dashboard (case-sensitive).
 
 **Triple-click doesn't open the login modal** — make sure you're clicking the actual "A" logo top-left, not just anywhere. Try the keyboard shortcut **Ctrl+Shift+A** as a fallback.
 

@@ -1,0 +1,13 @@
+{
+  "name": "akay-mighty-concept-site",
+  "version": "1.0.0",
+  "description": "Akay Mighty Concept portfolio site with inline admin dashboard.",
+  "private": true,
+  "scripts": {
+    "dev": "npx serve .",
+    "deploy": "vercel --prod"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

@@ -28,11 +28,17 @@
 // =====================================================================
 
 import { auth, db } from "./firebase-config.js";
-import { cloudinaryConfig, cloudinaryUploadUrl } from "./cloudinary-config.js";
+import {
+  cloudinaryConfig,
+  cloudinaryUploadUrl,
+  cloudinaryDeleteEndpoint,
+  publicIdFromCloudinaryUrl
+} from "./cloudinary-config.js";
 import {
   signInWithEmailAndPassword,
   signOut,
-  onAuthStateChanged
+  onAuthStateChanged,
+  getIdToken
 } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
 import {
   doc,
@@ -443,7 +449,8 @@ function ensureImageOverlays() {
       <div class="akay-img-overlay__btns">
         <button type="button" class="akay-btn akay-btn--mini akay-btn--primary" data-act="upload">Replace</button>
         <button type="button" class="akay-btn akay-btn--mini akay-btn--ghost"   data-act="url">Paste URL</button>
-        <button type="button" class="akay-btn akay-btn--mini akay-btn--danger"  data-act="reset">Reset</button>
+        <button type="button" class="akay-btn akay-btn--mini akay-btn--danger"  data-act="delete">Delete file</button>
+        <button type="button" class="akay-btn akay-btn--mini akay-btn--ghost"   data-act="reset">Reset</button>
       </div>
     `;
     overlay.addEventListener('click', e => {
@@ -454,6 +461,7 @@ function ensureImageOverlays() {
       const act = btn.getAttribute('data-act');
       if (act === 'upload')      triggerUpload(slot);
       else if (act === 'url')    triggerUrlPaste(slot);
+      else if (act === 'delete') deleteFromCloudinaryForSlot(slot);
       else if (act === 'reset')  resetSlot(slot);
     });
 
@@ -527,6 +535,54 @@ function resetSlot(slot) {
     toast(`${slot} reset`, 'info');
   }).catch(e => toast('Reset failed: ' + e.message, 'error'))
     .finally(() => setSaving(false));
+}
+
+// =====================================================================
+//  Hard-delete the current image file for a slot from Cloudinary.
+//  Calls the /api/delete-image serverless function (which holds the
+//  API secret). Also clears the slot in Firestore.
+// =====================================================================
+async function deleteFromCloudinaryForSlot(slot) {
+  const currentUrl = state.images[slot] || defaults.images[slot];
+  if (!currentUrl) {
+    toast(`No image set for ${slot}`, 'error');
+    return;
+  }
+  const publicId = publicIdFromCloudinaryUrl(currentUrl);
+  if (!publicId) {
+    toast(`This image isn't on Cloudinary (only Cloudinary uploads can be hard-deleted). URL: ${currentUrl.slice(0, 60)}…`, 'error');
+    return;
+  }
+  if (!confirm(`Permanently DELETE this file from Cloudinary?\n\n${publicId}\n\nThis cannot be undone. The slot will also be reset to its default.`)) {
+    return;
+  }
+  setSaving(true);
+  try {
+    const idToken = await getIdToken(auth.currentUser, /* forceRefresh */ false);
+    const resp = await fetch(cloudinaryDeleteEndpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${idToken}`
+      },
+      body: JSON.stringify({ publicId })
+    });
+    if (!resp.ok) {
+      const err = await resp.json().catch(() => ({ error: resp.statusText }));
+      throw new Error(err.error || `HTTP ${resp.status}`);
+    }
+    // Clear the slot in Firestore
+    await setDoc(doc(db, 'content', 'images'),
+      { [slot]: '', _updatedAt: serverTimestamp() },
+      { merge: true });
+    delete state.images[slot];
+    applyImage(slot, defaults.images[slot] || '');
+    toast(`Deleted ${publicId}`, 'success');
+  } catch (e) {
+    toast('Delete failed: ' + e.message, 'error');
+  } finally {
+    setSaving(false);
+  }
 }
 
 async function saveImage(slot, url) {
