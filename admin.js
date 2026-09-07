@@ -702,9 +702,13 @@ onAuthStateChanged(auth, user => {
 //  STEP 10 — BOOTSTRAP
 // =====================================================================
 function init() {
-  captureDefaults();
-  startSync();
-  initTripleClick();
+  // Register the triple-click handler FIRST so it works even if
+  // Firestore/network init throws later.
+  try {
+    initTripleClick();
+  } catch (e) {
+    console.error('[admin] initTripleClick failed:', e);
+  }
 
   // Hidden keyboard shortcut: Ctrl+Shift+A also opens the admin dashboard
   document.addEventListener('keydown', e => {
@@ -715,6 +719,20 @@ function init() {
       else window.location.href = './admin.html';
     }
   });
+
+  // Now try the Firebase-dependent init — wrapped so failures don't
+  // take down the rest of the page.
+  try {
+    captureDefaults();
+  } catch (e) {
+    console.error('[admin] captureDefaults failed:', e);
+  }
+
+  try {
+    startSync();
+  } catch (e) {
+    console.error('[admin] startSync failed:', e);
+  }
 
   console.log('[admin] ready. Triple-click the logo to log in.');
 }

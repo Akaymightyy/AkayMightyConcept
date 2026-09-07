@@ -1,13 +1,14 @@
 // =====================================================================
-//  showcase-scroll.js  v2
+//  showcase-scroll.js  v3
 //  ---------------------------------------------------------------------
-//  SIMPLIFIED: native horizontal scroll + rAF auto-play.
-//  No JS pointer/drag handlers — they were interfering with native
-//  touch scrolling on mobile. Users can now:
-//    • Touch-drag / mouse-drag / wheel horizontally — works natively
-//    • Vertical touch scroll passes through to the page (touch-action: pan-x)
-//    • Auto-play runs via requestAnimationFrame, pauses on hover/touch
-//  =====================================================================
+//  FIX: v2 had a feedback loop — setting wrap.scrollLeft in the auto-play
+//  loop fired a 'scroll' event, which set lastInteract = now, which
+//  blocked auto-play on the next frame. Auto-play was permanently stuck.
+//
+//  v3 fix: use an isAutoScrolling flag to distinguish programmatic
+//  scrolls (from our rAF loop) from user scrolls (touch/wheel/drag).
+//  Only user scrolls pause auto-play.
+// =====================================================================
 
 (function () {
   const SPEED = 0.4;          // px per ms
@@ -42,6 +43,7 @@
     let lastInteract = 0;
     let lastFrame = performance.now();
     let rafId = null;
+    let isAutoScrolling = false;   // CRITICAL: flag to distinguish our scroll from user scroll
 
     function tick(now) {
       const dt = Math.min(now - lastFrame, 50);
@@ -62,7 +64,13 @@
         } else {
           if (next <= 0) next += halfWidth;
         }
+
+        // Set flag BEFORE changing scrollLeft so our scroll listener
+        // knows this is a programmatic scroll, not a user scroll.
+        isAutoScrolling = true;
         wrap.scrollLeft = next;
+        // Reset flag on next microtask (after scroll event fires)
+        Promise.resolve().then(() => { isAutoScrolling = false; });
       } else {
         wrap.classList.remove('is-autoplaying');
       }
@@ -71,10 +79,16 @@
     rafId = requestAnimationFrame(tick);
 
     // Pause on hover (desktop)
-    wrap.addEventListener('mouseenter', () => { isHovering = true; lastInteract = performance.now(); });
-    wrap.addEventListener('mouseleave', () => { isHovering = false; lastInteract = performance.now(); });
+    wrap.addEventListener('mouseenter', () => {
+      isHovering = true;
+      lastInteract = performance.now();
+    });
+    wrap.addEventListener('mouseleave', () => {
+      isHovering = false;
+      lastInteract = performance.now();
+    });
 
-    // Pause on touch (mobile) — uses native scroll for actual dragging
+    // Pause on touch (mobile)
     wrap.addEventListener('touchstart', () => {
       isTouching = true;
       lastInteract = performance.now();
@@ -87,12 +101,16 @@
       lastInteract = performance.now();
     }, { passive: true });
 
-    // Detect native scroll (mouse wheel / trackpad) and pause briefly
+    // Detect USER scroll (not our programmatic scroll).
+    // Only set lastInteract if the scroll was NOT triggered by our auto-play.
     let scrollDebounce = null;
     wrap.addEventListener('scroll', () => {
+      if (isAutoScrolling) return;   // ignore our own scrolls
       lastInteract = performance.now();
       clearTimeout(scrollDebounce);
-      scrollDebounce = setTimeout(() => { lastInteract = performance.now(); }, 100);
+      scrollDebounce = setTimeout(() => {
+        lastInteract = performance.now();
+      }, 100);
     }, { passive: true });
 
     // Pause when offscreen (perf)
