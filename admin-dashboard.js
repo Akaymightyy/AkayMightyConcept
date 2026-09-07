@@ -1,8 +1,15 @@
 // =====================================================================
-//  admin-dashboard.js  —  logic for the dedicated /admin.html page
+//  admin-dashboard.js  v3  —  logic for /admin.html
 //  ---------------------------------------------------------------------
-//  Provides a grid view of ALL image + text slots, with bulk actions.
-//  Shares Firebase + Cloudinary config with the inline admin layer.
+//  FEATURES
+//    • Sidebar layout, stats bar, live preview grid
+//    • Auto-discovers ALL data-text-slot elements from the live site
+//      (opens a hidden iframe to ./ and reads them)
+//    • Groups image + text slots by section for easy scanning
+//    • Verifies Firestore writes actually land (not just queued in
+//      the offline cache) by re-reading the doc after write
+//    • Surfaces permission errors clearly
+//    • Auto-redirects to dashboard UI immediately after sign-in
 // =====================================================================
 
 import { auth, db } from "./firebase-config.js";
@@ -21,56 +28,78 @@ import {
 import {
   doc,
   setDoc,
+  getDoc,
   onSnapshot,
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
 
 // =====================================================================
-//  REGISTRY — every image slot we know about.
-//  Defaults are read from the main site (we open a hidden iframe to ./)
-//  so we always know what the "default" URL is for each slot.
+//  IMAGE-SLOT REGISTRY — grouped by section for the dashboard UI.
+//  Default URLs are pulled from the live site via iframe.
 // =====================================================================
-const IMAGE_SLOTS = [
-  { id: 'img:logo',           label: 'Site Logo (nav, preloader, footer)' },
-  { id: 'img:headshot',       label: 'Akay Headshot (hero + about)' },
-  { id: 'img:logo-design',    label: 'Logo Design sample' },
-  { id: 'img:ads-flyer',      label: 'Ads Flyer sample' },
-  { id: 'img:food-flyer',     label: 'Food Flyer sample' },
-  { id: 'img:business-flyer', label: 'Business Flyer sample' },
-  { id: 'img:club-flyer',     label: 'Club Flyer sample' },
-  { id: 'img:web3-flyer',     label: 'Web3 / Crypto Flyer sample' },
-  { id: 'img:business-card',  label: 'Business Card sample' },
-  { id: 'img:leather-print',  label: 'Leather Print sample' },
-  { id: 'img:paper-bag',      label: 'Paper Bag sample' },
-  { id: 'img:custom-bag',     label: 'Custom Bag sample' },
-  { id: 'img:branded-merch',  label: 'Branded Merch sample' },
-  { id: 'img:web-1',  label: 'Web Showcase Row 1 · Card 1' },
-  { id: 'img:web-2',  label: 'Web Showcase Row 1 · Card 2' },
-  { id: 'img:web-3',  label: 'Web Showcase Row 1 · Card 3' },
-  { id: 'img:web-4',  label: 'Web Showcase Row 1 · Card 4' },
-  { id: 'img:web-5',  label: 'Web Showcase Row 1 · Card 5' },
-  { id: 'img:web-6',  label: 'Web Showcase Row 1 · Card 6' },
-  { id: 'img:web-7',  label: 'Web Showcase Row 2 · Card 1' },
-  { id: 'img:web-8',  label: 'Web Showcase Row 2 · Card 2' },
-  { id: 'img:web-9',  label: 'Web Showcase Row 2 · Card 3' },
-  { id: 'img:web-10', label: 'Web Showcase Row 2 · Card 4' },
-  { id: 'img:web-11', label: 'Web Showcase Row 2 · Card 5' },
-  { id: 'img:web-12', label: 'Web Showcase Row 2 · Card 6' }
+const IMAGE_SECTIONS = [
+  {
+    title: 'Branding',
+    slots: [
+      { id: 'img:logo',           label: 'Site logo (nav, preloader, footer)' },
+      { id: 'img:headshot',       label: 'Akay headshot (hero + about)' }
+    ]
+  },
+  {
+    title: 'Design Services',
+    slots: [
+      { id: 'img:logo-design',    label: 'Logo Design sample' },
+      { id: 'img:ads-flyer',      label: 'Ads Flyer sample' },
+      { id: 'img:food-flyer',     label: 'Food Flyer sample' },
+      { id: 'img:business-flyer', label: 'Business Flyer sample' },
+      { id: 'img:club-flyer',     label: 'Club Flyer sample' },
+      { id: 'img:web3-flyer',     label: 'Web3 / Crypto Flyer sample' }
+    ]
+  },
+  {
+    title: 'Print Services',
+    slots: [
+      { id: 'img:business-card',  label: 'Business Card sample' },
+      { id: 'img:leather-print',  label: 'Leather Print sample' },
+      { id: 'img:paper-bag',      label: 'Paper Bag sample' },
+      { id: 'img:custom-bag',     label: 'Custom Bag sample' },
+      { id: 'img:branded-merch',  label: 'Branded Merch sample' }
+    ]
+  },
+  {
+    title: 'Web Showcase (horizontal marquee)',
+    slots: [
+      { id: 'img:web-1',  label: 'Row 1 · Card 1' },
+      { id: 'img:web-2',  label: 'Row 1 · Card 2' },
+      { id: 'img:web-3',  label: 'Row 1 · Card 3' },
+      { id: 'img:web-4',  label: 'Row 1 · Card 4' },
+      { id: 'img:web-5',  label: 'Row 1 · Card 5' },
+      { id: 'img:web-6',  label: 'Row 1 · Card 6' },
+      { id: 'img:web-7',  label: 'Row 2 · Card 1' },
+      { id: 'img:web-8',  label: 'Row 2 · Card 2' },
+      { id: 'img:web-9',  label: 'Row 2 · Card 3' },
+      { id: 'img:web-10', label: 'Row 2 · Card 4' },
+      { id: 'img:web-11', label: 'Row 2 · Card 5' },
+      { id: 'img:web-12', label: 'Row 2 · Card 6' }
+    ]
+  }
 ];
 
 // =====================================================================
 //  STATE
 // =====================================================================
 const state = {
-  images: {},      // current overrides from Firestore
+  images: {},
   texts: {},
-  defaults: {},    // captured from main site iframe
+  defaults: { images: {}, texts: {} },
   defaultsReady: false,
+  textSlotsDiscovered: [],   // [{slot, default, section}]
   unsubImages: null,
-  unsubTexts: null
+  unsubTexts: null,
+  rulesOk: null              // null=unknown, true=ok, false=rules-missing
 };
 
-const $ = (s, r = document) => r.querySelector(s);
+const $  = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
 
 // =====================================================================
@@ -86,56 +115,86 @@ function toast(msg, kind = 'info') {
   el.textContent = msg;
   el.className = `akay-toast akay-toast--${kind} is-visible`;
   clearTimeout(el._t);
-  el._t = setTimeout(() => el.classList.remove('is-visible'), 2800);
+  el._t = setTimeout(() => el.classList.remove('is-visible'), 3000);
 }
 
 // =====================================================================
-//  STEP 1 — capture default image URLs from the live site
-//  We open a hidden iframe to ./ (same origin) and read every
-//  [data-img-slot] element's src. This guarantees the dashboard's
-//  "default" matches whatever the site currently ships with.
+//  STEP 1 — capture defaults from the live site via hidden iframe.
+//  We also discover every [data-text-slot] element on the page so the
+//  admin can edit any text without us having to maintain a registry.
 // =====================================================================
 function captureDefaultsFromSite() {
   return new Promise(resolve => {
     const iframe = document.createElement('iframe');
-    iframe.style.cssText = 'position:fixed;width:1px;height:1px;left:-9999px;top:0;border:0;';
+    iframe.style.cssText = 'position:fixed;width:1px;height:1px;left:-9999px;top:0;border:0;opacity:0;';
     iframe.src = './';
+    document.body.appendChild(iframe);
+
+    const finish = () => {
+      if (iframe.parentNode) iframe.remove();
+      resolve();
+    };
+
     iframe.onload = () => {
       try {
         const idoc = iframe.contentDocument;
         if (!idoc) throw new Error('No iframe document');
-        $$('#index.html, body', idoc);
+
+        // Capture image defaults
         idoc.querySelectorAll('[data-img-slot]').forEach(el => {
           const slot = el.getAttribute('data-img-slot');
-          if (state.defaults[slot]) return;
+          if (state.defaults.images[slot]) return;
           if (el.tagName === 'IMG') {
             const s = el.getAttribute('src');
-            if (s) state.defaults[slot] = new URL(s, iframe.src).href;
+            if (s) state.defaults.images[slot] = new URL(s, iframe.src).href;
           } else {
             const inner = el.querySelector('img');
             if (inner && inner.getAttribute('src')) {
-              state.defaults[slot] = new URL(inner.getAttribute('src'), iframe.src).href;
+              state.defaults.images[slot] = new URL(inner.getAttribute('src'), iframe.src).href;
             }
           }
         });
+
+        // Discover all text slots — group by section
+        const sectionMap = new Map();   // sectionId -> { title, slots: [] }
+        idoc.querySelectorAll('[data-text-slot]').forEach(el => {
+          const slot = el.getAttribute('data-text-slot');
+          if (state.defaults.texts[slot]) return;
+          state.defaults.texts[slot] = el.textContent.trim();
+
+          // Figure out which section this slot lives in
+          const sec = el.closest('section, header, footer');
+          const secId = sec ? (sec.id || sec.className.split(' ')[0] || 'general') : 'general';
+          const secTitle = sec
+            ? (sec.querySelector('.section-title, .showcase-title, h2, h3')?.textContent?.trim() || secId)
+            : 'General';
+
+          if (!sectionMap.has(secId)) {
+            sectionMap.set(secId, { id: secId, title: secTitle, slots: [] });
+          }
+          sectionMap.get(secId).slots.push({
+            slot,
+            default: el.textContent.trim(),
+            label: slot.replace(/^text:/, '').replace(/[-_]/g, ' ')
+          });
+        });
+        state.textSlotsDiscovered = Array.from(sectionMap.values());
         state.defaultsReady = true;
-        console.log('[dash] captured defaults:', Object.keys(state.defaults).length);
+
+        console.log(`[dash] captured ${Object.keys(state.defaults.images).length} image defaults, ${state.defaults.texts.length} text slots across ${state.textSlotsDiscovered.length} sections`);
       } catch (e) {
         console.warn('[dash] iframe defaults capture failed:', e.message);
       } finally {
-        iframe.remove();
-        resolve();
+        finish();
       }
     };
-    iframe.onerror = () => { iframe.remove(); resolve(); };
-    document.body.appendChild(iframe);
-    // Safety timeout in case onload never fires
-    setTimeout(() => { if (iframe.parentNode) iframe.remove(); resolve(); }, 4000);
+    iframe.onerror = finish;
+    setTimeout(finish, 5000);   // safety
   });
 }
 
 // =====================================================================
-//  STEP 2 — Firestore real-time subscriptions
+//  STEP 2 — Firestore real-time subscriptions + rules check
 // =====================================================================
 function startSync() {
   if (state.unsubImages) state.unsubImages();
@@ -144,125 +203,181 @@ function startSync() {
   state.unsubImages = onSnapshot(doc(db, 'content', 'images'), snap => {
     state.images = snap.exists() ? snap.data() : {};
     delete state.images._updatedAt;
+    if (state.rulesOk === null) {
+      // First read succeeded — rules at least allow read
+      // (we'll verify write separately)
+    }
     renderImages();
     renderStats();
   }, err => {
     console.error('[dash] images sync error:', err);
-    toast('Image sync failed — check Firestore rules', 'error');
+    if (err.code === 'permission-denied') {
+      state.rulesOk = false;
+      renderRulesStatus();
+      toast('Firestore rules not deployed — see Settings tab', 'error');
+    } else {
+      toast('Image sync failed: ' + err.message, 'error');
+    }
   });
 
   state.unsubTexts = onSnapshot(doc(db, 'content', 'texts'), snap => {
     state.texts = snap.exists() ? snap.data() : {};
     delete state.texts._updatedAt;
     renderTexts();
-  }, err => console.error('[dash] texts sync error:', err));
+    renderStats();
+  }, err => {
+    console.error('[dash] texts sync error:', err);
+  });
+
+  // Verify write permission by attempting a no-op merge
+  verifyWritePermission();
+}
+
+async function verifyWritePermission() {
+  try {
+    await setDoc(doc(db, 'content', '_health'),
+      { ping: true, _updatedAt: serverTimestamp() },
+      { merge: true });
+    state.rulesOk = true;
+    renderRulesStatus();
+  } catch (e) {
+    if (e.code === 'permission-denied') {
+      state.rulesOk = false;
+      renderRulesStatus();
+      console.error('[dash] WRITE PERMISSION DENIED — Firestore rules not deployed. See firestore.rules.');
+    } else {
+      console.warn('[dash] write health check failed:', e.message);
+    }
+  }
+}
+
+function renderRulesStatus() {
+  const el = $('#rulesStatus');
+  if (!el) return;
+  if (state.rulesOk === true) {
+    el.innerHTML = '<span class="dash-status-pill dash-status-pill--ok"><span class="dash-status-pill__dot"></span>Deployed &amp; working</span>';
+  } else if (state.rulesOk === false) {
+    el.innerHTML = '<span class="dash-status-pill dash-status-pill--err"><span class="dash-status-pill__dot"></span>Not deployed — edits will NOT sync</span>';
+  } else {
+    el.innerHTML = '<span class="dash-status-pill dash-status-pill--warn"><span class="dash-status-pill__dot"></span>Checking…</span>';
+  }
 }
 
 // =====================================================================
-//  STEP 3 — render the image grid
+//  STEP 3 — render images grouped by section
 // =====================================================================
 function renderImages() {
-  const grid = $('#imgGrid');
-  if (!grid) return;
+  const wrap = $('#imgSections');
+  if (!wrap) return;
 
-  if (!IMAGE_SLOTS.length) {
-    grid.innerHTML = '<p class="dash-panel__hint">No image slots registered.</p>';
-    return;
-  }
-
-  grid.innerHTML = IMAGE_SLOTS.map(slot => {
-    const override = state.images[slot.id];
-    const isCustom = !!override && override.length > 0;
-    const url = isCustom ? override : (state.defaults[slot.id] || '');
-    const isDefault = !isCustom;
-    const urlLabel = url ? url.replace(/^https?:\/\//, '') : '(no default set)';
-
-    return `
-      <div class="dash-card ${isCustom ? 'is-custom' : ''}" data-slot="${slot.id}">
-        <div class="dash-card__preview ${url ? '' : 'dash-card__preview--empty'}">
-          ${url
-            ? `<img src="${url}" alt="${slot.label}" loading="lazy" onerror="this.style.display='none'; this.parentElement.classList.add('dash-card__preview--empty'); this.parentElement.innerHTML='No preview';" />`
-            : 'No image'
-          }
-        </div>
-        <div class="dash-card__body">
-          <div>
-            <div class="dash-card__slot">${slot.id}</div>
-            <div class="dash-card__url" title="${url}">${urlLabel}</div>
-          </div>
-          <div class="dash-card__btns">
-            <button class="dash-btn dash-btn--primary dash-btn--mini" data-act="upload">Replace</button>
-            <button class="dash-btn dash-btn--ghost dash-btn--mini" data-act="url">Paste URL</button>
-            <button class="dash-btn dash-btn--danger dash-btn--mini" data-act="delete" ${!isCustom || !publicIdFromCloudinaryUrl(url) ? 'disabled title="Only available for Cloudinary-hosted custom images"' : ''}>Delete file</button>
-            <button class="dash-btn dash-btn--ghost dash-btn--mini" data-act="reset" ${isDefault ? 'disabled' : ''}>Reset</button>
-          </div>
-          <div style="font-size:11px;color:#5a5a5a;margin-top:4px;">${slot.label}</div>
-        </div>
+  wrap.innerHTML = IMAGE_SECTIONS.map(section => `
+    <div class="dash-section">
+      <div class="dash-section__head">
+        <div class="dash-section__bar"></div>
+        <h4 class="dash-section__title">${section.title}</h4>
+        <span class="dash-section__count">${section.slots.length} slots</span>
       </div>
-    `;
-  }).join('');
+      <div class="dash-grid">
+        ${section.slots.map(slot => renderImageCard(slot)).join('')}
+      </div>
+    </div>
+  `).join('');
 
-  // wire buttons
-  grid.querySelectorAll('.dash-card').forEach(card => {
+  // Wire buttons
+  wrap.querySelectorAll('.dash-card').forEach(card => {
     const slot = card.getAttribute('data-slot');
     card.querySelectorAll('button[data-act]').forEach(btn => {
-      btn.addEventListener('click', () => handleImageAction(slot, btn.getAttribute('data-act'), card));
+      btn.addEventListener('click', () => handleImageAction(slot, btn.getAttribute('data-act')));
     });
   });
 }
 
+function renderImageCard(slot) {
+  const override = state.images[slot.id];
+  const isCustom = !!override && override.length > 0;
+  const url = isCustom ? override : (state.defaults.images[slot.id] || '');
+  const urlLabel = url ? url.replace(/^https?:\/\//, '') : '(no default set)';
+  const canDelete = isCustom && !!publicIdFromCloudinaryUrl(url);
+
+  return `
+    <div class="dash-card ${isCustom ? 'is-custom' : ''}" data-slot="${slot.id}">
+      <div class="dash-card__preview ${url ? '' : 'dash-card__preview--empty'}">
+        ${url
+          ? `<img src="${url}" alt="${slot.label}" loading="lazy" onerror="this.style.display='none'; this.parentElement.classList.add('dash-card__preview--empty'); this.parentElement.innerHTML='Load failed';" />`
+          : 'No image'
+        }
+      </div>
+      <div class="dash-card__body">
+        <div>
+          <div class="dash-card__slot">${slot.id}</div>
+          <div class="dash-card__label">${slot.label}</div>
+        </div>
+        <div class="dash-card__url" title="${url}">${urlLabel}</div>
+        <div class="dash-card__btns">
+          <button class="dash-btn dash-btn--primary dash-btn--mini" data-act="upload">Replace</button>
+          <button class="dash-btn dash-btn--ghost dash-btn--mini" data-act="url">Paste URL</button>
+          <button class="dash-btn dash-btn--danger dash-btn--mini" data-act="delete" ${!canDelete ? 'disabled title="Only available for Cloudinary-hosted custom images"' : ''}>Delete file</button>
+          <button class="dash-btn dash-btn--ghost dash-btn--mini" data-act="reset" ${!isCustom ? 'disabled' : ''}>Reset</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
 // =====================================================================
-//  STEP 4 — render the text grid
+//  STEP 4 — render text slots grouped by section
 // =====================================================================
 function renderTexts() {
-  const grid = $('#textGrid');
-  if (!grid) return;
-  const slots = Object.keys(state.texts).filter(k => k.startsWith('text:')).sort();
-  if (!slots.length) {
-    grid.innerHTML = `
-      <div class="dash-textcard">
-        <div></div>
-        <div style="color:#8a8a8a;font-size:13px;">
-          No text slots saved yet. Add <code>data-text-slot="text:slot-name"</code> attributes
-          to elements in <code>index.html</code>, then edit them inline on the site
-          (triple-click the logo to enter edit mode). They'll appear here automatically.
+  const wrap = $('#textSections');
+  if (!wrap) return;
+
+  if (!state.textSlotsDiscovered.length) {
+    wrap.innerHTML = `
+      <div class="dash-section">
+        <div class="dash-section__head">
+          <div class="dash-section__bar"></div>
+          <h4 class="dash-section__title">No text slots found</h4>
         </div>
-        <div></div>
+        <p class="dash-panel__hint">
+          No <code>data-text-slot</code> attributes were found on the site yet.
+          Re-deploy with the latest <code>index.html</code> to make captions editable.
+        </p>
       </div>
     `;
     return;
   }
-  grid.innerHTML = slots.map(slot => {
-    const val = state.texts[slot] || '';
-    return `
-      <div class="dash-textcard" data-slot="${slot}">
-        <div class="dash-textcard__slot">${slot}</div>
-        <input type="text" class="dash-textcard__input" value="${escapeAttr(val)}" data-original="${escapeAttr(val)}" />
-        <div class="dash-textcard__btns">
-          <button class="dash-btn dash-btn--primary dash-btn--mini" data-act="save">Save</button>
-          <button class="dash-btn dash-btn--danger dash-btn--mini" data-act="delete">Delete</button>
-        </div>
-      </div>
-    `;
-  }).join('');
 
-  grid.querySelectorAll('.dash-textcard').forEach(card => {
+  wrap.innerHTML = state.textSlotsDiscovered.map(section => `
+    <div class="dash-section">
+      <div class="dash-section__head">
+        <div class="dash-section__bar"></div>
+        <h4 class="dash-section__title">${section.title}</h4>
+        <span class="dash-section__count">${section.slots.length} text slots</span>
+      </div>
+      ${section.slots.map(s => renderTextCard(s)).join('')}
+    </div>
+  `).join('');
+
+  // Wire buttons
+  wrap.querySelectorAll('.dash-textcard').forEach(card => {
     const slot = card.getAttribute('data-slot');
-    const input = card.querySelector('input');
+    const input = card.querySelector('input, textarea');
     card.querySelector('[data-act="save"]').addEventListener('click', async () => {
       const val = input.value.trim();
       if (val === input.dataset.original) return;
-      await saveText(slot, val);
-      toast(`Saved ${slot}`, 'success');
+      const ok = await saveText(slot, val);
+      if (ok) {
+        input.dataset.original = val;
+        toast(`Saved ${slot}`, 'success');
+      }
     });
     card.querySelector('[data-act="delete"]').addEventListener('click', async () => {
-      if (!confirm(`Delete ${slot}?`)) return;
-      await deleteText(slot);
-      toast(`Deleted ${slot}`, 'info');
+      if (!confirm(`Reset ${slot} to default?`)) return;
+      const ok = await deleteText(slot);
+      if (ok) toast(`Reset ${slot}`, 'info');
     });
-    // Enter key saves
     input.addEventListener('keydown', e => {
-      if (e.key === 'Enter') {
+      if (e.key === 'Enter' && e.target.tagName === 'INPUT') {
         e.preventDefault();
         card.querySelector('[data-act="save"]').click();
       }
@@ -270,26 +385,53 @@ function renderTexts() {
   });
 }
 
+function renderTextCard(s) {
+  const override = state.texts[s.slot];
+  const isCustom = !!override && override.length > 0 && override !== s.default;
+  const val = isCustom ? override : s.default;
+  const isLong = s.default && s.default.length > 80;
+  return `
+    <div class="dash-textcard ${isCustom ? 'is-custom' : ''}" data-slot="${s.slot}">
+      <div>
+        <div class="dash-textcard__slot">${s.slot}<small>${s.label}</small></div>
+      </div>
+      ${isLong
+        ? `<textarea class="dash-textcard__input" rows="3" data-original="${escapeAttr(val)}">${escapeHtml(val)}</textarea>`
+        : `<input type="text" class="dash-textcard__input" value="${escapeAttr(val)}" data-original="${escapeAttr(val)}" />`
+      }
+      <div class="dash-textcard__btns">
+        <button class="dash-btn dash-btn--primary dash-btn--mini" data-act="save">Save</button>
+        <button class="dash-btn dash-btn--danger dash-btn--mini" data-act="delete">Reset</button>
+      </div>
+    </div>
+  `;
+}
+
 function escapeAttr(s) {
   return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
+function escapeHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
 
 // =====================================================================
-//  STEP 5 — render stats
+//  STEP 5 — stats
 // =====================================================================
 function renderStats() {
-  const total = IMAGE_SLOTS.length;
+  const totalSlots = IMAGE_SECTIONS.reduce((n, s) => n + s.slots.length, 0);
   const custom = Object.values(state.images).filter(v => v && v.length > 0).length;
-  $('#statSlots').textContent  = total;
+  const textCount = state.textSlotsDiscovered.reduce((n, s) => n + s.slots.length, 0);
+  $('#statSlots').textContent  = totalSlots;
   $('#statCustom').textContent = custom;
-  $('#statDefaults').textContent = total - custom;
-  $('#statSaved').textContent = new Date().toLocaleTimeString();
+  $('#statTexts').textContent  = textCount;
+  $('#navCountImages').textContent = totalSlots;
+  $('#navCountTexts').textContent  = textCount;
 }
 
 // =====================================================================
 //  STEP 6 — image actions
 // =====================================================================
-async function handleImageAction(slot, act, card) {
+async function handleImageAction(slot, act) {
   if (act === 'upload') return triggerUpload(slot);
   if (act === 'url')    return triggerUrlPaste(slot);
   if (act === 'delete') return deleteFromCloudinaryForSlot(slot);
@@ -310,11 +452,12 @@ function triggerUpload(slot) {
       input.remove();
       return;
     }
-    toast('Uploading…', 'info');
+    toast('Uploading to Cloudinary…', 'info');
     try {
       const url = await uploadToCloudinary(file);
-      await saveImage(slot, url);
-      toast(`Updated ${slot}`, 'success');
+      toast('Uploaded — saving to Firestore…', 'info');
+      const ok = await saveImage(slot, url);
+      if (ok) toast(`✓ ${slot} updated`, 'success');
     } catch (e) {
       toast('Upload failed: ' + e.message, 'error');
     } finally {
@@ -325,24 +468,20 @@ function triggerUpload(slot) {
 }
 
 function triggerUrlPaste(slot) {
-  const current = state.images[slot] || state.defaults[slot] || '';
+  const current = state.images[slot] || state.defaults.images[slot] || '';
   const url = prompt(`Paste image URL for ${slot}:`, current);
   if (url === null) return;
   if (!url.trim()) { toast('No URL entered', 'error'); return; }
   try { new URL(url.trim()); } catch { toast('Invalid URL', 'error'); return; }
-  saveImage(slot, url.trim()).then(() => toast(`Updated ${slot}`, 'success'));
+  saveImage(slot, url.trim()).then(ok => {
+    if (ok) toast(`✓ ${slot} updated`, 'success');
+  });
 }
 
 async function resetSlot(slot) {
   if (!confirm(`Reset ${slot} to default?`)) return;
-  try {
-    await setDoc(doc(db, 'content', 'images'),
-      { [slot]: '', _updatedAt: serverTimestamp() },
-      { merge: true });
-    toast(`${slot} reset`, 'info');
-  } catch (e) {
-    toast('Reset failed: ' + e.message, 'error');
-  }
+  const ok = await saveImage(slot, '');
+  if (ok) toast(`${slot} reset to default`, 'info');
 }
 
 async function deleteFromCloudinaryForSlot(slot) {
@@ -354,7 +493,7 @@ async function deleteFromCloudinaryForSlot(slot) {
     return;
   }
   if (!confirm(`Permanently DELETE from Cloudinary?\n\n${publicId}\n\nThis cannot be undone.`)) return;
-  toast('Deleting…', 'info');
+  toast('Deleting from Cloudinary…', 'info');
   try {
     const idToken = await getIdToken(auth.currentUser, false);
     const resp = await fetch(cloudinaryDeleteEndpoint, {
@@ -369,31 +508,70 @@ async function deleteFromCloudinaryForSlot(slot) {
       const err = await resp.json().catch(() => ({ error: resp.statusText }));
       throw new Error(err.error || `HTTP ${resp.status}`);
     }
-    await setDoc(doc(db, 'content', 'images'),
-      { [slot]: '', _updatedAt: serverTimestamp() },
-      { merge: true });
-    toast(`Deleted ${publicId}`, 'success');
+    const ok = await saveImage(slot, '');
+    if (ok) toast(`✓ Deleted ${publicId}`, 'success');
   } catch (e) {
     toast('Delete failed: ' + e.message, 'error');
   }
 }
 
+// =====================================================================
+//  STEP 7 — Firestore writes with VERIFICATION
+//  The bug we're fixing: with IndexedDB persistence enabled, setDoc()
+//  can return success even when the actual server write failed (it
+//  gets queued in the local cache). We verify by re-reading the doc
+//  after write to confirm the server actually has our change.
+// =====================================================================
 async function saveImage(slot, url) {
-  await setDoc(doc(db, 'content', 'images'),
-    { [slot]: url, _updatedAt: serverTimestamp() },
-    { merge: true });
+  try {
+    await setDoc(doc(db, 'content', 'images'),
+      { [slot]: url, _updatedAt: serverTimestamp() },
+      { merge: true });
+
+    // Verify the write actually landed on the server
+    const verify = await getDoc(doc(db, 'content', 'images'));
+    if (!verify.exists()) {
+      throw new Error('Verification failed — doc does not exist on server');
+    }
+    const data = verify.data();
+    if (data[slot] !== url) {
+      throw new Error('Verification failed — server has stale value. Check Firestore rules.');
+    }
+    return true;
+  } catch (e) {
+    console.error('[dash] saveImage failed:', e);
+    if (e.code === 'permission-denied' || /permission|denied/i.test(e.message)) {
+      toast('SAVE FAILED — Firestore rules not deployed. Open Settings tab for instructions.', 'error');
+      state.rulesOk = false;
+      renderRulesStatus();
+    } else {
+      toast('Save failed: ' + e.message, 'error');
+    }
+    return false;
+  }
 }
 
 async function saveText(slot, text) {
-  await setDoc(doc(db, 'content', 'texts'),
-    { [slot]: text, _updatedAt: serverTimestamp() },
-    { merge: true });
+  try {
+    await setDoc(doc(db, 'content', 'texts'),
+      { [slot]: text, _updatedAt: serverTimestamp() },
+      { merge: true });
+    return true;
+  } catch (e) {
+    console.error('[dash] saveText failed:', e);
+    if (e.code === 'permission-denied' || /permission|denied/i.test(e.message)) {
+      toast('SAVE FAILED — Firestore rules not deployed. See Settings tab.', 'error');
+      state.rulesOk = false;
+      renderRulesStatus();
+    } else {
+      toast('Save failed: ' + e.message, 'error');
+    }
+    return false;
+  }
 }
 
 async function deleteText(slot) {
-  await setDoc(doc(db, 'content', 'texts'),
-    { [slot]: '', _updatedAt: serverTimestamp() },
-    { merge: true });
+  return saveText(slot, '');
 }
 
 async function uploadToCloudinary(file) {
@@ -404,7 +582,12 @@ async function uploadToCloudinary(file) {
   const resp = await fetch(cloudinaryUploadUrl(), { method: 'POST', body: fd });
   if (!resp.ok) {
     const txt = await resp.text().catch(() => '');
-    throw new Error(`Cloudinary ${resp.status}: ${txt.slice(0, 200)}`);
+    let msg = `Cloudinary ${resp.status}`;
+    try {
+      const j = JSON.parse(txt);
+      if (j.error?.message) msg = `Cloudinary: ${j.error.message}`;
+    } catch {}
+    throw new Error(msg);
   }
   const data = await resp.json();
   if (!data.secure_url) throw new Error('Cloudinary response missing secure_url');
@@ -412,39 +595,82 @@ async function uploadToCloudinary(file) {
 }
 
 // =====================================================================
-//  STEP 7 — Reset ALL
+//  STEP 8 — Reset ALL
 // =====================================================================
 async function resetAll() {
   if (!confirm('Reset ALL image slots to defaults? This wipes every override in Firestore.')) return;
-  const blank = Object.fromEntries(IMAGE_SLOTS.map(s => [s.id, '']));
+  const blank = Object.fromEntries(
+    IMAGE_SECTIONS.flatMap(s => s.slots).map(s => [s.id, ''])
+  );
   blank._updatedAt = serverTimestamp();
   try {
     await setDoc(doc(db, 'content', 'images'), blank, { merge: true });
-    toast('All images reset to defaults', 'success');
+    toast('✓ All images reset to defaults', 'success');
   } catch (e) {
     toast('Reset failed: ' + e.message, 'error');
   }
 }
 
 // =====================================================================
-//  STEP 8 — tabs
+//  STEP 9 — sidebar navigation
 // =====================================================================
-function initTabs() {
-  $$('.dash-tab').forEach(tab => {
+const VIEW_TITLES = {
+  images:   { title: 'All Images',         sub: 'Manage every image on your site from one place' },
+  texts:    { title: 'Captions & Text',    sub: 'Edit every heading, label, and description' },
+  settings: { title: 'Settings & Status',  sub: 'Connection health and configuration' }
+};
+
+function initNav() {
+  $$('.dash-nav-item').forEach(tab => {
     tab.addEventListener('click', () => {
       const target = tab.getAttribute('data-tab');
-      $$('.dash-tab').forEach(t => t.classList.toggle('is-active', t === tab));
+      $$('.dash-nav-item').forEach(t => t.classList.toggle('is-active', t === tab));
       $$('.dash-panel').forEach(p => {
         p.classList.toggle('is-active', p.id === `tab-${target}`);
-        p.hidden = p.id !== `tab-${target}`;
       });
+      const v = VIEW_TITLES[target];
+      if (v) {
+        $('#viewTitle').textContent = v.title;
+        $('#viewSub').textContent   = v.sub;
+      }
     });
   });
 }
 
 // =====================================================================
-//  STEP 9 — login
+//  STEP 10 — login (with immediate UI swap fix)
+//  The previous bug: after signInWithEmailAndPassword resolved,
+//  onAuthStateChanged was the only thing swapping the UI. Sometimes
+//  that callback is delayed by network/persistence warm-up.
+//  Fix: swap the UI immediately after await resolves, AND keep the
+//  onAuthStateChanged subscription for the cross-tab case.
 // =====================================================================
+function swapToApp(user) {
+  if (!user) return;
+  $('#dashLogin').hidden = true;
+  $('#dashApp').hidden = false;
+  const email = user.email || '';
+  $('#headerUser').textContent = email;
+  $('#sidebarUser').textContent = email;
+  // Start sync if not already running
+  if (!state.unsubImages) startSync();
+  // Capture defaults from site (first time only)
+  if (!state.defaultsReady) {
+    captureDefaultsFromSite().then(() => {
+      renderTexts();
+      renderStats();
+    });
+  }
+  toast(`Welcome, ${email}`, 'success');
+}
+
+function swapToLogin() {
+  $('#dashLogin').hidden = false;
+  $('#dashApp').hidden = true;
+  if (state.unsubImages) { state.unsubImages(); state.unsubImages = null; }
+  if (state.unsubTexts)  { state.unsubTexts();  state.unsubTexts  = null; }
+}
+
 function initLogin() {
   $('#dashLoginForm').addEventListener('submit', async e => {
     e.preventDefault();
@@ -456,8 +682,9 @@ function initLogin() {
     btn.disabled = true;
     btn.querySelector('.dash-btn-label').textContent = 'Logging in…';
     try {
-      await signInWithEmailAndPassword(auth, email, pass);
-      // onAuthStateChanged will swap UI
+      const userCred = await signInWithEmailAndPassword(auth, email, pass);
+      // IMMEDIATELY swap UI — don't wait for onAuthStateChanged
+      swapToApp(userCred.user);
     } catch (err) {
       const map = {
         'auth/invalid-email':            'That email address is malformed.',
@@ -480,39 +707,43 @@ function initLogin() {
 }
 
 // =====================================================================
-//  STEP 10 — auth state → swap UI
+//  STEP 11 — auth state (handles cross-tab + page reload)
 // =====================================================================
-onAuthStateChanged(auth, async user => {
+onAuthStateChanged(auth, user => {
   if (user) {
-    $('#dashLogin').hidden = true;
-    $('#dashApp').hidden = false;
-    $('#dashEmail').value = '';
-    $('#dashPass').value = '';
-    if (!state.defaultsReady) await captureDefaultsFromSite();
-    if (!state.unsubImages)   startSync();
-    toast(`Welcome, ${user.email}`, 'success');
+    swapToApp(user);
   } else {
-    $('#dashLogin').hidden = false;
-    $('#dashApp').hidden = true;
-    if (state.unsubImages) { state.unsubImages(); state.unsubImages = null; }
-    if (state.unsubTexts)  { state.unsubTexts();  state.unsubTexts  = null; }
+    swapToLogin();
+    // Reset login form
+    const btn = $('#dashLoginBtn');
+    if (btn) {
+      btn.disabled = false;
+      btn.querySelector('.dash-btn-label').textContent = 'Log in';
+    }
   }
 });
 
 // =====================================================================
-//  STEP 11 — wire buttons + boot
+//  STEP 12 — wire buttons + boot
 // =====================================================================
 function boot() {
   initLogin();
-  initTabs();
+  initNav();
+
   $('#btnRefresh').addEventListener('click', () => {
     renderImages();
-    renderTexts();
     renderStats();
     toast('Refreshed', 'info');
   });
+  $('#btnRefreshText').addEventListener('click', () => {
+    renderTexts();
+    toast('Refreshed', 'info');
+  });
   $('#btnResetAll').addEventListener('click', resetAll);
-  // Settings tab — show the delete endpoint
+  const btnReset2 = $('#btnResetAll2');
+  if (btnReset2) btnReset2.addEventListener('click', resetAll);
+
+  // Show the delete endpoint in Settings
   const ep = $('#settingsDeleteEndpoint');
   if (ep) ep.textContent = cloudinaryDeleteEndpoint;
 }

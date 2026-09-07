@@ -36,11 +36,20 @@ Open your site → **triple-click the nav logo** → log in → click any image 
 
 Both methods sync to the same Firestore docs in real-time.
 
-## What's new in this build (v2)
+## What's new in this build (v4)
 
-1. **New "Web Showcase" section** — Sievora-style horizontal marquee right after the hero. Two rows scrolling opposite directions, 12 editable website-screenshot slots (`img:web-1` through `img:web-12`), pauses on hover, pauses in edit mode.
-2. **"Delete file" button** on every image overlay — hard-deletes the file from your Cloudinary account (frees up storage quota). Requires deploying the `/api/delete-image.js` serverless function (see step 4 below).
-3. Existing image + text editing all still works.
+1. **Career Timeline is now horizontal scroll** — Sievora-style marquee with snap scrolling, hover lift, and editable dates/roles/companies/descriptions/tags.
+2. **86 editable text slots** — every portfolio title, service label, blog title, web showcase tag/title/category, and career field is now editable from the dashboard. The dashboard auto-discovers them and groups by section.
+3. **Fixed: login auto-redirect bug** — root cause was CSS `display: flex` on `.dash-login` overriding the `[hidden]` HTML attribute. Added `[hidden] { display: none !important }` rule. Now after submitting login, you immediately land on the dashboard — no need to "go back".
+4. **Fixed: uploads not syncing** — added Firestore write verification. After `setDoc()`, we re-read the doc to confirm the server actually has the new value. If the write was queued in the offline cache but rejected by the server (e.g., rules not deployed), we now surface a clear error toast and show "Not deployed" in the Settings tab.
+5. **Redesigned admin dashboard** — sidebar layout with icons, stat cards with live connection status, image cards grouped by section (Branding / Design Services / Print Services / Web Showcase), customizable text grid with auto-discovery, dedicated Settings tab showing Firestore rules health.
+
+## Existing features (still working)
+
+1. **Web Showcase marquee** — Sievora-style horizontal scrolling section after the hero.
+2. **"Delete file" button** — hard-deletes from Cloudinary via serverless function.
+3. **Triple-click the logo** → goes to `/admin.html` (or hold Shift for inline edit mode).
+4. **All previous image slots** still work (25 image slots total).
 
 ---
 

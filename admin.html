@@ -27,7 +27,7 @@
           <span>Password</span>
           <input type="password" id="dashPass" required autocomplete="current-password" placeholder="••••••••" />
         </label>
-        <button type="submit" class="dash-btn dash-btn--primary" id="dashLoginBtn">
+        <button type="submit" class="dash-btn dash-btn--primary dash-btn--block" id="dashLoginBtn">
           <span class="dash-btn-label">Log in</span>
         </button>
         <p class="dash-form__err" id="dashLoginErr"></p>
@@ -36,122 +36,184 @@
     </div>
   </div>
 
-  <!-- ============ Main dashboard (shown when authed) ============ -->
+  <!-- ============ Main app shell ============ -->
   <div id="dashApp" class="dash-app" hidden>
 
-    <!-- Header -->
-    <header class="dash-header">
-      <div class="dash-header__brand">
-        <div class="dash-header__logo">A</div>
+    <!-- Sidebar -->
+    <aside class="dash-sidebar">
+      <div class="dash-sidebar__brand">
+        <div class="dash-sidebar__logo">A</div>
         <div>
-          <h1 class="dash-header__title">Akay Mighty Concept</h1>
-          <p class="dash-header__sub">Content management dashboard</p>
+          <h1 class="dash-sidebar__title">Akay Mighty</h1>
+          <p class="dash-sidebar__sub">Admin Panel</p>
         </div>
       </div>
-      <div class="dash-header__actions">
-        <a href="./" target="_blank" class="dash-btn dash-btn--ghost">View site ↗</a>
-        <button type="button" class="dash-btn dash-btn--danger" id="dashSignOut">Sign out</button>
-      </div>
-    </header>
 
-    <!-- Stats bar -->
-    <section class="dash-stats">
-      <div class="dash-stat">
-        <span class="dash-stat__label">Image slots</span>
-        <span class="dash-stat__value" id="statSlots">—</span>
-      </div>
-      <div class="dash-stat">
-        <span class="dash-stat__label">Customized</span>
-        <span class="dash-stat__value" id="statCustom">—</span>
-      </div>
-      <div class="dash-stat">
-        <span class="dash-stat__label">Using defaults</span>
-        <span class="dash-stat__value" id="statDefaults">—</span>
-      </div>
-      <div class="dash-stat">
-        <span class="dash-stat__label">Last save</span>
-        <span class="dash-stat__value" id="statSaved">—</span>
-      </div>
-    </section>
+      <button class="dash-nav-item is-active" data-tab="images">
+        <span class="dash-nav-item__icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        </span>
+        Images
+        <span class="dash-nav-item__count" id="navCountImages">25</span>
+      </button>
+      <button class="dash-nav-item" data-tab="texts">
+        <span class="dash-nav-item__icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+        </span>
+        Captions &amp; Text
+        <span class="dash-nav-item__count" id="navCountTexts">0</span>
+      </button>
+      <button class="dash-nav-item" data-tab="settings">
+        <span class="dash-nav-item__icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+        </span>
+        Settings
+      </button>
 
-    <!-- Tab nav -->
-    <nav class="dash-tabs">
-      <button class="dash-tab is-active" data-tab="images">Images</button>
-      <button class="dash-tab" data-tab="texts">Text</button>
-      <button class="dash-tab" data-tab="settings">Settings</button>
-    </nav>
+      <div class="dash-sidebar__spacer"></div>
 
-    <!-- ============ Images tab ============ -->
-    <section class="dash-panel is-active" id="tab-images">
-      <div class="dash-panel__head">
-        <h2 class="dash-panel__title">All image slots</h2>
-        <div class="dash-panel__actions">
-          <button class="dash-btn dash-btn--ghost" id="btnRefresh">↻ Refresh</button>
-          <button class="dash-btn dash-btn--danger" id="btnResetAll">Reset ALL to defaults</button>
+      <div class="dash-sidebar__footer">
+        <strong id="sidebarUser">—</strong>
+        Signed in as admin
+        <br><br>
+        <a href="./" target="_blank" style="color: var(--akay-text-mute); text-decoration: none; font-size: 11px;">View live site ↗</a>
+      </div>
+    </aside>
+
+    <!-- Main content -->
+    <main class="dash-main">
+
+      <!-- Header -->
+      <header class="dash-header">
+        <div>
+          <h2 class="dash-header__title" id="viewTitle">All Images</h2>
+          <p class="dash-header__sub" id="viewSub">Manage every image on your site from one place</p>
         </div>
-      </div>
-      <p class="dash-panel__hint">
-        Each slot controls every place that image appears on the site.
-        Click <strong>Replace</strong> to upload a new image (goes to Cloudinary),
-        <strong>Paste URL</strong> to use any URL, or
-        <strong>Delete file</strong> to permanently remove from Cloudinary.
-      </p>
-      <div class="dash-grid" id="imgGrid"><!-- rendered by JS --></div>
-    </section>
+        <div class="dash-header__actions">
+          <div class="dash-user">
+            <div class="dash-user__avatar">A</div>
+            <span class="dash-user__email" id="headerUser">—</span>
+          </div>
+          <a href="./" target="_blank" class="dash-btn dash-btn--ghost">View site ↗</a>
+          <button type="button" class="dash-btn dash-btn--danger" id="dashSignOut">Sign out</button>
+        </div>
+      </header>
 
-    <!-- ============ Text tab ============ -->
-    <section class="dash-panel" id="tab-texts" hidden>
-      <div class="dash-panel__head">
-        <h2 class="dash-panel__title">Editable text slots</h2>
-      </div>
-      <p class="dash-panel__hint">
-        Text slots are added by tagging elements on the site with
-        <code>data-text-slot="text:slot-name"</code>. See
-        <code>README-admin.md</code> for how to add more.
-      </p>
-      <div class="dash-grid dash-grid--text" id="textGrid"><!-- rendered by JS --></div>
-    </section>
+      <!-- Stats bar -->
+      <section class="dash-stats">
+        <div class="dash-stat">
+          <span class="dash-stat__label">Image slots</span>
+          <span class="dash-stat__value" id="statSlots">—</span>
+          <div class="dash-stat__hint">total on the site</div>
+        </div>
+        <div class="dash-stat">
+          <span class="dash-stat__label">Customized</span>
+          <span class="dash-stat__value" id="statCustom">—</span>
+          <div class="dash-stat__hint">using your uploads</div>
+        </div>
+        <div class="dash-stat">
+          <span class="dash-stat__label">Text slots</span>
+          <span class="dash-stat__value" id="statTexts">—</span>
+          <div class="dash-stat__hint">captions &amp; headings</div>
+        </div>
+        <div class="dash-stat">
+          <span class="dash-stat__label">Connection</span>
+          <span class="dash-stat__value" id="statConn" style="font-size:14px; padding-top:6px;">
+            <span class="dash-status-pill dash-status-pill--ok" id="connPill">
+              <span class="dash-status-pill__dot"></span> Live
+            </span>
+          </span>
+          <div class="dash-stat__hint" id="connHint">real-time sync</div>
+        </div>
+      </section>
 
-    <!-- ============ Settings tab ============ -->
-    <section class="dash-panel" id="tab-settings" hidden>
-      <div class="dash-panel__head">
-        <h2 class="dash-panel__title">Settings</h2>
-      </div>
-      <div class="dash-settings">
-        <div class="dash-settings__row">
-          <div>
-            <strong>Cloudinary cloud name</strong>
-            <p>dfd1bgdam</p>
+      <!-- ============ Images tab ============ -->
+      <section class="dash-panel is-active" id="tab-images">
+        <div class="dash-panel__head">
+          <h3 class="dash-panel__title">All image slots</h3>
+          <div class="dash-panel__actions">
+            <button class="dash-btn dash-btn--ghost" id="btnRefresh">↻ Refresh</button>
+            <button class="dash-btn dash-btn--danger" id="btnResetAll">Reset ALL to defaults</button>
           </div>
         </div>
-        <div class="dash-settings__row">
-          <div>
-            <strong>Upload preset</strong>
-            <p>akaymightyconcept (unsigned)</p>
+        <p class="dash-panel__hint">
+          Each slot controls every place that image appears on the site.
+          Click <strong>Replace</strong> to upload a new image (goes to Cloudinary),
+          <strong>Paste URL</strong> to use any URL,
+          <strong>Delete file</strong> to permanently remove from Cloudinary, or
+          <strong>Reset</strong> to revert to the default.
+        </p>
+        <div id="imgSections"><!-- rendered by JS --></div>
+      </section>
+
+      <!-- ============ Text tab ============ -->
+      <section class="dash-panel" id="tab-texts">
+        <div class="dash-panel__head">
+          <h3 class="dash-panel__title">All text &amp; captions</h3>
+          <div class="dash-panel__actions">
+            <button class="dash-btn dash-btn--ghost" id="btnRefreshText">↻ Refresh</button>
           </div>
         </div>
-        <div class="dash-settings__row">
-          <div>
-            <strong>Firebase project</strong>
-            <p>akaymightyconcept-6ea63</p>
-          </div>
+        <p class="dash-panel__hint">
+          Every heading, label, title, and description on the site is editable here.
+          Changes save automatically when you click <strong>Save</strong> (or press Enter).
+          To add more, tag any element in <code>index.html</code> with <code>data-text-slot="text:your-id"</code>.
+        </p>
+        <div id="textSections"><!-- rendered by JS --></div>
+      </section>
+
+      <!-- ============ Settings tab ============ -->
+      <section class="dash-panel" id="tab-settings">
+        <div class="dash-panel__head">
+          <h3 class="dash-panel__title">Settings &amp; status</h3>
         </div>
-        <div class="dash-settings__row">
-          <div>
+        <div class="dash-settings">
+          <div class="dash-settings__row">
+            <strong>Cloudinary</strong>
+            <div>
+              <p>cloud: <code>dfd1bgdam</code> · preset: <code>akaymightyconcept</code> (unsigned)</p>
+              <small>Uploads go to the <code>akay-site/</code> folder in your Cloudinary account.</small>
+            </div>
+          </div>
+          <div class="dash-settings__row">
+            <strong>Firebase</strong>
+            <div>
+              <p>project: <code>akaymightyconcept-6ea63</code></p>
+              <small>Auth + Firestore. Rules must be deployed (see <code>firestore.rules</code>).</small>
+            </div>
+          </div>
+          <div class="dash-settings__row">
             <strong>Admin email</strong>
-            <p>akay@concept.com</p>
+            <div>
+              <p>akay@concept.com</p>
+              <small>Single admin account. To change the password, use Firebase console → Authentication → Users.</small>
+            </div>
+          </div>
+          <div class="dash-settings__row">
+            <strong>Hard-delete endpoint</strong>
+            <div>
+              <p id="settingsDeleteEndpoint">/api/delete-image</p>
+              <small>If "Delete file" buttons return 404, you need to deploy on Vercel/Netlify so the <code>/api/</code> folder becomes a serverless function. See README.</small>
+            </div>
+          </div>
+          <div class="dash-settings__row">
+            <strong>Firestore rules</strong>
+            <div>
+              <p id="rulesStatus">—</p>
+              <small>If shows "Not deployed", open Firebase console → Firestore → Rules → paste <code>firestore.rules</code> → Publish. Without this, no edits will sync.</small>
+            </div>
+          </div>
+          <div class="dash-settings__row">
+            <strong>Danger zone</strong>
+            <div>
+              <p>Wipe ALL customizations and start fresh.</p>
+              <button class="dash-btn dash-btn--danger" id="btnResetAll2" style="margin-top:8px;">Reset ALL content</button>
+            </div>
           </div>
         </div>
-        <div class="dash-settings__row">
-          <div>
-            <strong>Delete endpoint</strong>
-            <p id="settingsDeleteEndpoint">/api/delete-image</p>
-            <small>If "Delete file" buttons fail, this is where the function needs to live. Deploy on Vercel for it to work out-of-the-box.</small>
-          </div>
-        </div>
-      </div>
-    </section>
+      </section>
 
+    </main>
   </div>
 
   <script type="module" src="./admin-dashboard.js"></script>
