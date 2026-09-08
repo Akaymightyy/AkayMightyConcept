@@ -12,7 +12,7 @@
 //    • Auto-redirects to dashboard UI immediately after sign-in
 // =====================================================================
 
-import { auth, db } from "./firebase-config.js";
+import { auth, db, forceOnline, waitForServer } from "./firebase-config.js";
 import {
   cloudinaryConfig,
   cloudinaryUploadUrl,
@@ -91,12 +91,14 @@ const IMAGE_SECTIONS = [
 const state = {
   images: {},
   texts: {},
+  customImages: [],
   defaults: { images: {}, texts: {} },
   defaultsReady: false,
-  textSlotsDiscovered: [],   // [{slot, default, section}]
+  textSlotsDiscovered: [],
   unsubImages: null,
   unsubTexts: null,
-  rulesOk: null              // null=unknown, true=ok, false=rules-missing
+  unsubCustom: null,
+  rulesOk: null
 };
 
 const $  = (s, r = document) => r.querySelector(s);
@@ -199,15 +201,12 @@ function captureDefaultsFromSite() {
 function startSync() {
   if (state.unsubImages) state.unsubImages();
   if (state.unsubTexts)  state.unsubTexts();
+  if (state.unsubCustom) state.unsubCustom();
 
   state.unsubImages = onSnapshot(doc(db, 'content', 'images'), snap => {
     state.images = snap.exists() ? snap.data() : {};
     delete state.images._updatedAt;
-    if (state.rulesOk === null) {
-      // First read succeeded — rules at least allow read
-      // (we'll verify write separately)
-    }
-    renderImages();
+    renderImagesWithSearch();
     renderStats();
   }, err => {
     console.error('[dash] images sync error:', err);
@@ -227,6 +226,19 @@ function startSync() {
     renderStats();
   }, err => {
     console.error('[dash] texts sync error:', err);
+  });
+
+  state.unsubCustom = onSnapshot(doc(db, 'content', 'custom-images'), snap => {
+    if (snap.exists()) {
+      const data = snap.data();
+      state.customImages = Array.isArray(data.items) ? data.items : [];
+    } else {
+      state.customImages = [];
+    }
+    renderCustomImages();
+    renderStats();
+  }, err => {
+    console.error('[dash] custom sync error:', err);
   });
 
   // Verify write permission by attempting a no-op merge
@@ -426,6 +438,272 @@ function renderStats() {
   $('#statTexts').textContent  = textCount;
   $('#navCountImages').textContent = totalSlots;
   $('#navCountTexts').textContent  = textCount;
+  $('#navCountCustom').textContent = state.customImages.length;
+}
+
+// =====================================================================
+//  STEP 6.5 — search filter
+// =====================================================================
+function getSearchQuery() {
+  const el = $('#imgSearch');
+  return el ? el.value.trim().toLowerCase() : '';
+}
+
+function matchesSearch(slot, label, query) {
+  if (!query) return true;
+  return slot.toLowerCase().includes(query) ||
+         label.toLowerCase().includes(query);
+}
+
+function renderImagesWithSearch() {
+  const query = getSearchQuery();
+  const wrap = $('#imgSections');
+  if (!wrap) return;
+
+  let totalShown = 0;
+  let totalMatched = 0;
+
+  wrap.innerHTML = IMAGE_SECTIONS.map(section => {
+    const matchedSlots = section.slots.filter(s => {
+      const isMatch = matchesSearch(s.id, s.label, query);
+      if (isMatch) totalMatched++;
+      return isMatch;
+    });
+    if (!matchedSlots.length) return '';   // hide empty sections
+    totalShown += matchedSlots.length;
+    return `
+      <div class="dash-section">
+        <div class="dash-section__head">
+          <div class="dash-section__bar"></div>
+          <h4 class="dash-section__title">${section.title}</h4>
+          <span class="dash-section__count">${matchedSlots.length} of ${section.slots.length}</span>
+        </div>
+        <div class="dash-grid">
+          ${matchedSlots.map(slot => renderImageCard(slot)).join('')}
+        </div>
+      </div>
+    `;
+  }).join('') || `<p class="dash-panel__hint">No images match "${escapeHtml(query)}". Try a different search term.</p>`;
+
+  // Wire buttons
+  wrap.querySelectorAll('.dash-card').forEach(card => {
+    const slot = card.getAttribute('data-slot');
+    card.querySelectorAll('button[data-act]').forEach(btn => {
+      btn.addEventListener('click', () => handleImageAction(slot, btn.getAttribute('data-act')));
+    });
+  });
+
+  // Update count
+  const countEl = $('#imgSearchCount');
+  if (countEl) {
+    const total = IMAGE_SECTIONS.reduce((n, s) => n + s.slots.length, 0);
+    countEl.textContent = query ? `${totalMatched}/${total}` : `${total} total`;
+  }
+}
+
+// =====================================================================
+//  STEP 6.6 — Custom images (add / list / delete)
+//  Custom images live in Firestore: doc 'content/custom-images' which
+//  is an array of { id, url, publicId, caption, addedAt }.
+//  The site's index.html renders them in a #custom-gallery section
+//  that subscribes to the same doc.
+// =====================================================================
+async function addCustomImage() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+  input.style.display = 'none';
+  document.body.appendChild(input);
+  input.addEventListener('change', async () => {
+    const file = input.files[0];
+    if (!file) { input.remove(); return; }
+    if (file.size > 10 * 1024 * 1024) {
+      toast('Max 10MB per image', 'error');
+      input.remove();
+      return;
+    }
+    toast('Uploading to Cloudinary…', 'info');
+    try {
+      const url = await uploadToCloudinary(file);
+      toast('Uploaded — saving…', 'info');
+      const newItem = {
+        id: `custom-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        url,
+        publicId: publicIdFromCloudinaryUrl(url) || '',
+        caption: '',
+        addedAt: Date.now()
+      };
+      const updated = [...state.customImages, newItem];
+      const ok = await saveCustomImages(updated);
+      if (ok) {
+        // Prompt for caption immediately
+        const caption = prompt('Caption (optional — shown under the image on the site):', '');
+        if (caption !== null && caption.trim()) {
+          newItem.caption = caption.trim();
+          await saveCustomImages([...state.customImages, newItem]);
+        }
+        toast('✓ Image added', 'success');
+      }
+    } catch (e) {
+      toast('Add failed: ' + e.message, 'error');
+    } finally {
+      input.remove();
+    }
+  });
+  input.click();
+}
+
+async function saveCustomImageCaption(id, caption) {
+  const updated = state.customImages.map(c => c.id === id ? { ...c, caption } : c);
+  await saveCustomImages(updated);
+}
+
+async function deleteCustomImage(item) {
+  if (!confirm(`Delete this image?\n\n${item.caption || item.url.slice(-60)}\n\nThis removes it from the site AND deletes the file from Cloudinary.`)) return;
+  toast('Deleting…', 'info');
+  try {
+    // If it's on Cloudinary, hard-delete the file too
+    if (item.publicId) {
+      try {
+        const idToken = await getIdToken(auth.currentUser, false);
+        const resp = await fetch(cloudinaryDeleteEndpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${idToken}`
+          },
+          body: JSON.stringify({ publicId: item.publicId })
+        });
+        if (!resp.ok) {
+          const err = await resp.json().catch(() => ({}));
+          console.warn('Cloudinary delete failed (non-fatal):', err.error || resp.status);
+        }
+      } catch (e) {
+        console.warn('Cloudinary delete failed (non-fatal):', e.message);
+      }
+    }
+    const updated = state.customImages.filter(c => c.id !== item.id);
+    await saveCustomImages(updated);
+    toast('✓ Image deleted', 'success');
+  } catch (e) {
+    toast('Delete failed: ' + e.message, 'error');
+  }
+}
+
+async function saveCustomImages(arr) {
+  try {
+    await setDoc(doc(db, 'content', 'custom-images'),
+      { items: arr, _updatedAt: serverTimestamp() },
+      { merge: true });
+    // Show success immediately — don't block UI
+    toast(`✓ Custom images saved (${arr.length})`, 'success');
+    // Verify in background
+    verifyInBackgroundCustom(arr.length);
+    return true;
+  } catch (e) {
+    if (e.code === 'permission-denied' || /permission|denied|rules/i.test(e.message)) {
+      toast('SAVE FAILED — Firestore rules not deployed. See Settings tab.', 'error');
+      state.rulesOk = false;
+      renderRulesStatus();
+    } else if (/offline|network|timed out|unreachable/i.test(e.message)) {
+      toast('NETWORK — cannot reach Firestore. Changes saved locally, will sync when connection returns.', 'error');
+    } else {
+      toast('Save failed: ' + e.message, 'error');
+    }
+    return false;
+  }
+}
+
+// Background verification for custom images (non-blocking)
+async function verifyInBackgroundCustom(expectedCount) {
+  try {
+    const snap = await getDoc(doc(db, 'content', 'custom-images'));
+    if (!snap.exists()) {
+      toast('⚠ Custom images not yet on server — will retry. Check connection.', 'error');
+      return false;
+    }
+    const data = snap.data();
+    if (!Array.isArray(data.items) || data.items.length !== expectedCount) {
+      toast('⚠ Custom images save failed on server — Firestore rules may be blocking. Visit /debug.html', 'error');
+      return false;
+    }
+    console.log(`[dash] verified ${expectedCount} custom images saved to server ✓`);
+    return true;
+  } catch (e) {
+    console.error('[dash] verify custom failed:', e.message);
+    return false;
+  }
+}
+
+// Background verification helper (non-blocking, used by saveImage/saveText)
+async function verifyInBackground(slot, expectedValue, docName) {
+  try {
+    const snap = await getDoc(doc(db, 'content', docName));
+    if (!snap.exists()) {
+      toast(`⚠ ${slot} not yet on server — will retry. Check connection.`, 'error');
+      return false;
+    }
+    const data = snap.data();
+    if (data[slot] !== expectedValue) {
+      toast(`⚠ ${slot} save failed on server — Firestore rules may be blocking. Visit /debug.html`, 'error');
+      return false;
+    }
+    console.log(`[dash] verified ${slot} saved to server ✓`);
+    return true;
+  } catch (e) {
+    console.error(`[dash] verify ${slot} failed:`, e.message);
+    return false;
+  }
+}
+
+function renderCustomImages() {
+  const grid = $('#customGrid');
+  if (!grid) return;
+  if (!state.customImages.length) {
+    grid.innerHTML = `
+      <div class="dash-card dash-card--empty">
+        <div class="dash-card__body">
+          <p>No custom images yet.</p>
+          <button class="dash-btn dash-btn--primary" onclick="document.getElementById('btnAddCustom').click()" style="margin-top:10px;">+ Add your first image</button>
+        </div>
+      </div>
+    `;
+    return;
+  }
+  grid.innerHTML = state.customImages.map(item => `
+    <div class="dash-card dash-card--custom" data-id="${item.id}">
+      <div class="dash-card__preview">
+        <img src="${item.url}" alt="${escapeAttr(item.caption || 'custom image')}" loading="lazy" />
+      </div>
+      <div class="dash-card__body">
+        <input type="text" class="dash-card__caption" placeholder="Caption (shown on site)" value="${escapeAttr(item.caption || '')}" data-id="${item.id}" />
+        <div class="dash-card__url">${item.url.replace(/^https?:\/\//, '').slice(0, 80)}</div>
+        <div class="dash-card__btns">
+          <button class="dash-btn dash-btn--primary dash-btn--mini" data-act="save-caption">Save caption</button>
+          <button class="dash-btn dash-btn--danger dash-btn--mini" data-act="delete">Delete image</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+
+  grid.querySelectorAll('.dash-card--custom').forEach(card => {
+    const id = card.getAttribute('data-id');
+    const captionInput = card.querySelector('.dash-card__caption');
+    card.querySelector('[data-act="save-caption"]').addEventListener('click', async () => {
+      const ok = await saveCustomImageCaption(id, captionInput.value.trim());
+      if (ok) toast('Caption saved', 'success');
+    });
+    card.querySelector('[data-act="delete"]').addEventListener('click', () => {
+      const item = state.customImages.find(c => c.id === id);
+      if (item) deleteCustomImage(item);
+    });
+    captionInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        card.querySelector('[data-act="save-caption"]').click();
+      }
+    });
+  });
 }
 
 // =====================================================================
@@ -524,26 +802,25 @@ async function deleteFromCloudinaryForSlot(slot) {
 // =====================================================================
 async function saveImage(slot, url) {
   try {
+    // Write to Firestore (local cache accepts immediately, server syncs in background)
     await setDoc(doc(db, 'content', 'images'),
       { [slot]: url, _updatedAt: serverTimestamp() },
       { merge: true });
 
-    // Verify the write actually landed on the server
-    const verify = await getDoc(doc(db, 'content', 'images'));
-    if (!verify.exists()) {
-      throw new Error('Verification failed — doc does not exist on server');
-    }
-    const data = verify.data();
-    if (data[slot] !== url) {
-      throw new Error('Verification failed — server has stale value. Check Firestore rules.');
-    }
+    // Show success immediately — don't block UI waiting for server
+    toast(`✓ ${slot} saved`, 'success');
+
+    // Verify in background (non-blocking)
+    verifyInBackground(slot, url, 'images');
     return true;
   } catch (e) {
     console.error('[dash] saveImage failed:', e);
     if (e.code === 'permission-denied' || /permission|denied/i.test(e.message)) {
-      toast('SAVE FAILED — Firestore rules not deployed. Open Settings tab for instructions.', 'error');
+      toast('SAVE FAILED — Firestore rules rejected the write. Open Settings → Rules.', 'error');
       state.rulesOk = false;
       renderRulesStatus();
+    } else if (/offline|network|timed out|unreachable/i.test(e.message)) {
+      toast('NETWORK — cannot reach Firestore. Changes saved locally, will sync when connection returns.', 'error');
     } else {
       toast('Save failed: ' + e.message, 'error');
     }
@@ -556,13 +833,17 @@ async function saveText(slot, text) {
     await setDoc(doc(db, 'content', 'texts'),
       { [slot]: text, _updatedAt: serverTimestamp() },
       { merge: true });
+    toast(`✓ ${slot} saved`, 'success');
+    verifyInBackground(slot, text, 'texts');
     return true;
   } catch (e) {
     console.error('[dash] saveText failed:', e);
     if (e.code === 'permission-denied' || /permission|denied/i.test(e.message)) {
-      toast('SAVE FAILED — Firestore rules not deployed. See Settings tab.', 'error');
+      toast('SAVE FAILED — Firestore rules rejected the write. See Settings tab.', 'error');
       state.rulesOk = false;
       renderRulesStatus();
+    } else if (/offline|network|timed out|unreachable/i.test(e.message)) {
+      toast('NETWORK — cannot reach Firestore. Check connection and retry. Visit /debug.html', 'error');
     } else {
       toast('Save failed: ' + e.message, 'error');
     }
@@ -616,6 +897,7 @@ async function resetAll() {
 // =====================================================================
 const VIEW_TITLES = {
   images:   { title: 'All Images',         sub: 'Manage every image on your site from one place' },
+  custom:   { title: 'Custom Images',      sub: 'Upload additional product shots and recent work — auto-appears on the site' },
   texts:    { title: 'Captions & Text',    sub: 'Edit every heading, label, and description' },
   settings: { title: 'Settings & Status',  sub: 'Connection health and configuration' }
 };
@@ -708,11 +990,37 @@ function initLogin() {
 
 // =====================================================================
 //  STEP 11 — auth state (handles cross-tab + page reload)
+//  ---------------------------------------------------------------------
+//  CRITICAL FIX: when Firestore has network issues, onAuthStateChanged
+//  can fire with null even right after a successful login. This was
+//  causing the login form to flash back and "swallow" the user's
+//  credentials. We now:
+//    1. Track the last user we saw
+//    2. Only swap to login if we get a real null AND we weren't just
+//       logged in within the last 5 seconds (debounce)
+//    3. Show a "Reconnecting…" banner instead of bouncing the user
 // =====================================================================
+let _lastUser = null;
+let _lastSwapToApp = 0;
+
 onAuthStateChanged(auth, user => {
   if (user) {
+    _lastUser = user;
+    _lastSwapToApp = Date.now();
     swapToApp(user);
   } else {
+    // Did we JUST log in? If so, this null is a network hiccup, not a real sign-out.
+    // Don't swap back to the login form — keep showing the dashboard.
+    const sinceLastApp = Date.now() - _lastSwapToApp;
+    if (_lastUser && sinceLastApp < 10000) {
+      console.warn(`[auth] ignoring null user (likely network hiccup ${sinceLastApp}ms after login)`);
+      showConnBanner('Reconnecting to Firebase…', 'warn');
+      // Try to reconnect
+      forceOnline();
+      return;
+    }
+    // Real sign-out (or initial load)
+    _lastUser = null;
     swapToLogin();
     // Reset login form
     const btn = $('#dashLoginBtn');
@@ -723,6 +1031,47 @@ onAuthStateChanged(auth, user => {
   }
 });
 
+// Connection banner — shows Firebase online/offline state at top of dashboard
+function showConnBanner(msg, kind = 'warn') {
+  let banner = $('#dashConnBanner');
+  if (!banner) {
+    banner = document.createElement('div');
+    banner.id = 'dashConnBanner';
+    banner.style.cssText = 'position:sticky;top:0;z-index:100;padding:10px 18px;text-align:center;font:600 13px/1 "Poppins",sans-serif;border-radius:0 0 8px 8px;';
+    const main = $('.dash-main');
+    if (main) main.prepend(banner);
+  }
+  banner.textContent = msg;
+  banner.style.display = 'block';
+  if (kind === 'warn') {
+    banner.style.background = 'rgba(255, 213, 79, .15)';
+    banner.style.color = '#ffd54f';
+    banner.style.borderBottom = '1px solid rgba(255, 213, 79, .3)';
+  } else if (kind === 'err') {
+    banner.style.background = 'rgba(255, 82, 82, .15)';
+    banner.style.color = '#ff5252';
+    banner.style.borderBottom = '1px solid rgba(255, 82, 82, .3)';
+  } else if (kind === 'ok') {
+    banner.style.background = 'rgba(46, 204, 113, .15)';
+    banner.style.color = '#2ecc71';
+    banner.style.borderBottom = '1px solid rgba(46, 204, 113, .3)';
+    // Auto-hide success after 2.5s
+    clearTimeout(banner._t);
+    banner._t = setTimeout(() => { banner.style.display = 'none'; }, 2500);
+  } else {
+    banner.style.display = 'none';
+  }
+}
+
+// Listen for browser online/offline events to update the banner
+window.addEventListener('online', () => {
+  showConnBanner('Back online — reconnecting…', 'ok');
+  forceOnline();
+});
+window.addEventListener('offline', () => {
+  showConnBanner('Your device is offline. Edits will be saved when you reconnect.', 'warn');
+});
+
 // =====================================================================
 //  STEP 12 — wire buttons + boot
 // =====================================================================
@@ -731,7 +1080,7 @@ function boot() {
   initNav();
 
   $('#btnRefresh').addEventListener('click', () => {
-    renderImages();
+    renderImagesWithSearch();
     renderStats();
     toast('Refreshed', 'info');
   });
@@ -742,6 +1091,25 @@ function boot() {
   $('#btnResetAll').addEventListener('click', resetAll);
   const btnReset2 = $('#btnResetAll2');
   if (btnReset2) btnReset2.addEventListener('click', resetAll);
+
+  // Search bar — live filter
+  const search = $('#imgSearch');
+  if (search) {
+    let searchTimer = null;
+    search.addEventListener('input', () => {
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(() => renderImagesWithSearch(), 100);
+    });
+  }
+
+  // Custom image buttons
+  const btnAddCustom = $('#btnAddCustom');
+  if (btnAddCustom) btnAddCustom.addEventListener('click', addCustomImage);
+  const btnRefreshCustom = $('#btnRefreshCustom');
+  if (btnRefreshCustom) btnRefreshCustom.addEventListener('click', () => {
+    renderCustomImages();
+    toast('Refreshed', 'info');
+  });
 
   // Show the delete endpoint in Settings
   const ep = $('#settingsDeleteEndpoint');

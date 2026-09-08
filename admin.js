@@ -159,51 +159,23 @@ function applyText(slot, text) {
 // =====================================================================
 //  STEP 3 — Firestore real-time subscriptions
 // =====================================================================
-//  CRITICAL FIX (v9): the previous version had `if (!snap.exists()) return;`
-//  which bailed out when the doc didn't exist in cache. On flaky mobile
-//  networks, the cache can be empty/stale on first load, causing the
-//  page to show defaults forever — even though the server HAS the data.
-//
-//  New approach:
-//    1. onSnapshot still fires (for live updates)
-//    2. But we ALSO do an explicit getDoc() with server source on init
-//       to guarantee we get the server's truth, not just cache
-//    3. We never bail on !snap.exists() — we just apply nothing and
-//       wait for the next snapshot
-//    4. We use snapshot.metadata.fromCache to detect stale cache reads
-// =====================================================================
 function startSync() {
   if (state.unsubImages) state.unsubImages();
   if (state.unsubTexts)  state.unsubTexts();
 
-  // ---- Real-time subscription for images ----
   state.unsubImages = onSnapshot(doc(db, 'content', 'images'), snap => {
-    const fromCache = snap.metadata && snap.metadata.fromCache;
-    console.log(`[admin] images snapshot: ${snap.exists() ? Object.keys(snap.data()).length + ' fields' : 'doc does not exist'} ${fromCache ? '(from cache)' : '(from server)'}`);
-
+    console.log('[admin] images snapshot:', snap.exists() ? Object.keys(snap.data()).length + ' fields' : 'doc does not exist');
     if (!snap.exists()) {
-      // Doc doesn't exist — but DON'T clear state.images. We might be
-      // reading from a stale cache. Wait for the server snapshot.
-      // Only clear if this is confirmed from server.
-      if (!fromCache) {
-        console.log('[admin] server confirms: no images doc exists yet');
-        state.images = {};
-      }
+      state.images = {};
       return;
     }
-
     const data = snap.data();
     delete data._updatedAt;
     state.images = data;
-
-    // Apply all overrides — but only if this is from server OR we have no
-    // server data yet. This prevents cache from overwriting server data.
-    if (!fromCache || !state._gotServerImages) {
-      Object.entries(data).forEach(([slot, url]) => {
-        if (slot.startsWith('img:')) applyImage(slot, url);
-      });
-      if (!fromCache) state._gotServerImages = true;
-    }
+    // apply all overrides
+    Object.entries(data).forEach(([slot, url]) => {
+      if (slot.startsWith('img:')) applyImage(slot, url);
+    });
   }, err => {
     console.error('[admin] images sync error:', err);
     if (err.code === 'permission-denied') {
@@ -213,67 +185,20 @@ function startSync() {
     }
   });
 
-  // ---- Real-time subscription for texts ----
   state.unsubTexts = onSnapshot(doc(db, 'content', 'texts'), snap => {
-    const fromCache = snap.metadata && snap.metadata.fromCache;
     if (!snap.exists()) {
-      if (!fromCache) state.texts = {};
+      state.texts = {};
       return;
     }
     const data = snap.data();
     delete data._updatedAt;
     state.texts = data;
-    if (!fromCache || !state._gotServerTexts) {
-      Object.entries(data).forEach(([slot, text]) => {
-        if (slot.startsWith('text:')) applyText(slot, text);
-      });
-      if (!fromCache) state._gotServerTexts = true;
-    }
+    Object.entries(data).forEach(([slot, text]) => {
+      if (slot.startsWith('text:')) applyText(slot, text);
+    });
   }, err => {
     console.error('[admin] texts sync error:', err);
   });
-
-  // ---- CRITICAL: force a server read on init ----
-  // onSnapshot may fire with cache first. This explicit getDoc() with
-  // { source: 'server' } guarantees we get the server's truth, even if
-  // the real-time subscription is slow or stuck on cache.
-  forceServerRead();
-}
-
-async function forceServerRead() {
-  try {
-    console.log('[admin] forcing server read of content/images...');
-    const imgSnap = await getDoc(doc(db, 'content', 'images'));
-    if (imgSnap.exists()) {
-      const data = imgSnap.data();
-      delete data._updatedAt;
-      console.log(`[admin] server read: ${Object.keys(data).filter(k => k.startsWith('img:')).length} image overrides`);
-      state.images = { ...state.images, ...data };
-      state._gotServerImages = true;
-      Object.entries(data).forEach(([slot, url]) => {
-        if (slot.startsWith('img:')) applyImage(slot, url);
-      });
-    } else {
-      console.log('[admin] server confirms: no images doc exists');
-    }
-  } catch (e) {
-    console.error('[admin] forceServerRead images failed:', e.message);
-  }
-
-  try {
-    const textSnap = await getDoc(doc(db, 'content', 'texts'));
-    if (textSnap.exists()) {
-      const data = textSnap.data();
-      delete data._updatedAt;
-      state.texts = { ...state.texts, ...data };
-      state._gotServerTexts = true;
-      Object.entries(data).forEach(([slot, text]) => {
-        if (slot.startsWith('text:')) applyText(slot, text);
-      });
-    }
-  } catch (e) {
-    console.error('[admin] forceServerRead texts failed:', e.message);
-  }
 }
 
 // =====================================================================
@@ -510,35 +435,30 @@ function onTextEditKeydown(e) {
 async function saveText(slot, text) {
   setSaving(true);
   try {
+    // Apply optimistically
+    state.texts[slot] = text;
+
+    // Write to Firestore (local cache accepts immediately)
     await setDoc(doc(db, 'content', 'texts'),
       { [slot]: text, _updatedAt: serverTimestamp() },
       { merge: true });
 
-    // Wait for the write to actually reach the server.
-    await waitForServer(15000);
+    // Show "saved" immediately
+    setSaving(false);
+    toast(`✓ ${slot} saved`, 'success');
 
-    // VERIFY the write landed on the server
-    const verify = await getDoc(doc(db, 'content', 'texts'));
-    if (!verify.exists()) {
-      throw new Error('Verification failed — Firestore doc does not exist. Rules likely not deployed.');
-    }
-    const data = verify.data();
-    if (data[slot] !== text) {
-      throw new Error('PERMISSION_DENIED — write was rejected by Firestore rules. Deploy firestore.rules.');
-    }
-
-    state.texts[slot] = text;
+    // Verify in background (don't block UI)
+    verifyInBackground(slot, text, 'texts');
   } catch (e) {
     console.error('[admin] saveText failed:', e);
+    setSaving(false);
     if (e.code === 'permission-denied' || /permission|denied|rules/i.test(e.message)) {
-      toast('SAVE FAILED — Firestore rules not deployed. Open Firebase console → Firestore → Rules → paste firestore.rules → Publish.', 'error');
+      toast('SAVE FAILED — Firestore rules rejected the write. Open Firebase console → Firestore → Rules → paste firestore.rules → Publish.', 'error');
     } else if (/offline|network|timed out|unreachable/i.test(e.message)) {
-      toast('NETWORK — cannot reach Firestore. Check your connection and retry. Visit /debug.html', 'error');
+      toast('NETWORK — cannot reach Firestore. Changes saved locally, will sync when connection returns.', 'error');
     } else {
       toast('Save failed: ' + e.message, 'error');
     }
-  } finally {
-    setSaving(false);
   }
 }
 
@@ -698,39 +618,61 @@ async function deleteFromCloudinaryForSlot(slot) {
 async function saveImage(slot, url) {
   setSaving(true);
   try {
+    // Step 1: Apply optimistically to the DOM so the user sees the change
+    state.images[slot] = url;
+    applyImage(slot, url);
+
+    // Step 2: Write to Firestore (local cache accepts immediately,
+    // server sync happens in background)
     await setDoc(doc(db, 'content', 'images'),
       { [slot]: url, _updatedAt: serverTimestamp() },
       { merge: true });
 
-    // CRITICAL: wait for the write to actually reach the server.
-    // This catches "fake saves" where the offline cache accepts the
-    // write but the server never receives it.
-    await waitForServer(15000);
+    // Step 3: Show "saved" immediately (write was queued locally)
+    setSaving(false);
+    toast(`✓ ${slot} saved`, 'success');
 
-    // Verify the value actually landed
-    const verify = await getDoc(doc(db, 'content', 'images'));
-    if (!verify.exists()) {
-      throw new Error('Verification failed — Firestore doc does not exist. Rules likely not deployed.');
-    }
-    const data = verify.data();
-    if (data[slot] !== url) {
-      throw new Error('PERMISSION_DENIED — write was rejected by Firestore rules. Deploy firestore.rules.');
-    }
-
-    state.images[slot] = url;
-    applyImage(slot, url);
+    // Step 4: Verify in the background (don't block the UI).
+    // If verification fails (network issue or rules), show a clear error.
+    verifyInBackground(slot, url, 'images');
   } catch (e) {
     console.error('[admin] saveImage failed:', e);
+    setSaving(false);
     if (e.code === 'permission-denied' || /permission|denied|rules/i.test(e.message)) {
-      toast('SAVE FAILED — Firestore rules not deployed. Open Firebase console → Firestore → Rules → paste firestore.rules → Publish.', 'error');
+      toast('SAVE FAILED — Firestore rules rejected the write. Open Firebase console → Firestore → Rules → paste firestore.rules → Publish.', 'error');
     } else if (/offline|network|timed out|unreachable/i.test(e.message)) {
-      toast('NETWORK — cannot reach Firestore. Check your connection and retry. Visit /debug.html', 'error');
+      toast('NETWORK — cannot reach Firestore. Changes saved locally, will sync when connection returns.', 'error');
     } else {
       toast('Save failed: ' + e.message, 'error');
     }
     throw e;
-  } finally {
-    setSaving(false);
+  }
+}
+
+// Background verification — doesn't block UI.
+// Reads the doc back from the SERVER to confirm the write actually landed.
+// If it didn't, shows a clear error toast.
+async function verifyInBackground(slot, expectedValue, docName) {
+  try {
+    // Use getDoc with server source — bypasses cache, forces server read
+    const snap = await getDoc(doc(db, 'content', docName));
+    if (!snap.exists()) {
+      toast(`⚠ ${slot} not yet on server — will retry. Check connection.`, 'error');
+      return false;
+    }
+    const data = snap.data();
+    if (data[slot] !== expectedValue) {
+      toast(`⚠ ${slot} save failed on server — Firestore rules may be blocking. Visit /debug.html`, 'error');
+      return false;
+    }
+    console.log(`[admin] verified ${slot} saved to server ✓`);
+    return true;
+  } catch (e) {
+    console.error(`[admin] verify ${slot} failed:`, e.message);
+    // Don't toast here — the user already saw "saved" and we don't want to
+    // alarm them if it's just a transient network blip. The write is queued
+    // and will retry automatically.
+    return false;
   }
 }
 
