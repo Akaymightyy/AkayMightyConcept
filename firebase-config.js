@@ -9,13 +9,15 @@
 //  firestore.rules) and Firebase Authentication, not by hiding these
 //  values.
 //
-//  IMPORTANT (v5 fix): we intentionally do NOT call enableIndexedDbPersistence().
-//  Offline persistence was the root cause of the "uploads revert on refresh"
-//  bug — when Firestore rules reject a write, the offline cache accepts it
-//  locally so the image LOOKS saved, but on refresh the cache gets out of
-//  sync with the empty server state and reverts to defaults. Without
-//  persistence, writes either succeed on the server (and survive refresh)
-//  or fail with a clear error the admin can see.
+//  v7: Re-enabled offline persistence. The "fake save" bug from v4 was
+//  NOT actually caused by persistence — it was caused by not waiting for
+//  pending writes to reach the server. The right fix is:
+//    • Keep persistence ON  → reads work when network blips happen
+//    • Call waitForPendingWrites() after every setDoc → catches real
+//      failures (writes that never reach the server) instead of fake
+//      successes.
+//  Together these give us resilience (mobile networks are flaky) AND
+//  correctness (real write verification).
 // =====================================================================
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
@@ -24,7 +26,13 @@ import {
   setPersistence,
   browserLocalPersistence
 } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
-import { getFirestore } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+import {
+  getFirestore,
+  enableIndexedDbPersistence,
+  enableNetwork,
+  disableNetwork,
+  waitForPendingWrites
+} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDVU0NiXklVK0XSBSzT418GiLrW1lz0uhw",
@@ -40,13 +48,62 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
 // Keep the admin logged in across reloads/tabs (within this browser).
-// This only persists the AUTH SESSION, not data — totally safe.
 setPersistence(auth, browserLocalPersistence).catch(err => {
   console.warn("[firebase] auth persistence failed:", err.message);
 });
 
 const db = getFirestore(app);
 
-// NO enableIndexedDbPersistence() — see header comment for why.
+// ---- Re-enable offline persistence ----
+// Reads work from cache when network blips happen (critical on mobile).
+// Writes get queued locally and retried automatically.
+// We pair this with explicit waitForPendingWrites() in admin.js to verify
+// each write actually reaches the server before declaring success.
+let _persistenceOk = false;
+enableIndexedDbPersistence(db).then(() => {
+  _persistenceOk = true;
+  console.log('[firebase] IndexedDB persistence enabled');
+}).catch(err => {
+  if (err.code === 'failed-precondition') {
+    // Multiple tabs open — persistence only works in one tab at a time.
+    // Reads still work (just from server), writes still queue.
+    console.warn('[firebase] persistence skipped (another tab open)');
+  } else if (err.code === 'unimplemented') {
+    console.warn('[firebase] persistence not supported by browser');
+  } else {
+    console.warn('[firebase] persistence failed:', err.message);
+  }
+});
 
-export { app, auth, db };
+// ---- Force online + expose connection helpers ----
+// Sometimes the Firestore SDK starts in "offline" mode (especially on
+// mobile after a network change). We explicitly call enableNetwork() to
+// force a reconnect attempt.
+function forceOnline() {
+  return enableNetwork(db).catch(e => {
+    console.warn('[firebase] enableNetwork failed:', e.message);
+  });
+}
+forceOnline();
+
+// Listen for browser online/offline events and reconnect
+window.addEventListener('online', () => {
+  console.log('[firebase] browser online — reconnecting Firestore');
+  forceOnline();
+});
+window.addEventListener('offline', () => {
+  console.log('[firebase] browser offline — Firestore will queue writes');
+});
+
+// Wait for all pending writes to reach the server.
+// Throws if any write can't be confirmed within the timeout.
+function waitForServer(timeoutMs = 15000) {
+  return Promise.race([
+    waitForPendingWrites(db),
+    new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('Timed out waiting for server (network may be offline)')), timeoutMs)
+    )
+  ]);
+}
+
+export { app, auth, db, forceOnline, waitForServer };
