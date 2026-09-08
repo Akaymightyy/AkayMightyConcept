@@ -15,13 +15,34 @@
   const RESUME_DELAY = 2500;  // ms after last interaction before auto-play resumes
 
   function init() {
-    document.querySelectorAll('.showcase-track-wrap').forEach(initWrap);
+    const wraps = document.querySelectorAll('.showcase-track-wrap');
+    console.log(`[showcase] found ${wraps.length} showcase track(s) to init`);
+    wraps.forEach(initWrap);
+
+    // Re-init after window.load in case images load late and change layout
+    if (document.readyState !== 'complete') {
+      window.addEventListener('load', () => {
+        console.log('[showcase] window load — re-measuring');
+        wraps.forEach(w => {
+          // Trigger a re-measure via the strip's images
+          const strip = w.querySelector('.showcase-strip');
+          if (strip) {
+            const evt = new Event('resize');
+            window.dispatchEvent(evt);
+          }
+        });
+      });
+    }
   }
 
   function initWrap(wrap) {
     const strip = wrap.querySelector('.showcase-strip');
-    if (!strip) return;
+    if (!strip) {
+      console.warn('[showcase] no strip found inside wrap');
+      return;
+    }
     const direction = strip.getAttribute('data-direction') === 'right' ? -1 : 1;
+    console.log(`[showcase] initWrap direction=${direction > 0 ? 'left' : 'right'}`);
 
     // Track half-width for seamless loop (content is duplicated)
     let halfWidth = 0;

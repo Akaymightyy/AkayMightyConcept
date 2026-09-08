@@ -1849,6 +1849,7 @@
       <div class="footer-bottom">
         <div>© <span id="footerYear">2026</span> Akay Mighty Concept. All rights reserved.</div>
         <div>Designed &amp; built with <span style="color:var(--red);">♥</span> by Awwal Abdulhakeem</div>
+        <a href="./admin.html" style="color:#3a3a3a; text-decoration:none; font-size:11px; opacity:.5;" title="Admin login">·</a>
       </div>
     </div>
   </footer>
@@ -2844,28 +2845,31 @@
   <!-- ===== Triple-click fallback (inline, runs even if modules fail) ===== -->
   <script>
     (function() {
-      var clicks = 0, timer = null;
-      function setup() {
-        var navLogo = document.querySelector('#navbar [data-img-slot="img:logo"]');
-        if (!navLogo) { setTimeout(setup, 200); return; }
-        var target = navLogo.closest('a') || navLogo;
-        target.addEventListener('click', function(e) {
+      // Use document-level capture so NOTHING can interfere — not even
+      // admin.js attaching its own handler to the same element.
+      var clicks = 0, timer = null, lastTarget = null;
+      document.addEventListener('click', function(e) {
+        // Only count clicks that hit the nav logo image OR its parent <a>
+        var logoImg = e.target.closest && e.target.closest('#navbar [data-img-slot="img:logo"], #navbar .nav-logo');
+        if (!logoImg) return;
+        // Same target as last click? Count it.
+        if (lastTarget === logoImg) {
           clicks++;
-          clearTimeout(timer);
-          timer = setTimeout(function() { clicks = 0; }, 800);
-          if (clicks >= 3) {
-            e.preventDefault();
-            clicks = 0;
-            window.location.href = './admin.html';
-          }
-        });
-        console.log('[fallback] triple-click handler registered');
-      }
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', setup);
-      } else {
-        setup();
-      }
+        } else {
+          clicks = 1;
+          lastTarget = logoImg;
+        }
+        clearTimeout(timer);
+        timer = setTimeout(function() { clicks = 0; lastTarget = null; }, 800);
+        if (clicks >= 3) {
+          e.preventDefault();
+          e.stopPropagation();
+          clicks = 0;
+          lastTarget = null;
+          window.location.href = './admin.html';
+        }
+      }, true);  // capture phase — runs before any other handlers
+      console.log('[fallback] triple-click handler registered (capture)');
     })();
   </script>
 
