@@ -12,7 +12,7 @@
 //    • Auto-redirects to dashboard UI immediately after sign-in
 // =====================================================================
 
-import { auth, db, forceOnline, waitForServer } from "./firebase-config.js";
+import { auth, db } from "./firebase-config.js";
 import {
   cloudinaryConfig,
   cloudinaryUploadUrl,
@@ -595,8 +595,6 @@ async function saveCustomImages(arr) {
     await setDoc(doc(db, 'content', 'custom-images'),
       { items: arr, _updatedAt: serverTimestamp() },
       { merge: true });
-    // Wait for server ack
-    await waitForServer(15000);
     // Verify
     const snap = await getDoc(doc(db, 'content', 'custom-images'));
     if (!snap.exists()) throw new Error('Verification failed');
@@ -610,8 +608,6 @@ async function saveCustomImages(arr) {
       toast('SAVE FAILED — Firestore rules not deployed. See Settings tab.', 'error');
       state.rulesOk = false;
       renderRulesStatus();
-    } else if (/offline|network|timed out|unreachable/i.test(e.message)) {
-      toast('NETWORK — cannot reach Firestore. Check connection. Visit /debug.html', 'error');
     } else {
       toast('Save failed: ' + e.message, 'error');
     }
@@ -769,29 +765,22 @@ async function saveImage(slot, url) {
       { [slot]: url, _updatedAt: serverTimestamp() },
       { merge: true });
 
-    // CRITICAL: wait for the write to actually reach the server.
-    // This catches "fake saves" where the offline cache accepts the write
-    // but the server never receives it (network issue / rules rejection).
-    await waitForServer(15000);
-
-    // Verify the value actually landed
+    // Verify the write actually landed on the server
     const verify = await getDoc(doc(db, 'content', 'images'));
     if (!verify.exists()) {
       throw new Error('Verification failed — doc does not exist on server');
     }
     const data = verify.data();
     if (data[slot] !== url) {
-      throw new Error('PERMISSION_DENIED — write rejected by Firestore rules. Deploy firestore.rules.');
+      throw new Error('Verification failed — server has stale value. Check Firestore rules.');
     }
     return true;
   } catch (e) {
     console.error('[dash] saveImage failed:', e);
     if (e.code === 'permission-denied' || /permission|denied/i.test(e.message)) {
-      toast('SAVE FAILED — Firestore rules rejected the write. Open Settings → Rules.', 'error');
+      toast('SAVE FAILED — Firestore rules not deployed. Open Settings tab for instructions.', 'error');
       state.rulesOk = false;
       renderRulesStatus();
-    } else if (/offline|network|timed out|unreachable/i.test(e.message)) {
-      toast('NETWORK — cannot reach Firestore. Check your connection and retry. Visit /debug.html', 'error');
     } else {
       toast('Save failed: ' + e.message, 'error');
     }
@@ -804,16 +793,13 @@ async function saveText(slot, text) {
     await setDoc(doc(db, 'content', 'texts'),
       { [slot]: text, _updatedAt: serverTimestamp() },
       { merge: true });
-    await waitForServer(15000);
     return true;
   } catch (e) {
     console.error('[dash] saveText failed:', e);
     if (e.code === 'permission-denied' || /permission|denied/i.test(e.message)) {
-      toast('SAVE FAILED — Firestore rules rejected the write. See Settings tab.', 'error');
+      toast('SAVE FAILED — Firestore rules not deployed. See Settings tab.', 'error');
       state.rulesOk = false;
       renderRulesStatus();
-    } else if (/offline|network|timed out|unreachable/i.test(e.message)) {
-      toast('NETWORK — cannot reach Firestore. Check connection and retry. Visit /debug.html', 'error');
     } else {
       toast('Save failed: ' + e.message, 'error');
     }
@@ -960,37 +946,11 @@ function initLogin() {
 
 // =====================================================================
 //  STEP 11 — auth state (handles cross-tab + page reload)
-//  ---------------------------------------------------------------------
-//  CRITICAL FIX: when Firestore has network issues, onAuthStateChanged
-//  can fire with null even right after a successful login. This was
-//  causing the login form to flash back and "swallow" the user's
-//  credentials. We now:
-//    1. Track the last user we saw
-//    2. Only swap to login if we get a real null AND we weren't just
-//       logged in within the last 5 seconds (debounce)
-//    3. Show a "Reconnecting…" banner instead of bouncing the user
 // =====================================================================
-let _lastUser = null;
-let _lastSwapToApp = 0;
-
 onAuthStateChanged(auth, user => {
   if (user) {
-    _lastUser = user;
-    _lastSwapToApp = Date.now();
     swapToApp(user);
   } else {
-    // Did we JUST log in? If so, this null is a network hiccup, not a real sign-out.
-    // Don't swap back to the login form — keep showing the dashboard.
-    const sinceLastApp = Date.now() - _lastSwapToApp;
-    if (_lastUser && sinceLastApp < 10000) {
-      console.warn(`[auth] ignoring null user (likely network hiccup ${sinceLastApp}ms after login)`);
-      showConnBanner('Reconnecting to Firebase…', 'warn');
-      // Try to reconnect
-      forceOnline();
-      return;
-    }
-    // Real sign-out (or initial load)
-    _lastUser = null;
     swapToLogin();
     // Reset login form
     const btn = $('#dashLoginBtn');
@@ -999,47 +959,6 @@ onAuthStateChanged(auth, user => {
       btn.querySelector('.dash-btn-label').textContent = 'Log in';
     }
   }
-});
-
-// Connection banner — shows Firebase online/offline state at top of dashboard
-function showConnBanner(msg, kind = 'warn') {
-  let banner = $('#dashConnBanner');
-  if (!banner) {
-    banner = document.createElement('div');
-    banner.id = 'dashConnBanner';
-    banner.style.cssText = 'position:sticky;top:0;z-index:100;padding:10px 18px;text-align:center;font:600 13px/1 "Poppins",sans-serif;border-radius:0 0 8px 8px;';
-    const main = $('.dash-main');
-    if (main) main.prepend(banner);
-  }
-  banner.textContent = msg;
-  banner.style.display = 'block';
-  if (kind === 'warn') {
-    banner.style.background = 'rgba(255, 213, 79, .15)';
-    banner.style.color = '#ffd54f';
-    banner.style.borderBottom = '1px solid rgba(255, 213, 79, .3)';
-  } else if (kind === 'err') {
-    banner.style.background = 'rgba(255, 82, 82, .15)';
-    banner.style.color = '#ff5252';
-    banner.style.borderBottom = '1px solid rgba(255, 82, 82, .3)';
-  } else if (kind === 'ok') {
-    banner.style.background = 'rgba(46, 204, 113, .15)';
-    banner.style.color = '#2ecc71';
-    banner.style.borderBottom = '1px solid rgba(46, 204, 113, .3)';
-    // Auto-hide success after 2.5s
-    clearTimeout(banner._t);
-    banner._t = setTimeout(() => { banner.style.display = 'none'; }, 2500);
-  } else {
-    banner.style.display = 'none';
-  }
-}
-
-// Listen for browser online/offline events to update the banner
-window.addEventListener('online', () => {
-  showConnBanner('Back online — reconnecting…', 'ok');
-  forceOnline();
-});
-window.addEventListener('offline', () => {
-  showConnBanner('Your device is offline. Edits will be saved when you reconnect.', 'warn');
 });
 
 // =====================================================================

@@ -1,48 +1,26 @@
 // =====================================================================
-//  showcase-scroll.js  v3
+//  showcase-scroll.js  v2
 //  ---------------------------------------------------------------------
-//  FIX: v2 had a feedback loop — setting wrap.scrollLeft in the auto-play
-//  loop fired a 'scroll' event, which set lastInteract = now, which
-//  blocked auto-play on the next frame. Auto-play was permanently stuck.
-//
-//  v3 fix: use an isAutoScrolling flag to distinguish programmatic
-//  scrolls (from our rAF loop) from user scrolls (touch/wheel/drag).
-//  Only user scrolls pause auto-play.
-// =====================================================================
+//  SIMPLIFIED: native horizontal scroll + rAF auto-play.
+//  No JS pointer/drag handlers — they were interfering with native
+//  touch scrolling on mobile. Users can now:
+//    • Touch-drag / mouse-drag / wheel horizontally — works natively
+//    • Vertical touch scroll passes through to the page (touch-action: pan-x)
+//    • Auto-play runs via requestAnimationFrame, pauses on hover/touch
+//  =====================================================================
 
 (function () {
   const SPEED = 0.4;          // px per ms
   const RESUME_DELAY = 2500;  // ms after last interaction before auto-play resumes
 
   function init() {
-    const wraps = document.querySelectorAll('.showcase-track-wrap');
-    console.log(`[showcase] found ${wraps.length} showcase track(s) to init`);
-    wraps.forEach(initWrap);
-
-    // Re-init after window.load in case images load late and change layout
-    if (document.readyState !== 'complete') {
-      window.addEventListener('load', () => {
-        console.log('[showcase] window load — re-measuring');
-        wraps.forEach(w => {
-          // Trigger a re-measure via the strip's images
-          const strip = w.querySelector('.showcase-strip');
-          if (strip) {
-            const evt = new Event('resize');
-            window.dispatchEvent(evt);
-          }
-        });
-      });
-    }
+    document.querySelectorAll('.showcase-track-wrap').forEach(initWrap);
   }
 
   function initWrap(wrap) {
     const strip = wrap.querySelector('.showcase-strip');
-    if (!strip) {
-      console.warn('[showcase] no strip found inside wrap');
-      return;
-    }
+    if (!strip) return;
     const direction = strip.getAttribute('data-direction') === 'right' ? -1 : 1;
-    console.log(`[showcase] initWrap direction=${direction > 0 ? 'left' : 'right'}`);
 
     // Track half-width for seamless loop (content is duplicated)
     let halfWidth = 0;
@@ -64,7 +42,6 @@
     let lastInteract = 0;
     let lastFrame = performance.now();
     let rafId = null;
-    let isAutoScrolling = false;   // CRITICAL: flag to distinguish our scroll from user scroll
 
     function tick(now) {
       const dt = Math.min(now - lastFrame, 50);
@@ -85,13 +62,7 @@
         } else {
           if (next <= 0) next += halfWidth;
         }
-
-        // Set flag BEFORE changing scrollLeft so our scroll listener
-        // knows this is a programmatic scroll, not a user scroll.
-        isAutoScrolling = true;
         wrap.scrollLeft = next;
-        // Reset flag on next microtask (after scroll event fires)
-        Promise.resolve().then(() => { isAutoScrolling = false; });
       } else {
         wrap.classList.remove('is-autoplaying');
       }
@@ -100,16 +71,10 @@
     rafId = requestAnimationFrame(tick);
 
     // Pause on hover (desktop)
-    wrap.addEventListener('mouseenter', () => {
-      isHovering = true;
-      lastInteract = performance.now();
-    });
-    wrap.addEventListener('mouseleave', () => {
-      isHovering = false;
-      lastInteract = performance.now();
-    });
+    wrap.addEventListener('mouseenter', () => { isHovering = true; lastInteract = performance.now(); });
+    wrap.addEventListener('mouseleave', () => { isHovering = false; lastInteract = performance.now(); });
 
-    // Pause on touch (mobile)
+    // Pause on touch (mobile) — uses native scroll for actual dragging
     wrap.addEventListener('touchstart', () => {
       isTouching = true;
       lastInteract = performance.now();
@@ -122,16 +87,12 @@
       lastInteract = performance.now();
     }, { passive: true });
 
-    // Detect USER scroll (not our programmatic scroll).
-    // Only set lastInteract if the scroll was NOT triggered by our auto-play.
+    // Detect native scroll (mouse wheel / trackpad) and pause briefly
     let scrollDebounce = null;
     wrap.addEventListener('scroll', () => {
-      if (isAutoScrolling) return;   // ignore our own scrolls
       lastInteract = performance.now();
       clearTimeout(scrollDebounce);
-      scrollDebounce = setTimeout(() => {
-        lastInteract = performance.now();
-      }, 100);
+      scrollDebounce = setTimeout(() => { lastInteract = performance.now(); }, 100);
     }, { passive: true });
 
     // Pause when offscreen (perf)

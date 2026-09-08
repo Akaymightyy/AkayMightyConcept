@@ -27,7 +27,7 @@
 //    See firestore.rules. Only the authenticated admin can write.
 // =====================================================================
 
-import { auth, db, forceOnline, waitForServer } from "./firebase-config.js";
+import { auth, db } from "./firebase-config.js";
 import {
   cloudinaryConfig,
   cloudinaryUploadUrl,
@@ -439,9 +439,6 @@ async function saveText(slot, text) {
       { [slot]: text, _updatedAt: serverTimestamp() },
       { merge: true });
 
-    // Wait for the write to actually reach the server.
-    await waitForServer(15000);
-
     // VERIFY the write landed on the server
     const verify = await getDoc(doc(db, 'content', 'texts'));
     if (!verify.exists()) {
@@ -457,8 +454,6 @@ async function saveText(slot, text) {
     console.error('[admin] saveText failed:', e);
     if (e.code === 'permission-denied' || /permission|denied|rules/i.test(e.message)) {
       toast('SAVE FAILED — Firestore rules not deployed. Open Firebase console → Firestore → Rules → paste firestore.rules → Publish.', 'error');
-    } else if (/offline|network|timed out|unreachable/i.test(e.message)) {
-      toast('NETWORK — cannot reach Firestore. Check your connection and retry. Visit /debug.html', 'error');
     } else {
       toast('Save failed: ' + e.message, 'error');
     }
@@ -627,12 +622,9 @@ async function saveImage(slot, url) {
       { [slot]: url, _updatedAt: serverTimestamp() },
       { merge: true });
 
-    // CRITICAL: wait for the write to actually reach the server.
-    // This catches "fake saves" where the offline cache accepts the
-    // write but the server never receives it.
-    await waitForServer(15000);
-
-    // Verify the value actually landed
+    // VERIFY the write actually landed on the server (not just the
+    // local cache). This catches the "fake save" bug where rules
+    // reject the write but it appears to succeed locally.
     const verify = await getDoc(doc(db, 'content', 'images'));
     if (!verify.exists()) {
       throw new Error('Verification failed — Firestore doc does not exist. Rules likely not deployed.');
@@ -648,8 +640,6 @@ async function saveImage(slot, url) {
     console.error('[admin] saveImage failed:', e);
     if (e.code === 'permission-denied' || /permission|denied|rules/i.test(e.message)) {
       toast('SAVE FAILED — Firestore rules not deployed. Open Firebase console → Firestore → Rules → paste firestore.rules → Publish.', 'error');
-    } else if (/offline|network|timed out|unreachable/i.test(e.message)) {
-      toast('NETWORK — cannot reach Firestore. Check your connection and retry. Visit /debug.html', 'error');
     } else {
       toast('Save failed: ' + e.message, 'error');
     }
@@ -702,13 +692,9 @@ onAuthStateChanged(auth, user => {
 //  STEP 10 — BOOTSTRAP
 // =====================================================================
 function init() {
-  // Register the triple-click handler FIRST so it works even if
-  // Firestore/network init throws later.
-  try {
-    initTripleClick();
-  } catch (e) {
-    console.error('[admin] initTripleClick failed:', e);
-  }
+  captureDefaults();
+  startSync();
+  initTripleClick();
 
   // Hidden keyboard shortcut: Ctrl+Shift+A also opens the admin dashboard
   document.addEventListener('keydown', e => {
@@ -719,20 +705,6 @@ function init() {
       else window.location.href = './admin.html';
     }
   });
-
-  // Now try the Firebase-dependent init — wrapped so failures don't
-  // take down the rest of the page.
-  try {
-    captureDefaults();
-  } catch (e) {
-    console.error('[admin] captureDefaults failed:', e);
-  }
-
-  try {
-    startSync();
-  } catch (e) {
-    console.error('[admin] startSync failed:', e);
-  }
 
   console.log('[admin] ready. Triple-click the logo to log in.');
 }
