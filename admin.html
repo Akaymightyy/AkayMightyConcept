@@ -56,13 +56,6 @@
         Images
         <span class="dash-nav-item__count" id="navCountImages">25</span>
       </button>
-      <button class="dash-nav-item" data-tab="custom">
-        <span class="dash-nav-item__icon">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        </span>
-        Custom Images
-        <span class="dash-nav-item__count" id="navCountCustom">0</span>
-      </button>
       <button class="dash-nav-item" data-tab="texts">
         <span class="dash-nav-item__icon">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
@@ -84,8 +77,6 @@
         Signed in as admin
         <br><br>
         <a href="./" target="_blank" style="color: var(--akay-text-mute); text-decoration: none; font-size: 11px;">View live site ↗</a>
-        &nbsp;·&nbsp;
-        <a href="./debug.html" style="color: var(--akay-text-mute); text-decoration: none; font-size: 11px;">Debug</a>
       </div>
     </aside>
 
@@ -152,36 +143,7 @@
           <strong>Delete file</strong> to permanently remove from Cloudinary, or
           <strong>Reset</strong> to revert to the default.
         </p>
-
-        <!-- Search bar -->
-        <div class="dash-search">
-          <svg class="dash-search__icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="11" cy="11" r="8"/>
-            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-          </svg>
-          <input type="search" id="imgSearch" placeholder="Search images by slot name or label (e.g. 'logo', 'web-3', 'showcase')…" autocomplete="off" />
-          <span class="dash-search__count" id="imgSearchCount">—</span>
-        </div>
-
         <div id="imgSections"><!-- rendered by JS --></div>
-      </section>
-
-      <!-- ============ Custom Images tab ============ -->
-      <section class="dash-panel" id="tab-custom">
-        <div class="dash-panel__head">
-          <h3 class="dash-panel__title">Custom images</h3>
-          <div class="dash-panel__actions">
-            <button class="dash-btn dash-btn--primary" id="btnAddCustom">+ Add new image</button>
-            <button class="dash-btn dash-btn--ghost" id="btnRefreshCustom">↻ Refresh</button>
-          </div>
-        </div>
-        <p class="dash-panel__hint">
-          Upload additional images that aren't tied to a fixed slot on the site —
-          product shots, new portfolio pieces, recent work, behind-the-scenes photos.
-          These appear in the "More Work" gallery section on the site (auto-rendered
-          from this list). Each image can have a caption that you can edit any time.
-        </p>
-        <div id="customGrid" class="dash-grid"></div>
       </section>
 
       <!-- ============ Text tab ============ -->

@@ -740,6 +740,13 @@
 
     /* Auto-play is driven by JS — we toggle .is-autoplaying on the wrap */
     .showcase-track-wrap.is-autoplaying { scroll-snap-type: none; }
+    .showcase-track-wrap:hover .showcase-card { transition: none; }
+
+    /* When the user is dragging (pointer-down), pause snap and disable hover effects */
+    .showcase-track-wrap.is-dragging { cursor: grabbing; scroll-snap-type: none; }
+    .showcase-track-wrap.is-dragging .showcase-card { pointer-events: none; }
+    .showcase-track-wrap { cursor: grab; }
+    .showcase-track-wrap:not(.is-autoplaying):not(.is-dragging) { cursor: default; }
 
     .showcase-card {
       width: 360px;
@@ -750,12 +757,16 @@
       border: 1px solid #1f1f1f;
       transition: transform .35s cubic-bezier(.2,.8,.2,1), border-color .25s, box-shadow .25s;
       cursor: pointer;
+      user-select: none;
+      -webkit-user-drag: none;
     }
+    .showcase-card img { pointer-events: none; }   /* let drag start on card, not image */
     .showcase-card:hover {
       transform: translateY(-6px);
       border-color: rgba(255, 26, 26, .35);
       box-shadow: 0 18px 40px rgba(0, 0, 0, .55), 0 0 0 1px rgba(255, 26, 26, .15);
     }
+    .showcase-track-wrap.is-dragging .showcase-card:hover { transform: none; box-shadow: none; }
     .showcase-card-img {
       position: relative;
       aspect-ratio: 16/10;
@@ -884,50 +895,6 @@
     @media (max-width: 640px) {
       .tl-card-h { width: 280px; padding: 22px 20px; }
       .tl-card-h__role { font-size: 17px; }
-    }
-
-    /* ===== Custom Gallery (admin-uploaded images) ============ */
-    .cg-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 20px;
-      margin-top: 40px;
-    }
-    .cg-card {
-      margin: 0;
-      border-radius: 14px;
-      overflow: hidden;
-      background: #141414;
-      border: 1px solid #1f1f1f;
-      transition: transform .35s cubic-bezier(.2,.8,.2,1), border-color .25s, box-shadow .25s;
-      cursor: pointer;
-    }
-    .cg-card:hover {
-      transform: translateY(-4px);
-      border-color: rgba(255, 26, 26, .35);
-      box-shadow: 0 16px 36px rgba(0, 0, 0, .5);
-    }
-    .cg-card__img {
-      aspect-ratio: 4/3;
-      overflow: hidden;
-      background: #0a0a0a;
-    }
-    .cg-card__img img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-      transition: transform .55s cubic-bezier(.2,.8,.2,1);
-    }
-    .cg-card:hover .cg-card__img img { transform: scale(1.05); }
-    .cg-card__caption {
-      padding: 14px 16px;
-      font: 500 13px/1.4 'Poppins', sans-serif;
-      color: #b0b0b0;
-      border-top: 1px solid #1f1f1f;
-    }
-    @media (max-width: 640px) {
-      .cg-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; }
     }
 </style>
 
@@ -1359,18 +1326,6 @@
           </button>
         </div>
       </div>
-    </div>
-  </section>
-
-  <!-- ============ CUSTOM GALLERY (admin-uploaded images) ============ -->
-  <section id="custom-gallery" style="display:none;">
-    <div class="container">
-      <div class="section-header">
-        <p class="section-label reveal">More Work</p>
-        <h2 class="section-title reveal reveal-delay-1">Recent <span>Additions</span></h2>
-        <p class="section-desc reveal reveal-delay-2">Fresh work and product shots — added regularly from the studio.</p>
-      </div>
-      <div class="cg-grid" id="customGalleryGrid"></div>
     </div>
   </section>
 
@@ -2846,6 +2801,5 @@
   <script type="module" src="./cloudinary-config.js"></script>
   <script type="module" src="./admin.js"></script>
   <script type="module" src="./showcase-scroll.js"></script>
-  <script type="module" src="./custom-gallery.js"></script>
 </body>
 </html>

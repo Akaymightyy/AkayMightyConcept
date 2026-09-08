@@ -91,14 +91,12 @@ const IMAGE_SECTIONS = [
 const state = {
   images: {},
   texts: {},
-  customImages: [],
   defaults: { images: {}, texts: {} },
   defaultsReady: false,
-  textSlotsDiscovered: [],
+  textSlotsDiscovered: [],   // [{slot, default, section}]
   unsubImages: null,
   unsubTexts: null,
-  unsubCustom: null,
-  rulesOk: null
+  rulesOk: null              // null=unknown, true=ok, false=rules-missing
 };
 
 const $  = (s, r = document) => r.querySelector(s);
@@ -201,12 +199,15 @@ function captureDefaultsFromSite() {
 function startSync() {
   if (state.unsubImages) state.unsubImages();
   if (state.unsubTexts)  state.unsubTexts();
-  if (state.unsubCustom) state.unsubCustom();
 
   state.unsubImages = onSnapshot(doc(db, 'content', 'images'), snap => {
     state.images = snap.exists() ? snap.data() : {};
     delete state.images._updatedAt;
-    renderImagesWithSearch();
+    if (state.rulesOk === null) {
+      // First read succeeded — rules at least allow read
+      // (we'll verify write separately)
+    }
+    renderImages();
     renderStats();
   }, err => {
     console.error('[dash] images sync error:', err);
@@ -226,19 +227,6 @@ function startSync() {
     renderStats();
   }, err => {
     console.error('[dash] texts sync error:', err);
-  });
-
-  state.unsubCustom = onSnapshot(doc(db, 'content', 'custom-images'), snap => {
-    if (snap.exists()) {
-      const data = snap.data();
-      state.customImages = Array.isArray(data.items) ? data.items : [];
-    } else {
-      state.customImages = [];
-    }
-    renderCustomImages();
-    renderStats();
-  }, err => {
-    console.error('[dash] custom sync error:', err);
   });
 
   // Verify write permission by attempting a no-op merge
@@ -438,231 +426,6 @@ function renderStats() {
   $('#statTexts').textContent  = textCount;
   $('#navCountImages').textContent = totalSlots;
   $('#navCountTexts').textContent  = textCount;
-  $('#navCountCustom').textContent = state.customImages.length;
-}
-
-// =====================================================================
-//  STEP 6.5 — search filter
-// =====================================================================
-function getSearchQuery() {
-  const el = $('#imgSearch');
-  return el ? el.value.trim().toLowerCase() : '';
-}
-
-function matchesSearch(slot, label, query) {
-  if (!query) return true;
-  return slot.toLowerCase().includes(query) ||
-         label.toLowerCase().includes(query);
-}
-
-function renderImagesWithSearch() {
-  const query = getSearchQuery();
-  const wrap = $('#imgSections');
-  if (!wrap) return;
-
-  let totalShown = 0;
-  let totalMatched = 0;
-
-  wrap.innerHTML = IMAGE_SECTIONS.map(section => {
-    const matchedSlots = section.slots.filter(s => {
-      const isMatch = matchesSearch(s.id, s.label, query);
-      if (isMatch) totalMatched++;
-      return isMatch;
-    });
-    if (!matchedSlots.length) return '';   // hide empty sections
-    totalShown += matchedSlots.length;
-    return `
-      <div class="dash-section">
-        <div class="dash-section__head">
-          <div class="dash-section__bar"></div>
-          <h4 class="dash-section__title">${section.title}</h4>
-          <span class="dash-section__count">${matchedSlots.length} of ${section.slots.length}</span>
-        </div>
-        <div class="dash-grid">
-          ${matchedSlots.map(slot => renderImageCard(slot)).join('')}
-        </div>
-      </div>
-    `;
-  }).join('') || `<p class="dash-panel__hint">No images match "${escapeHtml(query)}". Try a different search term.</p>`;
-
-  // Wire buttons
-  wrap.querySelectorAll('.dash-card').forEach(card => {
-    const slot = card.getAttribute('data-slot');
-    card.querySelectorAll('button[data-act]').forEach(btn => {
-      btn.addEventListener('click', () => handleImageAction(slot, btn.getAttribute('data-act')));
-    });
-  });
-
-  // Update count
-  const countEl = $('#imgSearchCount');
-  if (countEl) {
-    const total = IMAGE_SECTIONS.reduce((n, s) => n + s.slots.length, 0);
-    countEl.textContent = query ? `${totalMatched}/${total}` : `${total} total`;
-  }
-}
-
-// =====================================================================
-//  STEP 6.6 — Custom images (add / list / delete)
-//  Custom images live in Firestore: doc 'content/custom-images' which
-//  is an array of { id, url, publicId, caption, addedAt }.
-//  The site's index.html renders them in a #custom-gallery section
-//  that subscribes to the same doc.
-// =====================================================================
-async function addCustomImage() {
-  const input = document.createElement('input');
-  input.type = 'file';
-  input.accept = 'image/*';
-  input.style.display = 'none';
-  document.body.appendChild(input);
-  input.addEventListener('change', async () => {
-    const file = input.files[0];
-    if (!file) { input.remove(); return; }
-    if (file.size > 10 * 1024 * 1024) {
-      toast('Max 10MB per image', 'error');
-      input.remove();
-      return;
-    }
-    toast('Uploading to Cloudinary…', 'info');
-    try {
-      const url = await uploadToCloudinary(file);
-      toast('Uploaded — saving…', 'info');
-      const newItem = {
-        id: `custom-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-        url,
-        publicId: publicIdFromCloudinaryUrl(url) || '',
-        caption: '',
-        addedAt: Date.now()
-      };
-      const updated = [...state.customImages, newItem];
-      const ok = await saveCustomImages(updated);
-      if (ok) {
-        // Prompt for caption immediately
-        const caption = prompt('Caption (optional — shown under the image on the site):', '');
-        if (caption !== null && caption.trim()) {
-          newItem.caption = caption.trim();
-          await saveCustomImages([...state.customImages, newItem]);
-        }
-        toast('✓ Image added', 'success');
-      }
-    } catch (e) {
-      toast('Add failed: ' + e.message, 'error');
-    } finally {
-      input.remove();
-    }
-  });
-  input.click();
-}
-
-async function saveCustomImageCaption(id, caption) {
-  const updated = state.customImages.map(c => c.id === id ? { ...c, caption } : c);
-  await saveCustomImages(updated);
-}
-
-async function deleteCustomImage(item) {
-  if (!confirm(`Delete this image?\n\n${item.caption || item.url.slice(-60)}\n\nThis removes it from the site AND deletes the file from Cloudinary.`)) return;
-  toast('Deleting…', 'info');
-  try {
-    // If it's on Cloudinary, hard-delete the file too
-    if (item.publicId) {
-      try {
-        const idToken = await getIdToken(auth.currentUser, false);
-        const resp = await fetch(cloudinaryDeleteEndpoint, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${idToken}`
-          },
-          body: JSON.stringify({ publicId: item.publicId })
-        });
-        if (!resp.ok) {
-          const err = await resp.json().catch(() => ({}));
-          console.warn('Cloudinary delete failed (non-fatal):', err.error || resp.status);
-        }
-      } catch (e) {
-        console.warn('Cloudinary delete failed (non-fatal):', e.message);
-      }
-    }
-    const updated = state.customImages.filter(c => c.id !== item.id);
-    await saveCustomImages(updated);
-    toast('✓ Image deleted', 'success');
-  } catch (e) {
-    toast('Delete failed: ' + e.message, 'error');
-  }
-}
-
-async function saveCustomImages(arr) {
-  try {
-    await setDoc(doc(db, 'content', 'custom-images'),
-      { items: arr, _updatedAt: serverTimestamp() },
-      { merge: true });
-    // Verify
-    const snap = await getDoc(doc(db, 'content', 'custom-images'));
-    if (!snap.exists()) throw new Error('Verification failed');
-    const data = snap.data();
-    if (!Array.isArray(data.items) || data.items.length !== arr.length) {
-      throw new Error('PERMISSION_DENIED — write rejected by Firestore rules');
-    }
-    return true;
-  } catch (e) {
-    if (e.code === 'permission-denied' || /permission|denied|rules/i.test(e.message)) {
-      toast('SAVE FAILED — Firestore rules not deployed. See Settings tab.', 'error');
-      state.rulesOk = false;
-      renderRulesStatus();
-    } else {
-      toast('Save failed: ' + e.message, 'error');
-    }
-    return false;
-  }
-}
-
-function renderCustomImages() {
-  const grid = $('#customGrid');
-  if (!grid) return;
-  if (!state.customImages.length) {
-    grid.innerHTML = `
-      <div class="dash-card dash-card--empty">
-        <div class="dash-card__body">
-          <p>No custom images yet.</p>
-          <button class="dash-btn dash-btn--primary" onclick="document.getElementById('btnAddCustom').click()" style="margin-top:10px;">+ Add your first image</button>
-        </div>
-      </div>
-    `;
-    return;
-  }
-  grid.innerHTML = state.customImages.map(item => `
-    <div class="dash-card dash-card--custom" data-id="${item.id}">
-      <div class="dash-card__preview">
-        <img src="${item.url}" alt="${escapeAttr(item.caption || 'custom image')}" loading="lazy" />
-      </div>
-      <div class="dash-card__body">
-        <input type="text" class="dash-card__caption" placeholder="Caption (shown on site)" value="${escapeAttr(item.caption || '')}" data-id="${item.id}" />
-        <div class="dash-card__url">${item.url.replace(/^https?:\/\//, '').slice(0, 80)}</div>
-        <div class="dash-card__btns">
-          <button class="dash-btn dash-btn--primary dash-btn--mini" data-act="save-caption">Save caption</button>
-          <button class="dash-btn dash-btn--danger dash-btn--mini" data-act="delete">Delete image</button>
-        </div>
-      </div>
-    </div>
-  `).join('');
-
-  grid.querySelectorAll('.dash-card--custom').forEach(card => {
-    const id = card.getAttribute('data-id');
-    const captionInput = card.querySelector('.dash-card__caption');
-    card.querySelector('[data-act="save-caption"]').addEventListener('click', async () => {
-      const ok = await saveCustomImageCaption(id, captionInput.value.trim());
-      if (ok) toast('Caption saved', 'success');
-    });
-    card.querySelector('[data-act="delete"]').addEventListener('click', () => {
-      const item = state.customImages.find(c => c.id === id);
-      if (item) deleteCustomImage(item);
-    });
-    captionInput.addEventListener('keydown', e => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        card.querySelector('[data-act="save-caption"]').click();
-      }
-    });
-  });
 }
 
 // =====================================================================
@@ -853,7 +616,6 @@ async function resetAll() {
 // =====================================================================
 const VIEW_TITLES = {
   images:   { title: 'All Images',         sub: 'Manage every image on your site from one place' },
-  custom:   { title: 'Custom Images',      sub: 'Upload additional product shots and recent work — auto-appears on the site' },
   texts:    { title: 'Captions & Text',    sub: 'Edit every heading, label, and description' },
   settings: { title: 'Settings & Status',  sub: 'Connection health and configuration' }
 };
@@ -969,7 +731,7 @@ function boot() {
   initNav();
 
   $('#btnRefresh').addEventListener('click', () => {
-    renderImagesWithSearch();
+    renderImages();
     renderStats();
     toast('Refreshed', 'info');
   });
@@ -980,25 +742,6 @@ function boot() {
   $('#btnResetAll').addEventListener('click', resetAll);
   const btnReset2 = $('#btnResetAll2');
   if (btnReset2) btnReset2.addEventListener('click', resetAll);
-
-  // Search bar — live filter
-  const search = $('#imgSearch');
-  if (search) {
-    let searchTimer = null;
-    search.addEventListener('input', () => {
-      clearTimeout(searchTimer);
-      searchTimer = setTimeout(() => renderImagesWithSearch(), 100);
-    });
-  }
-
-  // Custom image buttons
-  const btnAddCustom = $('#btnAddCustom');
-  if (btnAddCustom) btnAddCustom.addEventListener('click', addCustomImage);
-  const btnRefreshCustom = $('#btnRefreshCustom');
-  if (btnRefreshCustom) btnRefreshCustom.addEventListener('click', () => {
-    renderCustomImages();
-    toast('Refreshed', 'info');
-  });
 
   // Show the delete endpoint in Settings
   const ep = $('#settingsDeleteEndpoint');
