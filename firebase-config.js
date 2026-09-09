@@ -1,11 +1,9 @@
 // =====================================================================
-//  firebase-config.js  v13
+//  firebase-config.js  v14
 //  ---------------------------------------------------------------------
-//  FIX: Added experimentalForceLongPolling + experimentalAutoDetectLongPolling
-//  to Firestore settings. This forces HTTP long-polling instead of
-//  WebSockets, which can bypass DNS/network issues on some ISPs.
-//  Also switched to initializeFirestore() with cache settings (the
-//  new API that replaces enableIndexedDbPersistence).
+//  Aggressive reconnection: Firestore SDK gets stuck in "offline" mode
+//  after transient failures. This version forces enableNetwork() every
+//  15 seconds, on tab focus, and after any "offline" error.
 // =====================================================================
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
@@ -17,6 +15,7 @@ import {
 import {
   initializeFirestore,
   enableNetwork,
+  disableNetwork,
   waitForPendingWrites
 } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
 
@@ -38,39 +37,62 @@ setPersistence(auth, browserLocalPersistence).catch(err => {
 });
 
 // ---- Initialize Firestore with long-polling + cache ----
-// experimentalForceLongPolling: uses HTTP long-polling instead of
-//   WebSockets. This helps on networks that block/interfere with
-//   WebSocket connections (common on some Nigerian ISPs).
-// localCache: IndexedDB cache for offline reads (replaces the
-//   deprecated enableIndexedDbPersistence).
 let db;
 try {
   db = initializeFirestore(app, {
     experimentalForceLongPolling: true,
     localCache: { kind: 'indexedDB' }
   });
-  console.log('[firebase] Firestore initialized with long-polling + IndexedDB cache');
+  console.log('[firebase] Firestore initialized (long-polling + IndexedDB)');
 } catch (e) {
-  console.warn('[firebase] initializeFirestore failed, falling back to getFirestore:', e.message);
-  // Fallback: import getFirestore dynamically
+  console.warn('[firebase] init failed, falling back:', e.message);
   const { getFirestore } = await import("https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js");
   db = getFirestore(app);
 }
 
-// ---- Force online + expose connection helpers ----
-function forceOnline() {
-  return enableNetwork(db).catch(e => {
+// ---- Aggressive reconnection logic ----
+let _lastReconnect = 0;
+let _isReconnecting = false;
+
+async function forceOnline() {
+  if (_isReconnecting) return;
+  const now = Date.now();
+  if (now - _lastReconnect < 3000) return; // throttle: max once per 3s
+  _isReconnecting = true;
+  _lastReconnect = now;
+  try {
+    await enableNetwork(db);
+    console.log('[firebase] enableNetwork OK');
+  } catch (e) {
     console.warn('[firebase] enableNetwork failed:', e.message);
-  });
+  } finally {
+    _isReconnecting = false;
+  }
 }
+
+// 1. Force online on page load
 forceOnline();
 
+// 2. Heartbeat: reconnect every 15 seconds
+setInterval(() => {
+  forceOnline();
+}, 15000);
+
+// 3. Reconnect when tab regains focus
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) {
+    console.log('[firebase] tab focused — reconnecting');
+    forceOnline();
+  }
+});
+
+// 4. Reconnect on browser online event
 window.addEventListener('online', () => {
-  console.log('[firebase] browser online — reconnecting Firestore');
+  console.log('[firebase] browser online — reconnecting');
   forceOnline();
 });
 window.addEventListener('offline', () => {
-  console.log('[firebase] browser offline — Firestore will queue writes');
+  console.log('[firebase] browser offline');
 });
 
 function waitForServer(timeoutMs = 15000) {
