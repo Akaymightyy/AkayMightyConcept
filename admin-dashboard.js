@@ -433,12 +433,20 @@ function renderStats() {
   const totalSlots = IMAGE_SECTIONS.reduce((n, s) => n + s.slots.length, 0);
   const custom = Object.values(state.images).filter(v => v && v.length > 0).length;
   const textCount = state.textSlotsDiscovered.reduce((n, s) => n + s.slots.length, 0);
-  $('#statSlots').textContent  = totalSlots;
-  $('#statCustom').textContent = custom;
-  $('#statTexts').textContent  = textCount;
-  $('#navCountImages').textContent = totalSlots;
-  $('#navCountTexts').textContent  = textCount;
-  $('#navCountCustom').textContent = state.customImages.length;
+
+  // Defensive: use setText helper that skips missing elements
+  // (prevents "Cannot set properties of null" crash when admin.html is
+  // an older version missing some stat elements)
+  function setText(id, val) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = val;
+  }
+  setText('statSlots', totalSlots);
+  setText('statCustom', custom);
+  setText('statTexts', textCount);
+  setText('navCountImages', totalSlots);
+  setText('navCountTexts', textCount);
+  setText('navCountCustom', state.customImages.length);
 }
 
 // =====================================================================
@@ -912,8 +920,10 @@ function initNav() {
       });
       const v = VIEW_TITLES[target];
       if (v) {
-        $('#viewTitle').textContent = v.title;
-        $('#viewSub').textContent   = v.sub;
+        const t = $('#viewTitle');
+        const s = $('#viewSub');
+        if (t) t.textContent = v.title;
+        if (s) s.textContent = v.sub;
       }
     });
   });
@@ -929,11 +939,15 @@ function initNav() {
 // =====================================================================
 function swapToApp(user) {
   if (!user) return;
-  $('#dashLogin').hidden = true;
-  $('#dashApp').hidden = false;
+  const login = $('#dashLogin');
+  const app = $('#dashApp');
+  if (login) login.hidden = true;
+  if (app) app.hidden = false;
   const email = user.email || '';
-  $('#headerUser').textContent = email;
-  $('#sidebarUser').textContent = email;
+  const hu = $('#headerUser');
+  const su = $('#sidebarUser');
+  if (hu) hu.textContent = email;
+  if (su) su.textContent = email;
   // Start sync if not already running
   if (!state.unsubImages) startSync();
   // Capture defaults from site (first time only)
@@ -947,8 +961,10 @@ function swapToApp(user) {
 }
 
 function swapToLogin() {
-  $('#dashLogin').hidden = false;
-  $('#dashApp').hidden = true;
+  const login = $('#dashLogin');
+  const app = $('#dashApp');
+  if (login) login.hidden = false;
+  if (app) app.hidden = true;
   if (state.unsubImages) { state.unsubImages(); state.unsubImages = null; }
   if (state.unsubTexts)  { state.unsubTexts();  state.unsubTexts  = null; }
 }
