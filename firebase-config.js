@@ -93,17 +93,18 @@ export function doc(_db, collection, id) {
 // Matches Firebase SDK. The 'merge: true' option is always assumed (we
 // always patch, never replace).
 export async function setDoc(docRef, data, options) {
-  // Strip serverTimestamp markers and track them for fieldTransforms
+  // Strip serverTimestamp markers — we just skip these fields entirely
+  // (the Firestore REST API patch endpoint doesn't accept field transforms
+  // at the top level, and _updatedAt isn't critical for admin functionality)
   const cleanData = {};
-  const transforms = [];
   for (const [key, val] of Object.entries(data)) {
     if (val && val.__serverTimestamp) {
-      transforms.push({ fieldPath: key, setToServerValue: 'REQUEST_TIME' });
-    } else {
-      cleanData[key] = val;
+      // Skip — we don't write server timestamp fields via the proxy
+      continue;
     }
+    cleanData[key] = val;
   }
-  return proxySetDocWithTransforms(docRef._id, cleanData, transforms);
+  return proxySetDocSimple(docRef._id, cleanData);
 }
 
 // getDoc(docRef)
@@ -144,9 +145,12 @@ export function waitForServer(timeoutMs) {
   return Promise.resolve();
 }
 
-// ---- Internal: setDoc with field transforms (serverTimestamp) ----
-// Calls the proxy with the proper Firestore REST API format
-async function proxySetDocWithTransforms(docName, data, transforms) {
+// ---- Internal: setDoc (simple, no transforms) ----
+// Calls the proxy with the proper Firestore REST API format.
+// We skip the _updatedAt field entirely (it's not critical, and the
+// Firestore REST API patch endpoint doesn't accept field transforms
+// at the top level of the request body).
+async function proxySetDocSimple(docName, data) {
   const token = await proxyGetIdToken();
   if (!token) {
     const err = new Error('Not authenticated — sign in first');
@@ -157,9 +161,8 @@ async function proxySetDocWithTransforms(docName, data, transforms) {
   // Convert data to Firestore REST format
   const fields = objToFields(data);
   const body = { fields };
-  if (transforms.length) body.transforms = transforms;
 
-  // Build updateMask for merge behavior
+  // Build updateMask for merge behavior (only update the fields we're changing)
   const fieldPaths = Object.keys(fields);
   const maskParams = fieldPaths.map(f => `updateMask.fieldPaths=${encodeURIComponent(f)}`).join('&');
 
