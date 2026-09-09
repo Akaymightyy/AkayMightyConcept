@@ -1,184 +1,147 @@
 // =====================================================================
-//  showcase-scroll.js
+//  showcase-scroll.js  v21
 //  ---------------------------------------------------------------------
-//  Drives the Web Showcase horizontal marquee with:
-//    • Auto-play (smooth, ~0.4px per frame, loops seamlessly because
-//      the strip content is duplicated)
-//    • Pause on hover (desktop) and on touch (mobile)
-//    • Manual drag-to-scroll with pointer events (mouse + touch + pen)
-//    • Vertical touch-scroll passes through to the page (touch-action: pan-x
-//      on the wrap means horizontal pans go to the showcase, vertical pans
-//      go to the page)
-//    • Direction taken from data-direction="left|right" on the strip
-//    • Resumes auto-play 2s after the user stops interacting
+//  FIX: Removed pointer event drag handlers that were capturing all
+//  touch events (via setPointerCapture) and blocking vertical page
+//  scroll. Now uses:
+//    • Native overflow-x: auto for horizontal scroll (works with touch)
+//    • rAF for smooth auto-play
+//    • Passive touch listeners (don't block anything)
+//    • CSS touch-action: pan-x pan-y (browser handles both directions)
 //
-//  No external deps. Loaded as a module from index.html.
+//  Exposes window.initShowcase() so projects-renderer.js can re-init
+//  after dynamically rendering project cards.
 // =====================================================================
 
-(function () {
-  const SPEED = 0.4;          // px per frame (~24 px/sec at 60fps)
-  const RESUME_DELAY = 2000;  // ms after last interaction before auto-play resumes
+const SPEED = 0.4;          // px per ms
+const RESUME_DELAY = 2500;  // ms after last interaction before auto-play resumes
 
-  function init() {
-    document.querySelectorAll('.showcase-track-wrap').forEach(initWrap);
+function initShowcase() {
+  document.querySelectorAll('.showcase-track-wrap').forEach(initWrap);
+  console.log('[showcase] initShowcase — found', document.querySelectorAll('.showcase-track-wrap').length, 'tracks');
+}
+window.initShowcase = initShowcase;
+
+function initWrap(wrap) {
+  // Skip if already initialized
+  if (wrap.dataset.akayShowcaseInit === '1') return;
+  wrap.dataset.akayShowcaseInit = '1';
+
+  const strip = wrap.querySelector('.showcase-strip');
+  if (!strip) return;
+  const direction = strip.getAttribute('data-direction') === 'right' ? -1 : 1;
+
+  // Track half-width for seamless loop (content is duplicated)
+  let halfWidth = 0;
+  function measure() {
+    halfWidth = strip.scrollWidth / 2;
+    if (!halfWidth || halfWidth < 100) halfWidth = strip.scrollWidth;
   }
+  measure();
+  window.addEventListener('resize', measure);
+  // Re-measure when images load
+  strip.querySelectorAll('img').forEach(img => {
+    if (img.complete) return;
+    img.addEventListener('load', measure, { once: true });
+    img.addEventListener('error', measure, { once: true });
+  });
 
-  function initWrap(wrap) {
-    const strip = wrap.querySelector('.showcase-strip');
-    if (!strip) return;
-    const direction = strip.getAttribute('data-direction') === 'right' ? -1 : 1;
+  // State
+  let isHovering = false;
+  let isTouching = false;
+  let lastInteract = 0;
+  let lastFrame = performance.now();
+  let rafId = null;
+  let isAutoScrolling = false;
 
-    // Half the strip's scrollWidth = one full loop (because content is duplicated)
-    let halfWidth = 0;
-    function measure() {
-      halfWidth = strip.scrollWidth / 2;
-      // If for some reason there's no duplicate, just loop on full width
-      if (!halfWidth || halfWidth < 100) halfWidth = strip.scrollWidth;
-    }
-    measure();
-    window.addEventListener('resize', measure);
-    // Re-measure once images load (scrollWidth changes)
-    strip.querySelectorAll('img').forEach(img => {
-      if (img.complete) return;
-      img.addEventListener('load', measure, { once: true });
-      img.addEventListener('error', measure, { once: true });
-    });
+  function tick(now) {
+    const dt = Math.min(now - lastFrame, 50);
+    lastFrame = now;
 
-    // ---- state ----
-    let isHovering = false;
-    let isDragging = false;
-    let resumeTimer = null;
-    let lastFrame = performance.now();
+    const inEditMode = document.body.classList.contains('akay-edit-mode');
+    const recentlyInteracted = (now - lastInteract) < RESUME_DELAY;
+    const shouldAutoPlay = !isHovering && !isTouching && !inEditMode && !recentlyInteracted;
 
-    // ---- auto-play loop ----
-    let rafId = null;
-    function tick(now) {
-      const dt = Math.min(now - lastFrame, 50); // ms, capped
-      lastFrame = now;
+    if (shouldAutoPlay) {
+      wrap.classList.add('is-autoplaying');
+      const dx = SPEED * dt * direction;
+      let next = wrap.scrollLeft + dx;
 
-      if (!isHovering && !isDragging && !document.body.classList.contains('akay-edit-mode')) {
-        wrap.classList.add('is-autoplaying');
-        const dx = (SPEED * dt / 16.67) * direction;
-        let next = wrap.scrollLeft + dx;
-
-        // Seamless wrap-around
-        if (direction > 0) {
-          // scrolling left (content moves left)
-          if (next >= halfWidth) next -= halfWidth;
-        } else {
-          // scrolling right
-          if (next <= 0) next += halfWidth;
-        }
-        wrap.scrollLeft = next;
+      // Seamless wrap-around
+      if (direction > 0) {
+        if (next >= halfWidth) next -= halfWidth;
       } else {
-        wrap.classList.remove('is-autoplaying');
+        if (next <= 0) next += halfWidth;
       }
-      rafId = requestAnimationFrame(tick);
+
+      isAutoScrolling = true;
+      wrap.scrollLeft = next;
+      Promise.resolve().then(() => { isAutoScrolling = false; });
+    } else {
+      wrap.classList.remove('is-autoplaying');
     }
     rafId = requestAnimationFrame(tick);
+  }
+  rafId = requestAnimationFrame(tick);
 
-    // ---- hover pause (desktop) ----
-    wrap.addEventListener('mouseenter', () => { isHovering = true; });
-    wrap.addEventListener('mouseleave', () => { isHovering = false; });
+  // ---- Pause on hover (desktop) ----
+  wrap.addEventListener('mouseenter', () => {
+    isHovering = true;
+    lastInteract = performance.now();
+  });
+  wrap.addEventListener('mouseleave', () => {
+    isHovering = false;
+    lastInteract = performance.now();
+  });
 
-    // ---- manual drag (pointer events: mouse, touch, pen) ----
-    let pointerStartX = 0;
-    let pointerStartScroll = 0;
-    let pointerId = null;
-    let didMove = false;
+  // ---- Pause on touch (mobile) — ALL PASSIVE, no preventDefault ----
+  // These do NOT block vertical scrolling. The CSS touch-action: pan-x pan-y
+  // tells the browser to handle both directions natively.
+  wrap.addEventListener('touchstart', () => {
+    isTouching = true;
+    lastInteract = performance.now();
+  }, { passive: true });
+  wrap.addEventListener('touchend', () => {
+    isTouching = false;
+    lastInteract = performance.now();
+  }, { passive: true });
+  wrap.addEventListener('touchmove', () => {
+    lastInteract = performance.now();
+  }, { passive: true });
 
-    wrap.addEventListener('pointerdown', e => {
-      // Only react to primary button / touch / pen
-      if (e.pointerType === 'mouse' && e.button !== 0) return;
-      // Don't start drag if user clicked a button (admin overlay)
-      if (e.target.closest('button, a')) return;
+  // ---- Detect USER scroll (not our auto-play scroll) ----
+  wrap.addEventListener('scroll', () => {
+    if (isAutoScrolling) return;
+    lastInteract = performance.now();
+  }, { passive: true });
 
-      pointerId = e.pointerId;
-      pointerStartX = e.clientX;
-      pointerStartScroll = wrap.scrollLeft;
-      didMove = false;
-      isDragging = true;
-      wrap.classList.add('is-dragging');
-      try { wrap.setPointerCapture(pointerId); } catch {}
-
-      // Pause auto-play
-      clearTimeout(resumeTimer);
-    });
-
-    wrap.addEventListener('pointermove', e => {
-      if (pointerId !== e.pointerId) return;
-      const dx = e.clientX - pointerStartX;
-      if (Math.abs(dx) > 3) didMove = true;
-      wrap.scrollLeft = pointerStartScroll - dx;
-    });
-
-    function endDrag(e) {
-      if (pointerId !== e.pointerId) return;
-      isDragging = false;
-      wrap.classList.remove('is-dragging');
-      try { wrap.releasePointerCapture(pointerId); } catch {}
-      pointerId = null;
-
-      // Schedule auto-play resume
-      clearTimeout(resumeTimer);
-      resumeTimer = setTimeout(() => { /* just let the loop pick up */ }, RESUME_DELAY);
+  // ---- Wheel: shift+wheel = horizontal, otherwise page scrolls ----
+  wrap.addEventListener('wheel', e => {
+    if (e.shiftKey) {
+      e.preventDefault();
+      wrap.scrollLeft += e.deltaY;
     }
-    wrap.addEventListener('pointerup', endDrag);
-    wrap.addEventListener('pointercancel', endDrag);
+    // Otherwise let the page scroll vertically — do nothing
+  }, { passive: false });
 
-    // Prevent click-navigation right after a drag (so a swipe doesn't fire a card click)
-    wrap.addEventListener('click', e => {
-      if (didMove) {
-        e.preventDefault();
-        e.stopPropagation();
-        didMove = false;
+  // ---- Pause when offscreen (perf) ----
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(en => {
+      if (!en.isIntersecting) {
+        cancelAnimationFrame(rafId);
+        rafId = null;
+      } else if (!rafId) {
+        lastFrame = performance.now();
+        rafId = requestAnimationFrame(tick);
       }
-    }, true);
+    });
+  }, { threshold: 0 });
+  io.observe(wrap);
+}
 
-    // ---- touch: pause auto-play while touching ----
-    wrap.addEventListener('touchstart', () => {
-      clearTimeout(resumeTimer);
-      isHovering = true;
-    }, { passive: true });
-    wrap.addEventListener('touchend', () => {
-      isHovering = false;
-      clearTimeout(resumeTimer);
-      resumeTimer = setTimeout(() => {}, RESUME_DELAY);
-    }, { passive: true });
-
-    // ---- wheel: horizontal wheel scrolls the showcase, vertical scrolls the page ----
-    wrap.addEventListener('wheel', e => {
-      // Only intercept if it's a horizontal wheel OR shift+wheel
-      if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
-        // natural horizontal wheel — let the browser handle it
-        return;
-      }
-      if (e.shiftKey) {
-        // shift+wheel = force horizontal scroll on this element
-        e.preventDefault();
-        wrap.scrollLeft += e.deltaY;
-      }
-      // Otherwise, do nothing — let the page scroll vertically
-    }, { passive: false });
-
-    // ---- pause when offscreen (perf) ----
-    const io = new IntersectionObserver(entries => {
-      entries.forEach(en => {
-        if (!en.isIntersecting) {
-          cancelAnimationFrame(rafId);
-          rafId = null;
-        } else if (!rafId) {
-          lastFrame = performance.now();
-          rafId = requestAnimationFrame(tick);
-        }
-      });
-    }, { threshold: 0 });
-    io.observe(wrap);
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
-    init();
-  }
-})();
+// Auto-init on page load
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initShowcase);
+} else {
+  initShowcase();
+}

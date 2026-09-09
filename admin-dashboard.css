@@ -517,6 +517,84 @@ body.akay-dash {
   font-weight: 600;
 }
 
+/* ===== Project cards =========================================== */
+.dash-project-card {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: 16px;
+  background: linear-gradient(180deg, var(--akay-bg-2) 0%, var(--akay-bg-1) 100%);
+  border: 1px solid var(--akay-border);
+  border-radius: var(--akay-radius);
+  overflow: hidden;
+  margin-bottom: 12px;
+  transition: border-color .2s;
+}
+.dash-project-card:hover { border-color: var(--akay-border-2); }
+
+.dash-project-card__preview {
+  aspect-ratio: 4/3;
+  background: var(--akay-bg);
+  overflow: hidden;
+}
+.dash-project-card__preview img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.dash-project-card__noimg {
+  display: flex; align-items: center; justify-content: center;
+  width: 100%; height: 100%;
+  color: var(--akay-text-dim);
+  font: 600 11px/1 'Montserrat', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.dash-project-card__body { padding: 14px 16px 14px 0; display: flex; flex-direction: column; gap: 6px; }
+.dash-project-card__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.dash-project-card__order {
+  font: 800 13px/1 'Montserrat', sans-serif;
+  color: var(--akay-red);
+  margin-right: 8px;
+}
+.dash-project-card__tag {
+  font: 600 10px/1 'Montserrat', sans-serif;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--akay-text-mute);
+  background: var(--akay-bg-3);
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+.dash-project-card__btns { display: flex; gap: 4px; flex-wrap: wrap; }
+.dash-project-card__title { font: 700 15px/1.3 'Montserrat', sans-serif; margin: 0; color: #fff; }
+.dash-project-card__desc { font: 400 12px/1.4 'Poppins', sans-serif; color: var(--akay-text-mute); margin: 0; }
+.dash-project-card__url {
+  font: 400 11px/1 'SFMono-Regular', Menlo, monospace;
+  color: #ff8a8a;
+  text-decoration: none;
+  word-break: break-all;
+}
+.dash-project-card__url:hover { text-decoration: underline; }
+
+.dash-project-form__upload {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+@media (max-width: 640px) {
+  .dash-project-card { grid-template-columns: 1fr; }
+  .dash-project-card__body { padding: 14px 16px; }
+}
+
 /* ===== Settings =============================================== */
 .dash-settings { display: flex; flex-direction: column; gap: 10px; max-width: 720px; }
 .dash-settings__row {

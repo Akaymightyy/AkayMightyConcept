@@ -66,24 +66,9 @@ const IMAGE_SECTIONS = [
       { id: 'img:custom-bag',     label: 'Custom Bag sample' },
       { id: 'img:branded-merch',  label: 'Branded Merch sample' }
     ]
-  },
-  {
-    title: 'Web Showcase (horizontal marquee)',
-    slots: [
-      { id: 'img:web-1',  label: 'Row 1 · Card 1' },
-      { id: 'img:web-2',  label: 'Row 1 · Card 2' },
-      { id: 'img:web-3',  label: 'Row 1 · Card 3' },
-      { id: 'img:web-4',  label: 'Row 1 · Card 4' },
-      { id: 'img:web-5',  label: 'Row 1 · Card 5' },
-      { id: 'img:web-6',  label: 'Row 1 · Card 6' },
-      { id: 'img:web-7',  label: 'Row 2 · Card 1' },
-      { id: 'img:web-8',  label: 'Row 2 · Card 2' },
-      { id: 'img:web-9',  label: 'Row 2 · Card 3' },
-      { id: 'img:web-10', label: 'Row 2 · Card 4' },
-      { id: 'img:web-11', label: 'Row 2 · Card 5' },
-      { id: 'img:web-12', label: 'Row 2 · Card 6' }
-    ]
   }
+  // NOTE: Web Showcase cards (img:web-1 through img:web-12) are now
+  // managed dynamically via the Projects tab. See PROJECTS_DEFAULTS below.
 ];
 
 // =====================================================================
@@ -92,6 +77,7 @@ const IMAGE_SECTIONS = [
 const state = {
   images: {},
   texts: {},
+  projects: [],
   customImages: [],
   defaults: { images: {}, texts: {} },
   defaultsReady: false,
@@ -99,6 +85,7 @@ const state = {
   unsubImages: null,
   unsubTexts: null,
   unsubCustom: null,
+  unsubProjects: null,
   rulesOk: null
 };
 
@@ -240,6 +227,19 @@ function startSync() {
     renderStats();
   }, err => {
     console.error('[dash] custom sync error:', err);
+  });
+
+  state.unsubProjects = onSnapshot(doc(db, 'content', 'projects'), snap => {
+    if (snap.exists()) {
+      const data = snap.data();
+      state.projects = Array.isArray(data.items) ? data.items : [];
+    } else {
+      state.projects = [];
+    }
+    renderProjects();
+    renderStats();
+  }, err => {
+    console.error('[dash] projects sync error:', err);
   });
 
   // Verify write permission by attempting a no-op merge
@@ -448,6 +448,7 @@ function renderStats() {
   setText('navCountImages', totalSlots);
   setText('navCountTexts', textCount);
   setText('navCountCustom', state.customImages.length);
+  setText('navCountProjects', state.projects.length);
 }
 
 // =====================================================================
@@ -906,6 +907,7 @@ async function resetAll() {
 // =====================================================================
 const VIEW_TITLES = {
   images:   { title: 'All Images',         sub: 'Manage every image on your site from one place' },
+  projects: { title: 'Web Projects',       sub: 'Add, edit, delete, and reorder projects in the Recent Web Work showcase' },
   custom:   { title: 'Custom Images',      sub: 'Upload additional product shots and recent work — auto-appears on the site' },
   texts:    { title: 'Captions & Text',    sub: 'Edit every heading, label, and description' },
   settings: { title: 'Settings & Status',  sub: 'Connection health and configuration' }
@@ -1090,6 +1092,285 @@ window.addEventListener('offline', () => {
 });
 
 // =====================================================================
+//  STEP 11.5 — PROJECTS CRUD (dynamic Web Showcase)
+//  Projects are stored as an array in Firestore doc: content/projects
+//  Each project: { id, title, category, description, imageUrl, liveUrl, order }
+// =====================================================================
+
+const PROJECTS_DEFAULTS = [
+  { title: 'Chardonic Oil & Gas',     category: 'Corporate',    description: 'Web design · UI/UX',    liveUrl: '' },
+  { title: 'Gochez Logistics',        category: 'Corporate',    description: 'Web design · Branding', liveUrl: '' },
+  { title: 'iLoad App',               category: 'Landing Page', description: 'Web · Motion',          liveUrl: '' },
+  { title: 'AfriMart Store',          category: 'E-commerce',   description: 'Shopify · UI/UX',       liveUrl: '' },
+  { title: 'Studio Maya',             category: 'Portfolio',    description: 'Web · Branding',        liveUrl: '' },
+  { title: 'PayFlow Dashboard',       category: 'SaaS',         description: 'Web app · UI/UX',       liveUrl: '' },
+  { title: 'Suya Republic',           category: 'Restaurant',   description: 'Web · Branding',        liveUrl: '' },
+  { title: 'LuxVilla Listings',       category: 'Real Estate',  description: 'Web · SEO',             liveUrl: '' },
+  { title: 'Grace Cathedral',         category: 'Ministry',     description: 'Web · Branding',        liveUrl: '' },
+  { title: 'HaulPro Fleet',           category: 'Logistics',    description: 'Web app · UI',          liveUrl: '' },
+  { title: 'LearnHub Academy',        category: 'Education',    description: 'Web · LMS',             liveUrl: '' },
+  { title: 'Nova Creatives',          category: 'Agency',       description: 'Web · Branding',        liveUrl: '' }
+];
+
+function renderProjects() {
+  const list = $('#projectsList');
+  if (!list) return;
+
+  if (!state.projects.length) {
+    list.innerHTML = `
+      <div class="dash-card dash-card--empty">
+        <div class="dash-card__body">
+          <p>No projects yet.</p>
+          <p style="margin-top:6px;font-size:12px;">Click <strong>+ Add New Project</strong> to create one, or <strong>Seed 12 defaults</strong> to start with the original showcase projects.</p>
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  // Sort by order
+  const sorted = [...state.projects].sort((a, b) => (a.order || 0) - (b.order || 0));
+
+  list.innerHTML = sorted.map((p, i) => `
+    <div class="dash-project-card" data-id="${p.id}">
+      <div class="dash-project-card__preview">
+        ${p.imageUrl ? `<img src="${escapeAttr(p.imageUrl)}" alt="${escapeAttr(p.title)}" loading="lazy" />` : '<span class="dash-project-card__noimg">No image</span>'}
+      </div>
+      <div class="dash-project-card__body">
+        <div class="dash-project-card__head">
+          <div>
+            <span class="dash-project-card__order">#${i + 1}</span>
+            <span class="dash-project-card__tag">${escapeHtml(p.category || '')}</span>
+          </div>
+          <div class="dash-project-card__btns">
+            <button class="dash-btn dash-btn--ghost dash-btn--mini" data-act="up" title="Move up">↑</button>
+            <button class="dash-btn dash-btn--ghost dash-btn--mini" data-act="down" title="Move down">↓</button>
+            <button class="dash-btn dash-btn--primary dash-btn--mini" data-act="edit">Edit</button>
+            <button class="dash-btn dash-btn--danger dash-btn--mini" data-act="delete">Delete</button>
+          </div>
+        </div>
+        <h4 class="dash-project-card__title">${escapeHtml(p.title || 'Untitled')}</h4>
+        <p class="dash-project-card__desc">${escapeHtml(p.description || '')}</p>
+        ${p.liveUrl ? `<a href="${escapeAttr(p.liveUrl)}" target="_blank" class="dash-project-card__url">${escapeHtml(p.liveUrl)}</a>` : ''}
+      </div>
+    </div>
+  `).join('');
+
+  // Wire buttons
+  list.querySelectorAll('.dash-project-card').forEach(card => {
+    const id = card.getAttribute('data-id');
+    card.querySelectorAll('button[data-act]').forEach(btn => {
+      btn.addEventListener('click', () => handleProjectAction(id, btn.getAttribute('data-act')));
+    });
+  });
+}
+
+async function handleProjectAction(id, act) {
+  const project = state.projects.find(p => p.id === id);
+  if (!project && act !== 'add') return;
+
+  if (act === 'up') return moveProject(id, -1);
+  if (act === 'down') return moveProject(id, 1);
+  if (act === 'edit') return editProject(project);
+  if (act === 'delete') return deleteProject(project);
+}
+
+function addNewProject() {
+  showProjectForm(null);
+}
+
+function editProject(project) {
+  showProjectForm(project);
+}
+
+function showProjectForm(project) {
+  const isEdit = !!project;
+  const p = project || { title: '', category: '', description: '', imageUrl: '', liveUrl: '' };
+
+  // Build modal
+  let modal = $('#projectFormModal');
+  if (modal) modal.remove();
+
+  modal = document.createElement('div');
+  modal.id = 'projectFormModal';
+  modal.className = 'akay-modal is-open';
+  modal.innerHTML = `
+    <div class="akay-modal__panel" style="max-width:480px;">
+      <button class="akay-modal__close" type="button" id="pfClose">×</button>
+      <h2 class="akay-modal__title">${isEdit ? 'Edit Project' : 'Add New Project'}</h2>
+      <form id="projectForm" class="dash-form">
+        <label class="dash-field">
+          <span>Title *</span>
+          <input type="text" id="pf-title" required value="${escapeAttr(p.title)}" placeholder="e.g. Chardonic Oil & Gas" />
+        </label>
+        <label class="dash-field">
+          <span>Category / Tag</span>
+          <input type="text" id="pf-category" value="${escapeAttr(p.category)}" placeholder="e.g. Corporate, E-commerce, SaaS" />
+        </label>
+        <label class="dash-field">
+          <span>Description</span>
+          <input type="text" id="pf-description" value="${escapeAttr(p.description)}" placeholder="e.g. Web design · UI/UX" />
+        </label>
+        <label class="dash-field">
+          <span>Live URL (optional)</span>
+          <input type="url" id="pf-liveurl" value="${escapeAttr(p.liveUrl)}" placeholder="https://example.com" />
+        </label>
+        <label class="dash-field">
+          <span>Image URL</span>
+          <input type="url" id="pf-imageurl" value="${escapeAttr(p.imageUrl)}" placeholder="https://res.cloudinary.com/..." />
+        </label>
+        <div class="dash-project-form__upload">
+          <button type="button" class="dash-btn dash-btn--primary" id="pf-upload-btn">Upload Image</button>
+          <span style="font-size:12px;color:var(--akay-text-mute);">or paste a URL above</span>
+        </div>
+        <div id="pf-preview" style="margin-top:8px;">
+          ${p.imageUrl ? `<img src="${escapeAttr(p.imageUrl)}" style="width:100%;border-radius:8px;border:1px solid var(--akay-border);" />` : ''}
+        </div>
+        <button type="submit" class="dash-btn dash-btn--primary dash-btn--block" style="margin-top:16px;">${isEdit ? 'Save Changes' : 'Add Project'}</button>
+        <p class="dash-form__err" id="pf-err"></p>
+      </form>
+    </div>
+  `;
+  document.body.appendChild(modal);
+
+  modal.querySelector('#pfClose').addEventListener('click', () => modal.remove());
+  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+
+  // Upload button
+  modal.querySelector('#pf-upload-btn').addEventListener('click', () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.style.display = 'none';
+    document.body.appendChild(input);
+    input.addEventListener('change', async () => {
+      const file = input.files[0];
+      if (!file) { input.remove(); return; }
+      if (file.size > 10 * 1024 * 1024) { toast('Max 10MB', 'error'); input.remove(); return; }
+      toast('Uploading…', 'info');
+      try {
+        const url = await uploadToCloudinary(file);
+        modal.querySelector('#pf-imageurl').value = url;
+        modal.querySelector('#pf-preview').innerHTML = `<img src="${url}" style="width:100%;border-radius:8px;border:1px solid var(--akay-border);" />`;
+        toast('Image uploaded', 'success');
+      } catch (e) {
+        toast('Upload failed: ' + e.message, 'error');
+      } finally {
+        input.remove();
+      }
+    });
+    input.click();
+  });
+
+  // Live preview on URL change
+  modal.querySelector('#pf-imageurl').addEventListener('input', e => {
+    const url = e.target.value.trim();
+    modal.querySelector('#pf-preview').innerHTML = url
+      ? `<img src="${escapeAttr(url)}" style="width:100%;border-radius:8px;border:1px solid var(--akay-border);" />`
+      : '';
+  });
+
+  // Submit
+  modal.querySelector('#projectForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const title = modal.querySelector('#pf-title').value.trim();
+    const category = modal.querySelector('#pf-category').value.trim();
+    const description = modal.querySelector('#pf-description').value.trim();
+    const liveUrl = modal.querySelector('#pf-liveurl').value.trim();
+    const imageUrl = modal.querySelector('#pf-imageurl').value.trim();
+    const errEl = modal.querySelector('#pf-err');
+
+    if (!title) { errEl.textContent = 'Title is required'; return; }
+    if (!imageUrl) { errEl.textContent = 'Image is required (upload or paste URL)'; return; }
+
+    errEl.textContent = '';
+
+    if (isEdit) {
+      // Update existing
+      const updated = state.projects.map(p =>
+        p.id === project.id
+          ? { ...p, title, category, description, liveUrl, imageUrl }
+          : p
+      );
+      const ok = await saveProjects(updated);
+      if (ok) { toast('Project updated', 'success'); modal.remove(); }
+    } else {
+      // Add new
+      const newItem = {
+        id: `proj-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        title, category, description, liveUrl, imageUrl,
+        order: state.projects.length
+      };
+      const updated = [...state.projects, newItem];
+      const ok = await saveProjects(updated);
+      if (ok) { toast('Project added', 'success'); modal.remove(); }
+    }
+  });
+}
+
+async function deleteProject(project) {
+  if (!confirm(`Delete "${project.title}"?\n\nThis removes it from the site immediately.`)) return;
+  const updated = state.projects.filter(p => p.id !== project.id);
+  // Re-index order
+  updated.forEach((p, i) => p.order = i);
+  const ok = await saveProjects(updated);
+  if (ok) toast('Project deleted', 'info');
+}
+
+async function moveProject(id, direction) {
+  const sorted = [...state.projects].sort((a, b) => (a.order || 0) - (b.order || 0));
+  const index = sorted.findIndex(p => p.id === id);
+  if (index < 0) return;
+  const newIndex = index + direction;
+  if (newIndex < 0 || newIndex >= sorted.length) return;
+
+  // Swap
+  [sorted[index], sorted[newIndex]] = [sorted[newIndex], sorted[index]];
+  // Re-index
+  sorted.forEach((p, i) => p.order = i);
+
+  await saveProjects(sorted);
+}
+
+async function seedDefaultProjects() {
+  if (!confirm('This will ADD 12 default projects to your showcase. You can edit or delete them afterwards. Continue?')) return;
+  toast('Adding 12 default projects…', 'info');
+  const newProjects = PROJECTS_DEFAULTS.map((p, i) => ({
+    id: `proj-seed-${Date.now()}-${i}`,
+    title: p.title,
+    category: p.category,
+    description: p.description,
+    imageUrl: `https://picsum.photos/seed/akay-web-${i + 1}/800/600`,
+    liveUrl: p.liveUrl || '',
+    order: state.projects.length + i
+  }));
+  const updated = [...state.projects, ...newProjects];
+  const ok = await saveProjects(updated);
+  if (ok) toast('12 default projects added', 'success');
+}
+
+async function saveProjects(arr) {
+  try {
+    await setDoc(doc(db, 'content', 'projects'),
+      { items: arr, _updatedAt: serverTimestamp() },
+      { merge: true });
+    toast(`✓ Projects saved (${arr.length})`, 'success');
+    return true;
+  } catch (e) {
+    if (e.code === 'permission-denied' || /permission|denied|rules/i.test(e.message)) {
+      toast('SAVE FAILED — Firestore rules rejected the write. See Settings tab.', 'error');
+      state.rulesOk = false;
+      renderRulesStatus();
+    } else if (/offline|network|timed out|unreachable/i.test(e.message)) {
+      toast('NETWORK — cannot reach Firestore. Try again.', 'error');
+    } else {
+      toast('Save failed: ' + e.message, 'error');
+    }
+    return false;
+  }
+}
+
+// =====================================================================
 //  STEP 12 — wire buttons + boot
 // =====================================================================
 function boot() {
@@ -1125,6 +1406,17 @@ function boot() {
   const btnRefreshCustom = $('#btnRefreshCustom');
   if (btnRefreshCustom) btnRefreshCustom.addEventListener('click', () => {
     renderCustomImages();
+    toast('Refreshed', 'info');
+  });
+
+  // Project buttons
+  const btnAddProject = $('#btnAddProject');
+  if (btnAddProject) btnAddProject.addEventListener('click', addNewProject);
+  const btnSeedProjects = $('#btnSeedProjects');
+  if (btnSeedProjects) btnSeedProjects.addEventListener('click', seedDefaultProjects);
+  const btnRefreshProjects = $('#btnRefreshProjects');
+  if (btnRefreshProjects) btnRefreshProjects.addEventListener('click', () => {
+    renderProjects();
     toast('Refreshed', 'info');
   });
 
