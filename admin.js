@@ -27,26 +27,27 @@
 //    See firestore.rules. Only the authenticated admin can write.
 // =====================================================================
 
-import { auth, db, forceOnline, waitForServer } from "./firebase-config.js";
+import {
+  auth,
+  db,
+  forceOnline,
+  waitForServer,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged,
+  getIdToken,
+  doc,
+  getDoc,
+  setDoc,
+  onSnapshot,
+  serverTimestamp
+} from "./firebase-config.js";
 import {
   cloudinaryConfig,
   cloudinaryUploadUrl,
   cloudinaryDeleteEndpoint,
   publicIdFromCloudinaryUrl
 } from "./cloudinary-config.js";
-import {
-  signInWithEmailAndPassword,
-  signOut,
-  onAuthStateChanged,
-  getIdToken
-} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
-import {
-  doc,
-  getDoc,
-  setDoc,
-  onSnapshot,
-  serverTimestamp
-} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
 
 // =====================================================================
 //  STATE

@@ -12,26 +12,27 @@
 //    • Auto-redirects to dashboard UI immediately after sign-in
 // =====================================================================
 
-import { auth, db, forceOnline, waitForServer } from "./firebase-config.js";
+import {
+  auth,
+  db,
+  forceOnline,
+  waitForServer,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged,
+  getIdToken,
+  doc,
+  setDoc,
+  getDoc,
+  onSnapshot,
+  serverTimestamp
+} from "./firebase-config.js";
 import {
   cloudinaryConfig,
   cloudinaryUploadUrl,
   cloudinaryDeleteEndpoint,
   publicIdFromCloudinaryUrl
 } from "./cloudinary-config.js";
-import {
-  signInWithEmailAndPassword,
-  signOut,
-  onAuthStateChanged,
-  getIdToken
-} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
-import {
-  doc,
-  setDoc,
-  getDoc,
-  onSnapshot,
-  serverTimestamp
-} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
 
 // =====================================================================
 //  IMAGE-SLOT REGISTRY — grouped by section for the dashboard UI.

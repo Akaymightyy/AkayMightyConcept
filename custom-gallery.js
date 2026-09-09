@@ -6,8 +6,7 @@
 //  Runs on every page load — for admin AND public visitors.
 //  =====================================================================
 
-import { db } from "./firebase-config.js";
-import { doc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+import { db, doc, onSnapshot } from "./firebase-config.js";
 
 function escapeHtml(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
