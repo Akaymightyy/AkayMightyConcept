@@ -1,27 +1,10 @@
-// /api/firebase-auth-proxy.js
-// Server-side proxy for Firebase Identity Toolkit + Secure Token API.
-//
-// WHY THIS EXISTS
-// --------------
-// Some mobile carriers block or fail to resolve direct browser requests
-// to identitytoolkit.googleapis.com and securetoken.googleapis.com.
-// This makes admin sign-in fail on those networks even though the site
-// itself loads fine.
-//
-// This function runs on Vercel's servers (which have reliable internet)
-// and forwards auth requests on behalf of the browser.
-//
-// USAGE
-// -----
-// POST /api/firebase-auth-proxy  with JSON body:
-//   { endpoint: "/accounts:signInWithPassword?key=KEY", body: {...} }
-//   { endpoint: "/token?key=KEY", body: {...}, contentType: "application/x-www-form-urlencoded" }
+// /api/firebase-auth-proxy.js  v19
+// Updated with new Firebase API key for project `akaymightyconcept`.
 
 const IDENTITY_BASE = 'https://identitytoolkit.googleapis.com/v1';
 const SECURE_TOKEN_BASE = 'https://securetoken.googleapis.com/v1';
 
-// Your Firebase Web API key (this is PUBLIC — it's in your firebase-config.js already)
-const FIREBASE_API_KEY = 'AIzaSyDVU0NiXklVK0XSBSzT418GiLrW1lz0uhw';
+const FIREBASE_API_KEY = 'AIzaSyBpyyasdx-xwp9vyf-XpcFgXmzAWjGJgvA';
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -41,7 +24,6 @@ export default async function handler(req, res) {
     return res.status(400).json({ message: 'Missing endpoint in body' });
   }
 
-  // Determine which Google API base to use
   let baseUrl;
   if (endpoint.indexOf('/token') >= 0 || endpoint.indexOf('securetoken') >= 0) {
     baseUrl = SECURE_TOKEN_BASE;
@@ -49,7 +31,6 @@ export default async function handler(req, res) {
     baseUrl = IDENTITY_BASE;
   }
 
-  // Auto-append API key if not present
   let finalEndpoint = endpoint;
   if (!finalEndpoint.includes('key=')) {
     finalEndpoint += (finalEndpoint.includes('?') ? '&' : '?') + 'key=' + FIREBASE_API_KEY;
