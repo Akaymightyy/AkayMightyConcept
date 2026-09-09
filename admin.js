@@ -159,46 +159,163 @@ function applyText(slot, text) {
 // =====================================================================
 //  STEP 3 — Firestore real-time subscriptions
 // =====================================================================
+//  v11: Added network health monitoring. When Firestore can't reach
+//  the server (DNS failures, ERR_NAME_NOT_RESOLVED, etc.), we:
+//    1. Show a visible red banner at the top of the page
+//    2. Don't pretend saves succeeded (status stays "Saving...")
+//    3. Auto-retry every 10 seconds until network returns
+//    4. When network returns, all queued writes flush automatically
+// =====================================================================
+
+let _networkHealthy = null;   // null=unknown, true=ok, false=broken
+let _retryTimer = null;
+
+function setNetworkHealth(healthy, reason) {
+  if (_networkHealthy === healthy) return;
+  _networkHealthy = healthy;
+  console.log(`[admin] network health: ${healthy ? 'OK' : 'BROKEN'} ${reason ? '(' + reason + ')' : ''}`);
+  updateNetworkBanner(healthy, reason);
+
+  if (!healthy) {
+    // Start retry loop
+    if (!_retryTimer) {
+      _retryTimer = setInterval(async () => {
+        console.log('[admin] retrying Firestore connection...');
+        await forceOnline();
+        // Try a simple read to see if it works now
+        try {
+          await getDoc(doc(db, 'content', 'images'));
+          // If we got here, network is back
+          setNetworkHealth(true, 'reconnected');
+          clearInterval(_retryTimer);
+          _retryTimer = null;
+        } catch (e) {
+          // Still broken, keep retrying
+        }
+      }, 10000);
+    }
+  } else {
+    // Network is back — stop retry, force a fresh read
+    if (_retryTimer) {
+      clearInterval(_retryTimer);
+      _retryTimer = null;
+    }
+    forceServerRead();
+  }
+}
+
+function updateNetworkBanner(healthy, reason) {
+  let banner = $('#akayNetBanner');
+  if (!banner) {
+    banner = document.createElement('div');
+    banner.id = 'akayNetBanner';
+    banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:2147483647;padding:12px 16px;text-align:center;font:600 13px/1.4 Poppins,sans-serif;border-radius:0 0 8px 8px;box-shadow:0 4px 12px rgba(0,0,0,.4);';
+    document.body.appendChild(banner);
+  }
+  if (healthy) {
+    banner.style.display = 'none';
+  } else {
+    banner.style.display = 'block';
+    banner.style.background = 'rgba(255, 82, 82, .95)';
+    banner.style.color = '#fff';
+    banner.innerHTML = `<strong>⚠ Cannot reach Firebase.</strong> ${reason || 'Network/DNS issue.'} Edits will save locally and sync when connection returns. <a href="./debug.html" style="color:#fff;text-decoration:underline;">Open debug</a>`;
+  }
+}
+
 function startSync() {
   if (state.unsubImages) state.unsubImages();
   if (state.unsubTexts)  state.unsubTexts();
 
   state.unsubImages = onSnapshot(doc(db, 'content', 'images'), snap => {
-    console.log('[admin] images snapshot:', snap.exists() ? Object.keys(snap.data()).length + ' fields' : 'doc does not exist');
+    const fromCache = snap.metadata && snap.metadata.fromCache;
+    console.log(`[admin] images snapshot: ${snap.exists() ? Object.keys(snap.data()).length + ' fields' : 'doc does not exist'} ${fromCache ? '(cache)' : '(server)'}`);
+
+    // If we got a server snapshot, network is healthy
+    if (!fromCache) setNetworkHealth(true);
+
     if (!snap.exists()) {
-      state.images = {};
+      if (!fromCache) state.images = {};
       return;
     }
     const data = snap.data();
     delete data._updatedAt;
     state.images = data;
-    // apply all overrides
-    Object.entries(data).forEach(([slot, url]) => {
-      if (slot.startsWith('img:')) applyImage(slot, url);
-    });
+    if (!fromCache || !state._gotServerImages) {
+      Object.entries(data).forEach(([slot, url]) => {
+        if (slot.startsWith('img:')) applyImage(slot, url);
+      });
+      if (!fromCache) state._gotServerImages = true;
+    }
   }, err => {
     console.error('[admin] images sync error:', err);
     if (err.code === 'permission-denied') {
-      toast('READ FAILED — Firestore rules deny read. Deploy firestore.rules. Visit /debug.html for details.', 'error');
+      toast('READ FAILED — Firestore rules deny read. Deploy firestore.rules.', 'error');
+    } else if (err.code === 'unavailable' || /offline|network|unreachable|name-not-resolved/i.test(err.message)) {
+      setNetworkHealth(false, err.message);
     } else {
       toast('Image sync failed: ' + err.message, 'error');
     }
   });
 
   state.unsubTexts = onSnapshot(doc(db, 'content', 'texts'), snap => {
+    const fromCache = snap.metadata && snap.metadata.fromCache;
     if (!snap.exists()) {
-      state.texts = {};
+      if (!fromCache) state.texts = {};
       return;
     }
     const data = snap.data();
     delete data._updatedAt;
     state.texts = data;
-    Object.entries(data).forEach(([slot, text]) => {
-      if (slot.startsWith('text:')) applyText(slot, text);
-    });
+    if (!fromCache || !state._gotServerTexts) {
+      Object.entries(data).forEach(([slot, text]) => {
+        if (slot.startsWith('text:')) applyText(slot, text);
+      });
+      if (!fromCache) state._gotServerTexts = true;
+    }
   }, err => {
     console.error('[admin] texts sync error:', err);
   });
+
+  // Force a server read on init (with network health detection)
+  forceServerRead();
+}
+
+async function forceServerRead() {
+  try {
+    console.log('[admin] forcing server read of content/images...');
+    const imgSnap = await getDoc(doc(db, 'content', 'images'));
+    setNetworkHealth(true);   // we got a response — network is OK
+    if (imgSnap.exists()) {
+      const data = imgSnap.data();
+      delete data._updatedAt;
+      console.log(`[admin] server read: ${Object.keys(data).filter(k => k.startsWith('img:')).length} image overrides`);
+      state.images = { ...state.images, ...data };
+      state._gotServerImages = true;
+      Object.entries(data).forEach(([slot, url]) => {
+        if (slot.startsWith('img:')) applyImage(slot, url);
+      });
+    }
+  } catch (e) {
+    console.error('[admin] forceServerRead images failed:', e.message);
+    if (/offline|network|unreachable|name-not-resolved|err_name/i.test(e.message)) {
+      setNetworkHealth(false, e.message);
+    }
+  }
+
+  try {
+    const textSnap = await getDoc(doc(db, 'content', 'texts'));
+    if (textSnap.exists()) {
+      const data = textSnap.data();
+      delete data._updatedAt;
+      state.texts = { ...state.texts, ...data };
+      state._gotServerTexts = true;
+      Object.entries(data).forEach(([slot, text]) => {
+        if (slot.startsWith('text:')) applyText(slot, text);
+      });
+    }
+  } catch (e) {
+    console.error('[admin] forceServerRead texts failed:', e.message);
+  }
 }
 
 // =====================================================================
@@ -443,19 +560,25 @@ async function saveText(slot, text) {
       { [slot]: text, _updatedAt: serverTimestamp() },
       { merge: true });
 
-    // Show "saved" immediately
+    // Check network health before declaring success
+    if (_networkHealthy === false) {
+      setSaving(false);
+      toast(`⚠ ${slot} saved locally only — network down. Will sync when connection returns.`, 'error');
+      return;
+    }
+
+    // Show "saved" + verify in background
     setSaving(false);
     toast(`✓ ${slot} saved`, 'success');
-
-    // Verify in background (don't block UI)
     verifyInBackground(slot, text, 'texts');
   } catch (e) {
     console.error('[admin] saveText failed:', e);
     setSaving(false);
     if (e.code === 'permission-denied' || /permission|denied|rules/i.test(e.message)) {
       toast('SAVE FAILED — Firestore rules rejected the write. Open Firebase console → Firestore → Rules → paste firestore.rules → Publish.', 'error');
-    } else if (/offline|network|timed out|unreachable/i.test(e.message)) {
-      toast('NETWORK — cannot reach Firestore. Changes saved locally, will sync when connection returns.', 'error');
+    } else if (/offline|network|timed out|unreachable|err_name/i.test(e.message)) {
+      setNetworkHealth(false, e.message);
+      toast(`⚠ ${slot} saved locally only — network down. Will sync when connection returns.`, 'error');
     } else {
       toast('Save failed: ' + e.message, 'error');
     }
@@ -628,20 +751,27 @@ async function saveImage(slot, url) {
       { [slot]: url, _updatedAt: serverTimestamp() },
       { merge: true });
 
-    // Step 3: Show "saved" immediately (write was queued locally)
+    // Step 3: Check network health before declaring success.
+    // If network is broken, the write only went to local cache —
+    // don't pretend it succeeded.
+    if (_networkHealthy === false) {
+      setSaving(false);
+      toast(`⚠ ${slot} saved locally only — network down. Will sync when connection returns.`, 'error');
+      return;
+    }
+
+    // Step 4: Show "saved" + verify in background
     setSaving(false);
     toast(`✓ ${slot} saved`, 'success');
-
-    // Step 4: Verify in the background (don't block the UI).
-    // If verification fails (network issue or rules), show a clear error.
     verifyInBackground(slot, url, 'images');
   } catch (e) {
     console.error('[admin] saveImage failed:', e);
     setSaving(false);
     if (e.code === 'permission-denied' || /permission|denied|rules/i.test(e.message)) {
       toast('SAVE FAILED — Firestore rules rejected the write. Open Firebase console → Firestore → Rules → paste firestore.rules → Publish.', 'error');
-    } else if (/offline|network|timed out|unreachable/i.test(e.message)) {
-      toast('NETWORK — cannot reach Firestore. Changes saved locally, will sync when connection returns.', 'error');
+    } else if (/offline|network|timed out|unreachable|err_name/i.test(e.message)) {
+      setNetworkHealth(false, e.message);
+      toast(`⚠ ${slot} saved locally only — network down. Will sync when connection returns.`, 'error');
     } else {
       toast('Save failed: ' + e.message, 'error');
     }
