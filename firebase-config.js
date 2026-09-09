@@ -124,8 +124,18 @@ async function proxySetDocSimple(docName, data) {
 
   const fields = objToFields(data);
   const body = { fields };
+
+  // CRITICAL: Firestore REST API rejects field paths with special characters
+  // (colons, hyphens, etc.) unless they're backtick-quoted in updateMask.
+  // Our slot IDs like "img:web-1" contain both ":" and "-".
+  // Fix: wrap each field path in backticks if it contains non-alphanumeric chars.
   const fieldPaths = Object.keys(fields);
-  const maskParams = fieldPaths.map(f => `updateMask.fieldPaths=${encodeURIComponent(f)}`).join('&');
+  const maskParams = fieldPaths.map(f => {
+    // If field name contains anything other than [a-zA-Z0-9_], wrap in backticks
+    const needsQuoting = !/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(f);
+    const pathValue = needsQuoting ? '`' + f + '`' : f;
+    return `updateMask.fieldPaths=${encodeURIComponent(pathValue)}`;
+  }).join('&');
 
   const resp = await fetch('/api/firestore-proxy?path=/content/' + docName + '&method=PATCH&' + maskParams, {
     method: 'PATCH',
