@@ -136,11 +136,6 @@ export function onSnapshot(docRef, callback, errorCallback) {
   );
 }
 
-// getIdToken (used by delete-image function)
-export async function getIdToken(user, forceRefresh) {
-  return proxyGetIdToken();
-}
-
 // ---- No-op helpers (kept for backwards compat) ----
 export function forceOnline() {
   return Promise.resolve();

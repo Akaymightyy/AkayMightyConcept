@@ -2875,6 +2875,33 @@
       });
     })();
   </script>
+  <!-- ===== Triple-click fallback (inline, runs even if modules fail) ===== -->
+  <script>
+    (function() {
+      var clicks = 0, timer = null, lastTarget = null;
+      document.addEventListener('click', function(e) {
+        var logoImg = e.target.closest && e.target.closest('#navbar [data-img-slot="img:logo"], #navbar .nav-logo');
+        if (!logoImg) return;
+        if (lastTarget === logoImg) {
+          clicks++;
+        } else {
+          clicks = 1;
+          lastTarget = logoImg;
+        }
+        clearTimeout(timer);
+        timer = setTimeout(function() { clicks = 0; lastTarget = null; }, 800);
+        if (clicks >= 3) {
+          e.preventDefault();
+          e.stopPropagation();
+          clicks = 0;
+          lastTarget = null;
+          window.location.href = './admin.html';
+        }
+      }, true);
+      console.log('[fallback] triple-click handler registered (capture)');
+    })();
+  </script>
+
   <!-- ===== Admin / editing layer ===== -->
   <script type="module" src="./firebase-config.js"></script>
   <script type="module" src="./cloudinary-config.js"></script>
