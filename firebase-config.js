@@ -1,15 +1,13 @@
 // =====================================================================
-//  firebase-config.js  v16  (PROXY MODE)
+//  firebase-config.js  v19
 //  ---------------------------------------------------------------------
+//  Updated to point to project `akaymightyconcept` (NOT -6ea63).
+//  This project has the Firestore database actually created.
+//
 //  This file REPLACES the Firebase SDK with proxy-based equivalents.
 //  All calls go through /api/firestore-proxy and /api/firebase-auth-proxy
 //  (Vercel serverless functions), bypassing carrier DNS blocks on
 //  googleapis.com domains.
-//
-//  Exports the SAME API the existing admin.js / admin-dashboard.js expect:
-//    auth  — { signInWithEmailAndPassword, signOut, onAuthStateChanged, currentUser }
-//    db    — { doc, setDoc, getDoc, onSnapshot }
-//    forceOnline, waitForServer — no-ops (kept for backwards compat)
 // =====================================================================
 
 import {
@@ -26,17 +24,13 @@ import {
 } from "./firestore-proxy-client.js";
 
 // ---- serverTimestamp marker ----
-// The real Firestore SDK returns a special sentinel value. We use a
-// string marker that proxySetDoc recognizes and converts to a
-// fieldTransform (setToServerValue: REQUEST_TIME).
 export function serverTimestamp() {
   return { __serverTimestamp: true };
 }
 
 // ---- Auth compat layer ----
-// Matches the Firebase Auth SDK API used by admin.js / admin-dashboard.js
 export const auth = {
-  currentUser: null,  // updated by onAuthStateChanged
+  currentUser: null,
 
   signInWithEmailAndPassword: async (email, password) => {
     const result = await proxySignIn(email, password);
@@ -57,7 +51,6 @@ export const auth = {
   }
 };
 
-// Initialize currentUser from storage
 auth.currentUser = proxyGetCurrentUser();
 
 // ---- Auth function exports (match Firebase SDK import style) ----
@@ -75,39 +68,21 @@ export async function getIdToken(_user, forceRefresh) {
 }
 
 // ---- Firestore compat layer ----
-// Matches the Firestore SDK API used by admin.js / admin-dashboard.js
-// doc(db, 'content', 'images') → { path: 'images' }
-export function db_fn() {}  // placeholder, not used
+export const db = {};
 
-export const db = {
-  // doc(db, 'content', 'images') → returns a doc ref object
-  // We ignore the first arg (db) and use the last two as collection + id
-};
-
-// Helper: create a doc reference. Called as doc(db, 'content', 'images')
 export function doc(_db, collection, id) {
   return { _collection: collection, _id: id };
 }
 
-// setDoc(docRef, data, options)
-// Matches Firebase SDK. The 'merge: true' option is always assumed (we
-// always patch, never replace).
 export async function setDoc(docRef, data, options) {
-  // Strip serverTimestamp markers — we just skip these fields entirely
-  // (the Firestore REST API patch endpoint doesn't accept field transforms
-  // at the top level, and _updatedAt isn't critical for admin functionality)
   const cleanData = {};
   for (const [key, val] of Object.entries(data)) {
-    if (val && val.__serverTimestamp) {
-      // Skip — we don't write server timestamp fields via the proxy
-      continue;
-    }
+    if (val && val.__serverTimestamp) continue;
     cleanData[key] = val;
   }
   return proxySetDocSimple(docRef._id, cleanData);
 }
 
-// getDoc(docRef)
 export async function getDoc(docRef) {
   const result = await proxyGetDoc(docRef._id);
   return {
@@ -118,13 +93,10 @@ export async function getDoc(docRef) {
   };
 }
 
-// onSnapshot(docRef, callback, errorCallback)
-// Uses polling (every 3 seconds) instead of WebSockets.
 export function onSnapshot(docRef, callback, errorCallback) {
   return proxyOnSnapshot(
     docRef._id,
     (snapshot) => {
-      // Wrap to match Firebase SDK snapshot API
       callback({
         exists: () => snapshot.exists,
         data: () => snapshot.data,
@@ -137,19 +109,11 @@ export function onSnapshot(docRef, callback, errorCallback) {
   );
 }
 
-// ---- No-op helpers (kept for backwards compat) ----
-export function forceOnline() {
-  return Promise.resolve();
-}
-export function waitForServer(timeoutMs) {
-  return Promise.resolve();
-}
+// ---- No-op helpers ----
+export function forceOnline() { return Promise.resolve(); }
+export function waitForServer(timeoutMs) { return Promise.resolve(); }
 
 // ---- Internal: setDoc (simple, no transforms) ----
-// Calls the proxy with the proper Firestore REST API format.
-// We skip the _updatedAt field entirely (it's not critical, and the
-// Firestore REST API patch endpoint doesn't accept field transforms
-// at the top level of the request body).
 async function proxySetDocSimple(docName, data) {
   const token = await proxyGetIdToken();
   if (!token) {
@@ -158,11 +122,8 @@ async function proxySetDocSimple(docName, data) {
     throw err;
   }
 
-  // Convert data to Firestore REST format
   const fields = objToFields(data);
   const body = { fields };
-
-  // Build updateMask for merge behavior (only update the fields we're changing)
   const fieldPaths = Object.keys(fields);
   const maskParams = fieldPaths.map(f => `updateMask.fieldPaths=${encodeURIComponent(f)}`).join('&');
 
@@ -185,7 +146,7 @@ async function proxySetDocSimple(docName, data) {
   return true;
 }
 
-// ---- Helpers: convert JS values to/from Firestore REST format ----
+// ---- Helpers ----
 function objToFields(obj) {
   const fields = {};
   for (const [key, val] of Object.entries(obj)) {
@@ -207,7 +168,7 @@ function valueToFirestore(val) {
     return { arrayValue: { values: val.map(valueToFirestore) } };
   }
   if (typeof val === 'object') {
-    if (val.__serverTimestamp) return { nullValue: null }; // handled by transforms
+    if (val.__serverTimestamp) return { nullValue: null };
     return { mapValue: { fields: objToFields(val) } };
   }
   return { stringValue: String(val) };
