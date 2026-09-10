@@ -527,9 +527,61 @@ body.akay-dash {
   border-radius: var(--akay-radius);
   overflow: hidden;
   margin-bottom: 12px;
-  transition: border-color .2s;
+  transition: border-color .2s, opacity .2s;
 }
 .dash-project-card:hover { border-color: var(--akay-border-2); }
+.dash-project-card.is-marked {
+  border-color: var(--akay-err);
+  opacity: 0.6;
+  background: linear-gradient(180deg, rgba(255, 82, 82, .05) 0%, var(--akay-bg-1) 100%);
+}
+.dash-project-card.is-marked::before {
+  content: "MARKED FOR DELETE";
+  position: absolute;
+  top: 8px; right: 8px;
+  font: 700 8px/1 'Montserrat', sans-serif;
+  letter-spacing: 1px;
+  color: #fff;
+  background: var(--akay-err);
+  padding: 3px 6px;
+  border-radius: 3px;
+  z-index: 2;
+}
+.dash-project-card { position: relative; }
+
+/* Mark checkbox */
+.dash-project-card__mark {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+}
+.dash-project-card__mark input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.dash-project-card__mark-box {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--akay-border-2);
+  border-radius: 4px;
+  display: inline-block;
+  position: relative;
+  transition: background .15s, border-color .15s;
+}
+.dash-project-card__mark input:checked + .dash-project-card__mark-box {
+  background: var(--akay-err);
+  border-color: var(--akay-err);
+}
+.dash-project-card__mark input:checked + .dash-project-card__mark-box::after {
+  content: "✓";
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  color: #fff;
+  font: 700 12px/1 Arial, sans-serif;
+}
 
 .dash-project-card__preview {
   aspect-ratio: 4/3;

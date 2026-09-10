@@ -1112,6 +1112,14 @@ const PROJECTS_DEFAULTS = [
   { title: 'Nova Creatives',          category: 'Agency',       description: 'Web · Branding',        liveUrl: '' }
 ];
 
+// Track which projects are marked for deletion
+const markedForDeletion = new Set();
+
+function getProjectSearchQuery() {
+  const el = $('#projectSearch');
+  return el ? el.value.trim().toLowerCase() : '';
+}
+
 function renderProjects() {
   const list = $('#projectsList');
   if (!list) return;
@@ -1131,15 +1139,43 @@ function renderProjects() {
   // Sort by order
   const sorted = [...state.projects].sort((a, b) => (a.order || 0) - (b.order || 0));
 
-  list.innerHTML = sorted.map((p, i) => `
-    <div class="dash-project-card" data-id="${p.id}">
+  // Apply search filter
+  const query = getProjectSearchQuery();
+  const filtered = query
+    ? sorted.filter(p =>
+        (p.title || '').toLowerCase().includes(query) ||
+        (p.category || '').toLowerCase().includes(query) ||
+        (p.description || '').toLowerCase().includes(query)
+      )
+    : sorted;
+
+  // Update search count
+  const countEl = $('#projectSearchCount');
+  if (countEl) {
+    countEl.textContent = query ? `${filtered.length}/${sorted.length}` : `${sorted.length} total`;
+  }
+
+  if (!filtered.length) {
+    list.innerHTML = `<p class="dash-panel__hint">No projects match "${escapeHtml(query)}".</p>`;
+    return;
+  }
+
+  list.innerHTML = filtered.map((p, i) => {
+    const isMarked = markedForDeletion.has(p.id);
+    const originalIndex = sorted.findIndex(s => s.id === p.id);
+    return `
+    <div class="dash-project-card ${isMarked ? 'is-marked' : ''}" data-id="${p.id}">
       <div class="dash-project-card__preview">
         ${p.imageUrl ? `<img src="${escapeAttr(p.imageUrl)}" alt="${escapeAttr(p.title)}" loading="lazy" />` : '<span class="dash-project-card__noimg">No image</span>'}
       </div>
       <div class="dash-project-card__body">
         <div class="dash-project-card__head">
-          <div>
-            <span class="dash-project-card__order">#${i + 1}</span>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <label class="dash-project-card__mark" title="Mark for bulk delete">
+              <input type="checkbox" data-act="mark" ${isMarked ? 'checked' : ''} />
+              <span class="dash-project-card__mark-box"></span>
+            </label>
+            <span class="dash-project-card__order">#${originalIndex + 1}</span>
             <span class="dash-project-card__tag">${escapeHtml(p.category || '')}</span>
           </div>
           <div class="dash-project-card__btns">
@@ -1154,15 +1190,69 @@ function renderProjects() {
         ${p.liveUrl ? `<a href="${escapeAttr(p.liveUrl)}" target="_blank" class="dash-project-card__url">${escapeHtml(p.liveUrl)}</a>` : ''}
       </div>
     </div>
-  `).join('');
+  `}).join('');
 
-  // Wire buttons
+  // Wire buttons + checkboxes
   list.querySelectorAll('.dash-project-card').forEach(card => {
     const id = card.getAttribute('data-id');
     card.querySelectorAll('button[data-act]').forEach(btn => {
       btn.addEventListener('click', () => handleProjectAction(id, btn.getAttribute('data-act')));
     });
+    const markBox = card.querySelector('input[data-act="mark"]');
+    if (markBox) {
+      markBox.addEventListener('change', e => {
+        if (e.target.checked) {
+          markedForDeletion.add(id);
+          card.classList.add('is-marked');
+        } else {
+          markedForDeletion.delete(id);
+          card.classList.remove('is-marked');
+        }
+        updateMarkedCount();
+      });
+    }
   });
+
+  updateMarkedCount();
+}
+
+function updateMarkedCount() {
+  const el = $('#markedCount');
+  if (el) {
+    const count = markedForDeletion.size;
+    el.textContent = count > 0 ? `${count} marked` : '';
+    el.style.display = count > 0 ? 'inline-block' : 'none';
+  }
+  const btn = $('#btnDeleteMarked');
+  if (btn) {
+    btn.disabled = markedForDeletion.size === 0;
+    btn.textContent = markedForDeletion.size > 0
+      ? `🗑 Delete ${markedForDeletion.size} marked`
+      : '🗑 Delete marked';
+  }
+}
+
+async function deleteMarkedProjects() {
+  if (markedForDeletion.size === 0) return;
+  const ok = await new Promise(resolve => {
+    showConfirm(`Delete ${markedForDeletion.size} marked project(s)? This cannot be undone.`, resolve);
+  });
+  if (!ok) return;
+
+  toast(`Deleting ${markedForDeletion.size} projects...`, 'info');
+  const updated = state.projects.filter(p => !markedForDeletion.has(p.id));
+  // Re-index order
+  updated.forEach((p, i) => p.order = i);
+  const saveOk = await saveProjects(updated);
+  if (saveOk) {
+    markedForDeletion.clear();
+    toast('✓ Marked projects deleted', 'success');
+  }
+}
+
+function clearAllMarks() {
+  markedForDeletion.clear();
+  renderProjects();
 }
 
 async function handleProjectAction(id, act) {
@@ -1465,6 +1555,20 @@ function boot() {
     renderProjects();
     toast('Refreshed', 'info');
   });
+
+  // Project search + bulk delete
+  const projectSearch = $('#projectSearch');
+  if (projectSearch) {
+    let searchTimer = null;
+    projectSearch.addEventListener('input', () => {
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(() => renderProjects(), 150);
+    });
+  }
+  const btnDeleteMarked = $('#btnDeleteMarked');
+  if (btnDeleteMarked) btnDeleteMarked.addEventListener('click', deleteMarkedProjects);
+  const btnClearMarks = $('#btnClearMarks');
+  if (btnClearMarks) btnClearMarks.addEventListener('click', clearAllMarks);
 
   // Show the delete endpoint in Settings
   const ep = $('#settingsDeleteEndpoint');

@@ -166,8 +166,25 @@
         <p class="dash-panel__hint">
           These projects appear in the <strong>Recent Web Work</strong> showcase on your site.
           Add, edit, delete, and reorder them. Changes appear instantly for all visitors.
-          Each project has: title, category, description, image, and optional live URL.
+          Use the search bar to filter, and checkboxes to mark multiple projects for bulk deletion.
         </p>
+
+        <!-- Search bar + bulk actions -->
+        <div class="dash-search" style="margin-bottom:16px;">
+          <svg class="dash-search__icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"/>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <input type="search" id="projectSearch" placeholder="Search projects by title, category, or description..." autocomplete="off" />
+          <span class="dash-search__count" id="projectSearchCount">—</span>
+        </div>
+
+        <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center;">
+          <span class="dash-search__count" id="markedCount" style="position:static;transform:none;display:none;background:rgba(255,82,82,.15);color:#ff5252;border:1px solid rgba(255,82,82,.3);"></span>
+          <button class="dash-btn dash-btn--danger dash-btn--mini" id="btnDeleteMarked" disabled>🗑 Delete marked</button>
+          <button class="dash-btn dash-btn--ghost dash-btn--mini" id="btnClearMarks">Clear marks</button>
+        </div>
+
         <div id="projectsList"><!-- rendered by JS --></div>
       </section>
 
