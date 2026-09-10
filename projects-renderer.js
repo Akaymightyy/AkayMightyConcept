@@ -240,6 +240,34 @@ function renderServiceSection(sectionId, items) {
   });
 }
 
+function renderLoadingState(section) {
+  const wraps = section.querySelectorAll('.showcase-track-wrap');
+  if (wraps[0]) {
+    const strip1 = wraps[0].querySelector('.showcase-strip');
+    if (strip1) strip1.innerHTML = `
+      <div class="showcase-card reveal" style="opacity:0.5;">
+        <div class="showcase-card-img" style="display:flex;align-items:center;justify-content:center;">
+          <span style="color:#5a5a5a;font:600 12px/1.4 'Montserrat',sans-serif;text-align:center;padding:20px;">Loading projects…</span>
+        </div>
+      </div>
+    `;
+  }
+}
+
+function renderTimeoutState(section) {
+  const wraps = section.querySelectorAll('.showcase-track-wrap');
+  if (wraps[0]) {
+    const strip1 = wraps[0].querySelector('.showcase-strip');
+    if (strip1) strip1.innerHTML = `
+      <div class="showcase-card reveal" style="opacity:0.6;">
+        <div class="showcase-card-img" style="display:flex;align-items:center;justify-content:center;">
+          <span style="color:#8a8a8a;font:600 12px/1.4 'Montserrat',sans-serif;text-align:center;padding:20px;">Couldn't load projects right now.<br>Check your connection and reload.</span>
+        </div>
+      </div>
+    `;
+  }
+}
+
 function init() {
   console.log('[projects] init() called');
   const section = document.getElementById('web-showcase');
@@ -248,9 +276,23 @@ function init() {
     return;
   }
 
+  // Show something immediately instead of leaving the marquee blank
+  // while the first Firestore poll is in flight.
+  renderLoadingState(section);
+
+  let gotData = false;
+  const timeoutId = setTimeout(() => {
+    if (!gotData) {
+      console.warn('[projects] no data received after 8s — showing timeout state');
+      renderTimeoutState(section);
+    }
+  }, 8000);
+
   try {
     const docRef = doc(db, 'content', 'projects');
     onSnapshot(docRef, snap => {
+      gotData = true;
+      clearTimeout(timeoutId);
       console.log('[projects] onSnapshot fired, exists:', snap.exists());
       if (!snap.exists()) {
         renderProjects([]);
@@ -262,10 +304,14 @@ function init() {
       renderProjects(items);
     }, err => {
       console.error('[projects] onSnapshot error:', err.message);
+      clearTimeout(timeoutId);
+      renderTimeoutState(section);
     });
     console.log('[projects] onSnapshot subscribed');
   } catch (e) {
     console.error('[projects] init error:', e.message);
+    clearTimeout(timeoutId);
+    renderTimeoutState(section);
   }
 }
 

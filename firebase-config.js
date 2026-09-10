@@ -51,7 +51,12 @@ export const auth = {
   }
 };
 
-auth.currentUser = proxyGetCurrentUser();
+try {
+  auth.currentUser = proxyGetCurrentUser();
+} catch (e) {
+  console.warn('[firebase-config] proxyGetCurrentUser failed:', e && e.message);
+  auth.currentUser = null;
+}
 
 // ---- Auth function exports (match Firebase SDK import style) ----
 export function signInWithEmailAndPassword(_auth, email, password) {
