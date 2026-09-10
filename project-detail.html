@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+  <title>Case Study — Akay Mighty Concept</title>
+  <meta name="description" content="A full case study: the challenge, the solution, the tech, and the result. Designed and built by Awwal Abdulhakeem." />
+  <meta name="theme-color" content="#0a0a0a" />
+
+  <meta property="og:type" content="article" />
+  <meta property="og:title" content="Case Study — Akay Mighty Concept" />
+  <meta property="og:description" content="A full case study by Awwal Abdulhakeem." />
+
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%230a0a0a'/%3E%3Ctext x='50' y='68' font-family='Montserrat,Arial,sans-serif' font-size='52' font-weight='900' fill='%23ff1a1a' text-anchor='middle'%3EA%3C/text%3E%3C/svg%3E" />
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;900&family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./site.css" />
+  <link rel="stylesheet" href="./admin.css" />
+
+  <style>
+    /* Page-specific styles */
+    .case-study { padding: 140px 0 80px; }
+    .cs-back { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-muted); margin-bottom: 24px; transition: color 0.2s; }
+    .cs-back:hover { color: var(--red); }
+    .cs-loading { padding: 200px 0; text-align: center; color: var(--text-muted); }
+    .cs-loading-spinner { width: 36px; height: 36px; border: 3px solid var(--border); border-top-color: var(--red); border-radius: 50%; margin: 0 auto 16px; animation: sapSpin 0.8s linear infinite; }
+    @keyframes sapSpin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+  <!-- ============ CASE STUDY (rendered by JS below) ============ -->
+  <section class="case-study">
+    <div class="container" id="csContainer">
+
+      <!-- Loading state -->
+      <div class="cs-loading" id="csLoading">
+        <div class="cs-loading-spinner"></div>
+        <p>Loading case study…</p>
+      </div>
+
+      <!-- Loaded case study content (injected by JS) -->
+      <div id="csContent" style="display:none;"></div>
+
+      <!-- Not-found state -->
+      <div class="empty-state" id="csNotFound" style="display:none;">
+        <div class="empty-state-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        </div>
+        <h2 class="empty-state-title">Project not found</h2>
+        <p class="empty-state-text">This case study doesn't exist or hasn't been published yet. Check out the full projects grid instead.</p>
+        <a href="/projects.html" class="btn btn-primary">View All Projects</a>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ CTA ============ -->
+  <section class="cta-section glow-bg">
+    <div class="container">
+      <div class="cta-wrap">
+        <h2 class="cta-title reveal">Want a project like <span>this</span>?</h2>
+        <p class="cta-desc reveal reveal-delay-1">Let's build something that converts. Start a project today and I'll get back to you within 24 hours.</p>
+        <div class="hero-btns reveal reveal-delay-2" style="justify-content:center;">
+          <a href="/start-a-project.html" class="btn btn-primary">Start a Project</a>
+          <a href="/projects.html" class="btn btn-outline">View More Work</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE-SPECIFIC SCRIPTS ============ -->
+  <script type="module">
+    // Inject shared layout. project-detail.html doesn't need projects-renderer
+    // (we render a single project here, not the showcase grids).
+    import { initLayout } from './layout.js';
+    initLayout('projects', { skip: ['./projects-renderer.js'] });
+
+    import { db, doc, onSnapshot } from './firebase-config.js';
+    import { FEATURED_FALLBACK } from './site-config.js';
+
+    function getSlug() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get('slug') || '';
+    }
+
+    function escapeHtml(s) {
+      return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+    function escapeAttr(s) {
+      return String(s || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function renderProject(p, allItems) {
+      const loading = document.getElementById('csLoading');
+      const content = document.getElementById('csContent');
+      const notFound = document.getElementById('csNotFound');
+      loading.style.display = 'none';
+
+      if (!p) {
+        notFound.style.display = 'block';
+        document.title = 'Project not found — Akay Mighty Concept';
+        return;
+      }
+
+      document.title = `${p.title || 'Case Study'} — Akay Mighty Concept`;
+
+      // Find next project (for the "Next project" link at the bottom)
+      const slug = p.slug;
+      let nextProject = null;
+      if (allItems && allItems.length) {
+        const idx = allItems.findIndex(it => (it.slug || it.id) === slug);
+        if (idx >= 0) {
+          // Try the next item, otherwise wrap around to the first
+          nextProject = allItems[(idx + 1) % allItems.length] || allItems[0];
+        }
+      }
+
+      const category = p.category || 'Project';
+      const status = p.status || (p.liveUrl ? 'Active' : 'Delivered');
+      const statusClass = status.toLowerCase() === 'delivered' ? 'status delivered' : 'status';
+      const cover = p.cover || p.imageUrl || p.thumbnail || '';
+      const tech = Array.isArray(p.tech) ? p.tech : (p.techStack || []);
+      const screenshots = Array.isArray(p.screenshots) ? p.screenshots : (p.gallery || []);
+      const liveUrl = p.liveUrl || p.url || '';
+
+      const techHTML = tech.length
+        ? `<div class="cs-tech-tags">${tech.map(t => `<span class="cs-tech-tag">${escapeHtml(t)}</span>`).join('')}</div>`
+        : '';
+
+      const screenshotsHTML = screenshots.length
+        ? `<div class="cs-screenshots">${screenshots.map(s => `<div class="cs-screenshot"><img src="${escapeAttr(typeof s === 'string' ? s : s.url || s.src || '')}" alt="${escapeAttr(p.title || '')} screenshot" loading="lazy" onerror="this.style.opacity='0.3';" /></div>`).join('')}</div>`
+        : '';
+
+      const liveBtnHTML = liveUrl
+        ? `<a href="${escapeAttr(liveUrl)}" target="_blank" rel="noopener" class="btn btn-primary">Visit Live Site →</a>`
+        : '';
+
+      const nextHTML = nextProject
+        ? `<div class="cs-next">
+            <div>
+              <div class="cs-next-label">Next Project</div>
+              <div class="cs-next-title">${escapeHtml(nextProject.title || '')}</div>
+            </div>
+            <a href="/project-detail.html?slug=${encodeURIComponent(nextProject.slug || nextProject.id || '')}">View Next Project →</a>
+          </div>`
+        : '';
+
+      content.innerHTML = `
+        <a href="/projects.html" class="cs-back">← Back to all projects</a>
+
+        ${cover ? `<img class="cs-cover" src="${escapeAttr(cover)}" alt="${escapeAttr(p.title || '')}" />` : ''}
+
+        <div class="cs-tags">
+          <span class="cs-tag-pill cat">${escapeHtml(category)}</span>
+          <span class="cs-tag-pill ${statusClass}">${escapeHtml(status)}</span>
+        </div>
+
+        <h1 class="cs-title">${escapeHtml(p.title || 'Untitled Project')}</h1>
+        <p class="cs-subtitle">${escapeHtml(p.summary || p.description || '')}</p>
+
+        <div class="cs-body">
+          <div class="cs-block">
+            <div class="cs-block-label">The Challenge</div>
+            <p>${escapeHtml(p.challenge || '')}</p>
+          </div>
+          <div class="cs-block">
+            <div class="cs-block-label">The Solution</div>
+            <p>${escapeHtml(p.solution || '')}</p>
+          </div>
+        </div>
+
+        ${tech.length ? `<div class="cs-tech"><div class="cs-block-label">Tools &amp; Tech Used</div>${techHTML}</div>` : ''}
+
+        ${screenshots.length ? `<div class="cs-screenshots-wrap"><div class="cs-block-label" style="margin-bottom:18px;">Supporting Screenshots</div>${screenshotsHTML}</div>` : ''}
+
+        <div class="cs-actions">
+          ${liveBtnHTML}
+          <a href="/start-a-project.html" class="btn btn-outline">Start a Similar Project</a>
+        </div>
+
+        ${nextHTML}
+      `;
+      content.style.display = 'block';
+
+      // Trigger reveal animations on the freshly-injected content
+      content.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
+    }
+
+    function showNotFound() {
+      const loading = document.getElementById('csLoading');
+      const notFound = document.getElementById('csNotFound');
+      loading.style.display = 'none';
+      notFound.style.display = 'block';
+      document.title = 'Project not found — Akay Mighty Concept';
+    }
+
+    // ---- Main: read slug, fetch project from Firestore, render ----
+    const slug = getSlug();
+    if (!slug) {
+      showNotFound();
+    } else {
+      // First: check if it's in the static fallback (instant)
+      if (FEATURED_FALLBACK[slug]) {
+        renderProject(FEATURED_FALLBACK[slug], Object.values(FEATURED_FALLBACK));
+      }
+
+      // Then: subscribe to Firestore for the live project + all items
+      try {
+        const docRef = doc(db, 'content', 'projects');
+        onSnapshot(docRef, snap => {
+          if (!snap.exists()) {
+            if (!FEATURED_FALLBACK[slug]) showNotFound();
+            return;
+          }
+          const data = snap.data();
+          const items = Array.isArray(data.items) ? data.items : [];
+          const found = items.find(it => it.slug === slug || it.id === slug);
+          if (found) {
+            renderProject(found, items);
+          } else if (!FEATURED_FALLBACK[slug]) {
+            showNotFound();
+          }
+        }, err => {
+          console.warn('[project-detail] Firestore error:', err.message);
+          if (!FEATURED_FALLBACK[slug]) showNotFound();
+        });
+      } catch (e) {
+        console.warn('[project-detail] init error:', e.message);
+        if (!FEATURED_FALLBACK[slug]) showNotFound();
+      }
+
+      // Hard timeout — if nothing has rendered after 8s, show not-found
+      // unless we already have the static fallback shown.
+      setTimeout(() => {
+        const content = document.getElementById('csContent');
+        const notFound = document.getElementById('csNotFound');
+        if (!content.innerHTML.trim() && notFound.style.display === 'none' && !FEATURED_FALLBACK[slug]) {
+          showNotFound();
+        }
+      }, 8000);
+    }
+  </script>
+</body>
+</html>

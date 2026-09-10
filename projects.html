@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+  <title>Projects — Websites I've Built | Akay Mighty Concept</title>
+  <meta name="description" content="A full grid of websites, brand identities, and print projects designed and built by Awwal Abdulhakeem. Filter by category to find what you need." />
+  <meta name="theme-color" content="#0a0a0a" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Projects — Akay Mighty Concept" />
+  <meta property="og:description" content="Websites, branding, and print projects by Awwal Abdulhakeem." />
+
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%230a0a0a'/%3E%3Ctext x='50' y='68' font-family='Montserrat,Arial,sans-serif' font-size='52' font-weight='900' fill='%23ff1a1a' text-anchor='middle'%3EA%3C/text%3E%3C/svg%3E" />
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;900&family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./site.css" />
+  <link rel="stylesheet" href="./admin.css" />
+
+  <style>
+    /* Page-specific styles for the projects grid */
+    #projects-page { padding: 60px 0 100px; }
+    .filter-bar { margin-bottom: 48px; }
+    .projects-grid { margin-bottom: 48px; }
+    .empty-state { margin-top: 40px; }
+
+    /* Loading skeleton card */
+    .skel-card { background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+    .skel-cover { aspect-ratio: 16/10; background: linear-gradient(110deg, var(--bg2) 30%, var(--bg4) 50%, var(--bg2) 70%); background-size: 200% 100%; animation: skelShimmer 1.4s infinite; }
+    .skel-body { padding: 20px; }
+    .skel-line { height: 12px; border-radius: 6px; background: var(--bg4); margin-bottom: 10px; animation: skelShimmer 1.4s infinite; }
+    .skel-line.short { width: 60%; }
+    .skel-line.long { width: 100%; }
+    @keyframes skelShimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+  </style>
+</head>
+<body>
+
+  <!-- ============ PAGE BANNER ============ -->
+  <section class="page-banner hero-base">
+    <div class="hero-bg"></div>
+    <div class="hero-overlay"></div>
+    <div class="container">
+      <p class="page-banner-eyebrow reveal">Portfolio</p>
+      <h1 class="page-banner-title reveal reveal-delay-1">Websites I've <span>Built</span></h1>
+      <p class="page-banner-sub reveal reveal-delay-2">Real websites, brand identities, and print projects I've designed and built for clients across Nigeria and beyond. Click any card to view the full case study.</p>
+    </div>
+  </section>
+
+  <!-- ============ PROJECTS GRID ============ -->
+  <section id="projects-page">
+    <div class="container">
+      <!-- Filter bar -->
+      <div class="filter-bar reveal">
+        <button class="filter-btn active" data-filter="all">All Work</button>
+        <button class="filter-btn" data-filter="web">Web</button>
+        <button class="filter-btn" data-filter="branding">Branding</button>
+        <button class="filter-btn" data-filter="print">Print</button>
+      </div>
+
+      <!-- Grid (populated by Firestore subscription below) -->
+      <div class="projects-grid" id="projectsGrid">
+        <!-- Skeleton placeholders shown while loading -->
+        <div class="skel-card"><div class="skel-cover"></div><div class="skel-body"><div class="skel-line short"></div><div class="skel-line long"></div><div class="skel-line long"></div></div></div>
+        <div class="skel-card"><div class="skel-cover"></div><div class="skel-body"><div class="skel-line short"></div><div class="skel-line long"></div><div class="skel-line long"></div></div></div>
+        <div class="skel-card"><div class="skel-cover"></div><div class="skel-body"><div class="skel-line short"></div><div class="skel-line long"></div><div class="skel-line long"></div></div></div>
+        <div class="skel-card"><div class="skel-cover"></div><div class="skel-body"><div class="skel-line short"></div><div class="skel-line long"></div><div class="skel-line long"></div></div></div>
+        <div class="skel-card"><div class="skel-cover"></div><div class="skel-body"><div class="skel-line short"></div><div class="skel-line long"></div><div class="skel-line long"></div></div></div>
+        <div class="skel-card"><div class="skel-cover"></div><div class="skel-body"><div class="skel-line short"></div><div class="skel-line long"></div><div class="skel-line long"></div></div></div>
+      </div>
+
+      <!-- Empty state (shown when no projects match the filter) -->
+      <div class="empty-state" id="projectsEmpty" style="display:none;">
+        <div class="empty-state-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </div>
+        <h2 class="empty-state-title">No projects in this category yet</h2>
+        <p class="empty-state-text">I'm always adding new work. Try another filter, or check back soon — or start a project of your own.</p>
+        <a href="/start-a-project.html" class="btn btn-primary">Start a Project</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CTA ============ -->
+  <section class="cta-section glow-bg">
+    <div class="container">
+      <div class="cta-wrap">
+        <h2 class="cta-title reveal">Have a project in <span>mind</span>?</h2>
+        <p class="cta-desc reveal reveal-delay-1">Let's make something bold together. Most projects start within 24 hours.</p>
+        <div class="hero-btns reveal reveal-delay-2" style="justify-content:center;">
+          <a href="/start-a-project.html" class="btn btn-primary">Start a Project</a>
+          <a href="/services.html" class="btn btn-outline">View Pricing</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE-SPECIFIC SCRIPTS ============ -->
+  <script type="module">
+    // Inject shared layout (header, footer, chrome, admin.js, projects-renderer.js, showcase-scroll.js)
+    import { initLayout } from './layout.js';
+    initLayout('projects');
+
+    // Fetch all projects from Firestore and render the grid
+    import { db, doc, onSnapshot } from './firebase-config.js';
+    import { FEATURED_FALLBACK } from './site-config.js';
+
+    const grid = document.getElementById('projectsGrid');
+    const emptyState = document.getElementById('projectsEmpty');
+    let allItems = [];
+    let currentFilter = 'all';
+
+    function categoryToFilter(cat) {
+      const c = (cat || '').toLowerCase();
+      if (c.includes('web') || c.includes('app') || c.includes('saas') || c.includes('site')) return 'web';
+      if (c.includes('brand') || c.includes('logo') || c.includes('identity')) return 'branding';
+      if (c.includes('print') || c.includes('flyer') || c.includes('card') || c.includes('pack')) return 'print';
+      return 'web'; // default to web
+    }
+
+    function renderGrid() {
+      const filtered = currentFilter === 'all'
+        ? allItems
+        : allItems.filter(p => categoryToFilter(p.category) === currentFilter);
+
+      if (!filtered.length) {
+        grid.style.display = 'none';
+        emptyState.style.display = 'block';
+        return;
+      }
+      grid.style.display = '';
+      emptyState.style.display = 'none';
+
+      grid.innerHTML = filtered.map(p => {
+        const slug = p.slug || p.id || (p.title || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+        const url = p.imageUrl || '';
+        const title = p.title || 'Untitled';
+        const category = p.category || '';
+        const desc = p.description || '';
+        return `
+          <a href="/project-detail.html?slug=${encodeURIComponent(slug)}" class="project-card">
+            <div class="project-card-cover">
+              ${url ? `<img src="${url}" alt="${title}" loading="lazy" onerror="this.style.opacity='0.3';" />` : ''}
+            </div>
+            <div class="project-card-body">
+              ${category ? `<span class="project-card-tag">${category}</span>` : ''}
+              <h3 class="project-card-name">${title}</h3>
+              ${desc ? `<p class="project-card-desc">${desc}</p>` : ''}
+              <span class="project-card-cta">View Case Study →</span>
+            </div>
+          </a>`;
+      }).join('');
+    }
+
+    // Filter button handlers
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentFilter = btn.dataset.filter;
+        renderGrid();
+      });
+    });
+
+    // Subscribe to Firestore
+    function useFallback() {
+      allItems = Object.values(FEATURED_FALLBACK);
+      renderGrid();
+    }
+
+    try {
+      const docRef = doc(db, 'content', 'projects');
+      onSnapshot(docRef, snap => {
+        if (!snap.exists()) { useFallback(); return; }
+        const data = snap.data();
+        const items = Array.isArray(data.items) ? data.items : [];
+        if (!items.length) { useFallback(); return; }
+        allItems = items.sort((a, b) => (a.order || 0) - (b.order || 0));
+        renderGrid();
+      }, err => {
+        console.warn('[projects-page] Firestore error, using fallback:', err.message);
+        useFallback();
+      });
+    } catch (e) {
+      console.warn('[projects-page] init error, using fallback:', e.message);
+      useFallback();
+    }
+
+    // Hard fallback — if nothing has rendered in 7s, show static
+    setTimeout(() => {
+      if (!allItems.length) useFallback();
+    }, 7000);
+  </script>
+</body>
+</html>

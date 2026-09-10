@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+  <title>Services &amp; Pricing — Akay Mighty Concept</title>
+  <meta name="description" content="Three transparent service packages: Landing Page (₦50k), Full Website (₦150k), and Brand + Print (₦35k). Plus the 4-step process I follow on every project." />
+  <meta name="theme-color" content="#0a0a0a" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Services &amp; Pricing — Akay Mighty Concept" />
+  <meta property="og:description" content="Transparent packages for websites, branding, and print." />
+
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%230a0a0a'/%3E%3Ctext x='50' y='68' font-family='Montserrat,Arial,sans-serif' font-size='52' font-weight='900' fill='%23ff1a1a' text-anchor='middle'%3EA%3C/text%3E%3C/svg%3E" />
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;900&family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./site.css" />
+  <link rel="stylesheet" href="./admin.css" />
+
+  <style>
+    /* Services-page specific styles */
+    #services-banner { padding: 140px 0 60px; position: relative; overflow: hidden; }
+    .services-banner-bg { position: absolute; inset: 0; background: radial-gradient(ellipse at 70% 30%, rgba(74,74,213,0.22) 0%, transparent 55%), var(--bg); z-index: -3; }
+
+    /* Service tier detail cards */
+    #services-tiers { padding: 100px 0; }
+    .tier-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 0; overflow: hidden; transition: all 0.3s; display: flex; flex-direction: column; position: relative; }
+    .tier-card:hover { border-color: var(--border-red); transform: translateY(-6px); box-shadow: 0 20px 50px rgba(0,0,0,0.4); }
+    .tier-card--featured { background: var(--bg3); border: 1px solid var(--red); box-shadow: 0 0 60px rgba(42,42,133,0.25); }
+    .tier-badge { position: absolute; top: -14px; left: 50%; transform: translateX(-50%); background: var(--gradient-red); color: #fff; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; padding: 6px 16px; border-radius: 999px; white-space: nowrap; z-index: 2; }
+    .tier-header { padding: 36px 28px 28px; border-bottom: 1px solid var(--border); }
+    .tier-name { font-family: var(--font-heading); font-size: 22px; font-weight: 800; margin-bottom: 14px; }
+    .tier-price { font-family: var(--font-heading); font-size: 40px; font-weight: 900; color: var(--text); display: flex; align-items: baseline; gap: 4px; line-height: 1; }
+    .tier-price .currency { font-size: 22px; color: var(--red-bright); font-weight: 700; }
+    .tier-turnaround { font-size: 13px; color: var(--text-muted); margin-top: 8px; }
+    .tier-summary { font-size: 14px; color: var(--text-muted); line-height: 1.7; padding: 24px 28px; border-bottom: 1px solid var(--border); }
+    .tier-section-label { font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--red); margin-bottom: 14px; }
+    .tier-deliverables { padding: 24px 28px; border-bottom: 1px solid var(--border); flex: 1; }
+    .tier-deliverables ul { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+    .tier-deliverables li { font-size: 13px; color: var(--text); padding-left: 26px; position: relative; line-height: 1.5; }
+    .tier-deliverables li::before { content: '✓'; position: absolute; left: 0; top: 0; color: var(--red-bright); font-weight: 700; }
+    .tier-best-for { padding: 20px 28px; background: var(--bg3); border-bottom: 1px solid var(--border); }
+    .tier-best-for-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+    .tier-best-for-tag { font-size: 11px; padding: 4px 12px; border-radius: 100px; background: var(--bg4); border: 1px solid var(--border); color: var(--text-muted); }
+    .tier-cta-wrap { padding: 24px 28px; }
+    .tier-cta { display: block; text-align: center; padding: 14px; border-radius: var(--radius); border: 1px solid var(--border-red); color: var(--text); font-weight: 600; font-size: 14px; transition: var(--transition); }
+    .tier-cta:hover { background: var(--bg4); }
+    .tier-cta--filled { background: var(--gradient-red); border: none; color: #fff; }
+    .tier-cta--filled:hover { opacity: 0.9; transform: translateY(-2px); }
+
+    /* Process section */
+    #services-process { padding: 100px 0; background: var(--bg2); }
+    .process-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+    @media (max-width: 900px) { .process-grid { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 600px) { .process-grid { grid-template-columns: 1fr; } }
+    .process-step { background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 32px 24px; position: relative; transition: all 0.3s; }
+    .process-step:hover { border-color: var(--border-red); transform: translateY(-4px); }
+    .process-step-num { font-family: var(--font-heading); font-size: 48px; font-weight: 900; background: var(--gradient-red); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1; margin-bottom: 18px; }
+    .process-step-title { font-family: var(--font-heading); font-size: 18px; font-weight: 800; margin-bottom: 12px; }
+    .process-step-desc { font-size: 14px; color: var(--text-muted); line-height: 1.7; }
+    .process-step::after { content: ''; position: absolute; top: 50%; right: -12px; width: 0; height: 0; border-left: 12px solid var(--border-red); border-top: 8px solid transparent; border-bottom: 8px solid transparent; transform: translateY(-50%); opacity: 0.4; }
+    .process-step:last-child::after { display: none; }
+    @media (max-width: 900px) { .process-step::after { display: none; } }
+
+    /* Services anchor nav */
+    .services-anchor-nav { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; margin-bottom: 48px; }
+    .anchor-link { padding: 10px 20px; border-radius: 50px; border: 1px solid var(--border); background: var(--bg3); color: var(--text-muted); font-size: 13px; font-weight: 500; transition: all 0.25s; }
+    .anchor-link:hover { border-color: var(--border-red); color: var(--text); }
+  </style>
+</head>
+<body>
+
+  <!-- ============ PAGE BANNER ============ -->
+  <section id="services-banner" class="hero-base">
+    <div class="hero-bg"></div>
+    <div class="hero-overlay"></div>
+    <div class="container">
+      <p class="page-banner-eyebrow reveal">Services &amp; Pricing</p>
+      <h1 class="page-banner-title reveal reveal-delay-1">Pick a <span>package</span></h1>
+      <p class="page-banner-sub reveal reveal-delay-2">Three transparent packages — Landing Page, Full Website, and Brand + Print. Every project includes a free consultation and revisions until you're happy.</p>
+    </div>
+  </section>
+
+  <!-- ============ ANCHOR NAV ============ -->
+  <section style="padding: 40px 0 0;">
+    <div class="container">
+      <div class="services-anchor-nav reveal">
+        <a href="#web" class="anchor-link">Web</a>
+        <a href="#brand" class="anchor-link">Brand &amp; Design</a>
+        <a href="#print" class="anchor-link">Print</a>
+        <a href="#pricing" class="anchor-link">Pricing</a>
+        <a href="#process" class="anchor-link">My Process</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SERVICE TIERS ============ -->
+  <section id="services-tiers">
+    <div class="container">
+      <div class="section-header">
+        <p class="section-label reveal" id="web">Packages</p>
+        <h2 class="section-title reveal reveal-delay-1">What's <span>included</span></h2>
+        <p class="section-desc reveal reveal-delay-2">Pick the package that fits where your business is right now. Custom quotes available for e-commerce, SaaS dashboards, and larger projects.</p>
+      </div>
+
+      <!-- Tier cards rendered by JS below -->
+      <div class="pricing-grid" id="tierGrid" style="margin-top: 56px;">
+        <!-- Injected -->
+      </div>
+
+      <p class="pricing-note reveal reveal-delay-3">Don't see a perfect fit? <a href="/start-a-project.html" style="color:var(--red);font-weight:600;">Get a custom quote →</a></p>
+    </div>
+  </section>
+
+  <!-- ============ PRICING (quick reference, links to tiers above) ============ -->
+  <section id="pricing" class="glow-bg" style="background: var(--bg2); padding: 100px 0;">
+    <div class="container">
+      <div class="section-header">
+        <p class="section-label reveal" id="brand">Quick Reference</p>
+        <h2 class="section-title reveal reveal-delay-1">Starting <span>prices</span></h2>
+        <p class="section-desc reveal reveal-delay-2">Just need the headline numbers? Here's the at-a-glance version. Scroll up for the full breakdown of what each package includes.</p>
+      </div>
+      <div class="pricing-grid" id="quickPricingGrid">
+        <!-- Injected -->
+      </div>
+      <p class="pricing-note reveal reveal-delay-3">All prices in Nigerian Naira (₦). Final quote depends on scope — get a free quote using the form.</p>
+    </div>
+  </section>
+
+  <!-- ============ PROCESS ============ -->
+  <section id="services-process">
+    <div class="container">
+      <div class="section-header">
+        <p class="section-label reveal" id="process">How I Work</p>
+        <h2 class="section-title reveal reveal-delay-1">My 4-step <span>process</span></h2>
+        <p class="section-desc reveal reveal-delay-2">Every project — big or small — follows the same four-step flow. No 20-page briefs, no surprises, just clear progress.</p>
+      </div>
+      <div class="process-grid" id="processGrid">
+        <!-- Injected -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CTA ============ -->
+  <section class="cta-section glow-bg">
+    <div class="container">
+      <div class="cta-wrap">
+        <h2 class="cta-title reveal">Ready to <span>start</span>?</h2>
+        <p class="cta-desc reveal reveal-delay-1">Answer 7 quick questions and I'll get back to you on WhatsApp within 24 hours with a quote and timeline.</p>
+        <div class="hero-btns reveal reveal-delay-2" style="justify-content:center;">
+          <a href="/start-a-project.html" class="btn btn-primary">Start a Project</a>
+          <a href="/projects.html" class="btn btn-outline">View My Work</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE-SPECIFIC SCRIPTS ============ -->
+  <script type="module">
+    import { initLayout } from './layout.js';
+    initLayout('services');
+
+    import { SERVICE_TIERS_DETAIL, PRICING_TIERS, PROCESS_STEPS } from './site-config.js';
+
+    // ---- Render detailed tier cards ----
+    (function() {
+      const grid = document.getElementById('tierGrid');
+      if (!grid) return;
+      grid.innerHTML = SERVICE_TIERS_DETAIL.map(t => {
+        const featured = t.popular ? ' tier-card--featured' : '';
+        const badge = t.badge ? `<span class="tier-badge">${t.badge}</span>` : '';
+        const ctaClass = t.popular ? 'tier-cta tier-cta--filled' : 'tier-cta';
+        const deliverables = t.deliverables.map(d => `<li>${d}</li>`).join('');
+        const bestFor = t.bestFor.map(b => `<span class="tier-best-for-tag">${b}</span>`).join('');
+        return `
+          <div class="tier-card reveal${featured}">
+            ${badge}
+            <div class="tier-header">
+              <h3 class="tier-name">${t.name}</h3>
+              <div class="tier-price"><span class="currency">${t.symbol}</span><span>${t.price}</span></div>
+              <p class="tier-turnaround">${t.turnaround}</p>
+            </div>
+            <p class="tier-summary">${t.summary}</p>
+            <div class="tier-deliverables">
+              <div class="tier-section-label">What's Included</div>
+              <ul>${deliverables}</ul>
+            </div>
+            <div class="tier-best-for">
+              <div class="tier-section-label" style="margin-bottom:10px;">Best For</div>
+              <div class="tier-best-for-tags">${bestFor}</div>
+            </div>
+            <div class="tier-cta-wrap">
+              <a href="/start-a-project.html" class="${ctaClass}">Start This Project</a>
+            </div>
+          </div>`;
+      }).join('');
+    })();
+
+    // ---- Render quick-reference pricing cards ----
+    (function() {
+      const grid = document.getElementById('quickPricingGrid');
+      if (!grid) return;
+      grid.innerHTML = PRICING_TIERS.map(t => {
+        const featured = t.popular ? ' pricing-card--featured' : '';
+        const badge = t.badge ? `<span class="pricing-badge">${t.badge}</span>` : '';
+        const ctaClass = t.popular ? 'pricing-cta pricing-cta--filled' : 'pricing-cta';
+        const features = t.features.map(f => `<li>${f}</li>`).join('');
+        return `
+          <div class="pricing-card reveal${featured}">
+            ${badge}
+            <span class="pricing-tag">${t.name}</span>
+            <div class="pricing-amount"><span class="pricing-currency">${t.symbol}</span><span>${t.price}</span></div>
+            <p class="pricing-turnaround">${t.turnaround}</p>
+            <ul class="pricing-features">${features}</ul>
+            <a href="/start-a-project.html" class="${ctaClass}">Start This Project</a>
+          </div>`;
+      }).join('');
+    })();
+
+    // ---- Render process steps ----
+    (function() {
+      const grid = document.getElementById('processGrid');
+      if (!grid) return;
+      grid.innerHTML = PROCESS_STEPS.map(p => `
+        <div class="process-step reveal">
+          <div class="process-step-num">${p.num}</div>
+          <h3 class="process-step-title">${p.title}</h3>
+          <p class="process-step-desc">${p.desc}</p>
+        </div>`).join('');
+    })();
+  </script>
+</body>
+</html>

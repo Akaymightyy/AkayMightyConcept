@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+  <title>Start a Project — Akay Mighty Concept</title>
+  <meta name="description" content="Answer a few quick questions and I'll get back to you on WhatsApp within 24 hours with a quote and timeline. Most projects start within 24 hours." />
+  <meta name="theme-color" content="#0a0a0a" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Start a Project — Akay Mighty Concept" />
+  <meta property="og:description" content="Free consultation & quote. Unlimited revisions. Fast 24-72hr delivery on most projects." />
+
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%230a0a0a'/%3E%3Ctext x='50' y='68' font-family='Montserrat,Arial,sans-serif' font-size='52' font-weight='900' fill='%23ff1a1a' text-anchor='middle'%3EA%3C/text%3E%3C/svg%3E" />
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;900&family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./site.css" />
+  <link rel="stylesheet" href="./admin.css" />
+
+  <style>
+    /* Start-a-project page specific styles */
+    #start-page { padding: 140px 0 80px; background: var(--bg2); position: relative; overflow: hidden; }
+    .start-bg { position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 0%, rgba(74,74,213,0.18) 0%, transparent 60%), var(--bg2); z-index: -1; }
+
+    .order-grid { display: grid; grid-template-columns: 1fr 1.2fr; gap: 60px; align-items: start; width: 100%; }
+    @media (max-width: 900px) { .order-grid { grid-template-columns: 1fr; gap: 40px; } }
+
+    .order-intro-sticky { position: sticky; top: 100px; }
+    @media (max-width: 900px) { .order-intro-sticky { position: static; } }
+
+    .order-intro-eyebrow { font-size: 12px; font-weight: 600; letter-spacing: 4px; text-transform: uppercase; color: var(--red); margin-bottom: 14px; }
+    .order-intro-title { font-family: var(--font-heading); font-size: clamp(32px, 5vw, 48px); font-weight: 800; line-height: 1.1; margin-bottom: 16px; }
+    .order-intro-title span { color: var(--red); }
+    .order-intro-desc { font-size: 16px; color: var(--text-muted); line-height: 1.8; margin-bottom: 32px; }
+    .order-perks { display: flex; flex-direction: column; gap: 14px; }
+    .order-perk { display: flex; align-items: center; gap: 12px; font-size: 14px; color: var(--text-muted); }
+    .order-perk-check { width: 22px; height: 22px; border-radius: 50%; background: rgba(42,42,133,0.15); border: 1px solid var(--border-red); color: var(--red); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .order-perk-check svg { width: 12px; height: 12px; }
+
+    /* Trust badges row */
+    .trust-row { display: flex; gap: 18px; margin-top: 36px; flex-wrap: wrap; }
+    .trust-pill { display: inline-flex; align-items: center; gap: 8px; padding: 10px 14px; border-radius: 100px; background: var(--bg3); border: 1px solid var(--border); font-size: 12px; color: var(--text-muted); }
+    .trust-pill svg { width: 14px; height: 14px; color: var(--red); }
+  </style>
+</head>
+<body>
+
+  <!-- ============ START-A-PROJECT WIZARD ============ -->
+  <section id="order">
+    <div class="start-bg"></div>
+    <div class="container">
+      <div class="order-grid">
+
+        <!-- Intro column -->
+        <div class="order-intro-sticky">
+          <p class="order-intro-eyebrow reveal">Start a Project</p>
+          <h1 class="order-intro-title reveal reveal-delay-1">Let's create something <span>bold</span>.</h1>
+          <p class="order-intro-desc reveal reveal-delay-2">Answer a few quick questions and I'll get back to you on WhatsApp with a quote and timeline. Most projects start within 24 hours.</p>
+          <div class="order-perks reveal reveal-delay-3">
+            <div class="order-perk"><span class="order-perk-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span> Free consultation &amp; quote</div>
+            <div class="order-perk"><span class="order-perk-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span> Unlimited revisions until you're happy</div>
+            <div class="order-perk"><span class="order-perk-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span> Fast 24-72hr delivery on most projects</div>
+            <div class="order-perk"><span class="order-perk-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span> Print &amp; digital files delivered</div>
+          </div>
+          <div class="trust-row reveal reveal-delay-3">
+            <span class="trust-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> 24-hr response</span>
+            <span class="trust-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> 150+ projects done</span>
+            <span class="trust-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Kaduna, Nigeria</span>
+          </div>
+        </div>
+
+        <!-- ============ STEP-BY-STEP WIZARD ============ -->
+        <div class="sap reveal reveal-delay-2" id="sapWizard">
+          <div class="sap-progress"><div class="sap-progress-bar" id="sapProgress"></div></div>
+
+          <!-- STEP 0: NAME -->
+          <div class="sap-q active" data-q="0">
+            <div class="sap-greeting">Hey there 👋</div>
+            <h3 class="sap-question">What's your name?</h3>
+            <p class="sap-hint">Your first name would do just fine.</p>
+            <input type="text" id="q-name" class="sap-input" placeholder="e.g. Sarah Okonkwo" autocomplete="name" />
+          </div>
+
+          <!-- STEP 1: LOCATION -->
+          <div class="sap-q" data-q="1">
+            <div class="sap-greeting">Nice to meet you, <span id="echo-name">there</span> 🙌</div>
+            <h3 class="sap-question">Where are you based?</h3>
+            <p class="sap-hint">So I know whether we're working in the same city or across borders.</p>
+            <div class="sap-options" id="q-location">
+              <button type="button" class="sap-option" data-value="Kaduna">Kaduna</button>
+              <button type="button" class="sap-option" data-value="Lagos">Lagos</button>
+              <button type="button" class="sap-option" data-value="Abuja">Abuja</button>
+              <button type="button" class="sap-option" data-value="Other Nigeria">Other (Nigeria)</button>
+              <button type="button" class="sap-option" data-value="Outside Nigeria">Outside Nigeria</button>
+            </div>
+          </div>
+
+          <!-- STEP 2: SERVICE -->
+          <div class="sap-q" data-q="2">
+            <div class="sap-greeting">Got it!</div>
+            <h3 class="sap-question">What can I create for you?</h3>
+            <p class="sap-hint">Pick the closest match — you can add more detail at the end.</p>
+            <div class="sap-options" id="q-service">
+              <button type="button" class="sap-option" data-value="Logo &amp; Brand Identity">Logo &amp; Brand Identity</button>
+              <button type="button" class="sap-option" data-value="Flyer Design">Flyer Design</button>
+              <button type="button" class="sap-option" data-value="Website Development">Website Development</button>
+              <button type="button" class="sap-option" data-value="UI/UX Design">UI/UX Design</button>
+              <button type="button" class="sap-option" data-value="Print &amp; Branding">Print &amp; Branding (Cards, Bags)</button>
+              <button type="button" class="sap-option" data-value="Other">Other</button>
+            </div>
+            <div class="sap-other-wrap" id="q-service-other-wrap">
+              <input type="text" id="q-service-other" class="sap-input" placeholder="Please specify the service you need" />
+            </div>
+          </div>
+
+          <!-- STEP 3: BRAND NAME -->
+          <div class="sap-q" data-q="3">
+            <div class="sap-greeting">Great choice 💡</div>
+            <h3 class="sap-question">What's the name of your business or brand?</h3>
+            <p class="sap-hint">If you don't have one yet, just type "N/A" — we'll figure it out together.</p>
+            <input type="text" id="q-brand" class="sap-input" placeholder="e.g. Burgeon Properties Limited" />
+          </div>
+
+          <!-- STEP 4: TIMELINE -->
+          <div class="sap-q" data-q="4">
+            <div class="sap-greeting">Let's talk timeline ⏱</div>
+            <h3 class="sap-question">When do you need this delivered?</h3>
+            <p class="sap-hint">A rough timeline helps me plan and tell you upfront if it's doable.</p>
+            <div class="sap-options" id="q-timeline">
+              <button type="button" class="sap-option" data-value="ASAP (within 48hrs)">ASAP (48 hrs)</button>
+              <button type="button" class="sap-option" data-value="Within 1 week">Within 1 week</button>
+              <button type="button" class="sap-option" data-value="2–4 weeks">2–4 weeks</button>
+              <button type="button" class="sap-option" data-value="Flexible / no rush">Flexible</button>
+            </div>
+          </div>
+
+          <!-- STEP 5: BUDGET -->
+          <div class="sap-q" data-q="5">
+            <div class="sap-greeting">Money talk 💸</div>
+            <h3 class="sap-question">What's your budget (<span id="budget-currency-label">NGN</span>)?</h3>
+            <p class="sap-hint">Pick a range — this helps me recommend the right package for you.</p>
+            <div class="sap-options" id="q-budget">
+              <button type="button" class="sap-option" data-value="Under ₦20,000">Under ₦20,000</button>
+              <button type="button" class="sap-option" data-value="₦20,000 – ₦50,000">₦20,000 – ₦50,000</button>
+              <button type="button" class="sap-option" data-value="₦50,000 – ₦150,000">₦50,000 – ₦150,000</button>
+              <button type="button" class="sap-option" data-value="₦150,000 – ₦500,000">₦150,000 – ₦500,000</button>
+              <button type="button" class="sap-option" data-value="Above ₦500,000">Above ₦500,000</button>
+            </div>
+          </div>
+
+          <!-- STEP 6: DETAILS -->
+          <div class="sap-q" data-q="6">
+            <div class="sap-greeting">Almost done! 🎉</div>
+            <h3 class="sap-question">Tell me a bit more about your project</h3>
+            <p class="sap-hint">Vision, references, color ideas, anything goes. The more I know, the better I deliver.</p>
+            <textarea id="q-notes" class="sap-textarea" placeholder="Tell me about your project — what you need, references you love, color ideas, etc."></textarea>
+          </div>
+
+          <!-- SEND STEP -->
+          <div class="sap-q sap-send" data-q="send">
+            <div class="sap-greeting">All done! 🎉</div>
+            <h3 class="sap-question">How would you like to send this?</h3>
+            <p class="sap-hint">Choose your preferred method and your project details will be formatted and ready to send.</p>
+            <div class="sap-send-options">
+              <button type="button" class="sap-send-btn" id="send-whatsapp">
+                <div class="sap-send-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg></div>
+                <div class="sap-send-label">Send via WhatsApp</div>
+                <div class="sap-send-hint">Opens WhatsApp with your details pre-filled</div>
+              </button>
+              <button type="button" class="sap-send-btn" id="send-email">
+                <div class="sap-send-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
+                <div class="sap-send-label">Send via Email</div>
+                <div class="sap-send-hint">Opens your email client with a draft ready</div>
+              </button>
+              <button type="button" class="sap-send-btn sap-full" id="send-db">
+                <div class="sap-send-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg></div>
+                <div class="sap-send-text">
+                  <div class="sap-send-label">Call or text me instead</div>
+                  <div class="sap-send-hint">Leave your contact and I'll reach out to you</div>
+                </div>
+              </button>
+            </div>
+
+            <div class="sap-contact-form" id="sapContactForm">
+              <input type="text" id="q-contact" class="sap-input" placeholder="Email address or Phone number" />
+              <button type="button" class="sap-submit-db" id="btn-submit-db">
+                <span id="submit-db-label">Submit Request</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+              </button>
+            </div>
+
+            <div class="sap-success" id="sapSuccess">
+              <div class="sap-success-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+              <div class="sap-success-title">Request Sent Successfully!</div>
+              <div class="sap-success-text">Thanks for reaching out, <span id="success-name">there</span>. I'll get back to you shortly.</div>
+              <button type="button" class="sap-success-restart" id="sapRestart">Start another request</button>
+            </div>
+          </div>
+
+          <!-- NAVIGATION -->
+          <div class="sap-nav" id="sapNav">
+            <button type="button" class="sap-nav-btn sap-nav-back" id="btn-back" hidden>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+              Back
+            </button>
+            <button type="button" class="sap-nav-btn sap-nav-next" id="btn-next">
+              Continue
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE-SPECIFIC SCRIPTS ============ -->
+  <script type="module">
+    // Inject shared layout. We don't need projects-renderer.js or showcase-scroll.js
+    // on this page — it's a single-purpose intake form.
+    import { initLayout } from './layout.js';
+    initLayout('start-a-project', { skip: ['./projects-renderer.js', './showcase-scroll.js'] });
+
+    // ---- Multi-step wizard (carried over from index.html) ----
+    (function() {
+      const WA = '2349049541318';            // WhatsApp phone (Nigeria, +234)
+      const EMAIL = 'hello@akaymightyconcept.com';
+      const totalSteps = 7;                   // steps 0–6
+      let current = 0;
+      const answers = {};
+
+      const wizard = document.getElementById('sapWizard');
+      if (!wizard) return;
+
+      const qs = wizard.querySelectorAll('.sap-q');
+      const bar = document.getElementById('sapProgress');
+      const btnBack = document.getElementById('btn-back');
+      const btnNext = document.getElementById('btn-next');
+      const nav = document.getElementById('sapNav');
+      const echoName = document.getElementById('echo-name');
+      const successName = document.getElementById('success-name');
+
+      // ---------- helpers ----------
+      function show(idx) {
+        qs.forEach(q => q.classList.remove('active'));
+        const target = wizard.querySelector(`[data-q="${idx}"]`);
+        if (!target) return;
+        target.classList.add('active');
+
+        if (typeof idx === 'number') {
+          bar.style.width = `${((idx + 1) / totalSteps) * 100}%`;
+          btnBack.hidden = false;
+          btnNext.style.display = 'inline-flex';
+          btnNext.innerHTML = (idx === totalSteps - 1)
+            ? 'Submit <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>'
+            : 'Continue <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>';
+        }
+      }
+
+      function showSendStep() {
+        qs.forEach(q => q.classList.remove('active'));
+        wizard.querySelector('[data-q="send"]').classList.add('active');
+        bar.style.width = '100%';
+        nav.style.display = 'none';
+        // reset send UI
+        document.getElementById('sapContactForm').classList.remove('show');
+        document.getElementById('sapSuccess').classList.remove('show');
+        document.getElementById('q-contact').value = '';
+        document.querySelectorAll('.sap-send-btn').forEach(b => b.style.display = '');
+      }
+
+      function getCurrency() {
+        switch (answers.location) {
+          case 'Outside Nigeria': return 'USD';
+          default: return 'NGN';     // Kaduna, Lagos, Abuja, Other Nigeria
+        }
+      }
+
+      function updateBudgetUI() {
+        const cur = getCurrency();
+        document.getElementById('budget-currency-label').textContent = cur;
+      }
+
+      function save(idx) {
+        switch (idx) {
+          case 0: answers.name = document.getElementById('q-name').value.trim(); break;
+          case 1: answers.location = getSelectedValue('q-location'); break;
+          case 2:
+            answers.service = getSelectedValue('q-service');
+            if (answers.service === 'Other') {
+              const otherVal = document.getElementById('q-service-other').value.trim();
+              answers.service = otherVal ? `Other: ${otherVal}` : 'Other';
+            }
+            break;
+          case 3: answers.brand = document.getElementById('q-brand').value.trim(); break;
+          case 4: answers.timeline = getSelectedValue('q-timeline'); break;
+          case 5: answers.budget = getSelectedValue('q-budget'); break;
+          case 6: answers.notes = document.getElementById('q-notes').value.trim(); break;
+        }
+      }
+
+      function getSelectedValue(groupId) {
+        const sel = wizard.querySelector(`#${groupId} .sap-option.selected`);
+        return sel ? sel.dataset.value : '';
+      }
+
+      function validate(idx) {
+        switch (idx) {
+          case 0: {
+            const v = document.getElementById('q-name').value.trim();
+            const el = document.getElementById('q-name');
+            if (!v) { el.classList.add('sap-invalid'); setTimeout(() => el.classList.remove('sap-invalid'), 600); return false; }
+            return true;
+          }
+          case 1: return validateOptionGroup('q-location');
+          case 2: {
+            const ok = validateOptionGroup('q-service');
+            if (!ok) return false;
+            const sel = wizard.querySelector('#q-service .sap-option.selected');
+            if (sel && sel.dataset.value === 'Other') {
+              const otherInput = document.getElementById('q-service-other');
+              if (!otherInput.value.trim()) {
+                otherInput.classList.add('sap-invalid');
+                setTimeout(() => otherInput.classList.remove('sap-invalid'), 600);
+                return false;
+              }
+            }
+            return true;
+          }
+          case 3: {
+            const v = document.getElementById('q-brand').value.trim();
+            const el = document.getElementById('q-brand');
+            if (!v) { el.classList.add('sap-invalid'); setTimeout(() => el.classList.remove('sap-invalid'), 600); return false; }
+            return true;
+          }
+          case 4: return validateOptionGroup('q-timeline');
+          case 5: return validateOptionGroup('q-budget');
+          case 6: {
+            const v = document.getElementById('q-notes').value.trim();
+            const el = document.getElementById('q-notes');
+            if (!v) { el.classList.add('sap-invalid'); setTimeout(() => el.classList.remove('sap-invalid'), 600); return false; }
+            return true;
+          }
+        }
+        return true;
+      }
+
+      function validateOptionGroup(groupId) {
+        const sel = wizard.querySelector(`#${groupId} .sap-option.selected`);
+        if (!sel) {
+          const group = document.getElementById(groupId);
+          group.querySelectorAll('.sap-option').forEach(o => {
+            o.classList.add('sap-invalid');
+            setTimeout(() => o.classList.remove('sap-invalid'), 600);
+          });
+          return false;
+        }
+        return true;
+      }
+
+      function buildWAMessage() {
+        const lines = [];
+        lines.push('📋 *NEW PROJECT REQUEST*');
+        lines.push('━━━━━━━━━━━━━━━━━━━━━');
+        lines.push('');
+        lines.push(`• *Name:* ${answers.name || '—'}`);
+        lines.push(`• *Location:* ${answers.location || '—'}`);
+        lines.push(`• *Service Needed:* ${answers.service || '—'}`);
+        lines.push(`• *Business / Brand:* ${answers.brand || '—'}`);
+        lines.push(`• *Timeline:* ${answers.timeline || '—'}`);
+        lines.push(`• *Budget:* ${answers.budget || '—'}`);
+        lines.push('');
+        lines.push('📝 *Project Details:*');
+        lines.push(answers.notes || '—');
+        lines.push('');
+        lines.push('━━━━━━━━━━━━━━━━━━━━━');
+        lines.push('_Sent from akaymightyconcept.com_');
+        return lines.join('\n');
+      }
+
+      // ---------- navigation ----------
+      btnNext.addEventListener('click', () => {
+        if (!validate(current)) return;
+        save(current);
+        if (current === 0) {
+          echoName.textContent = answers.name || 'there';
+          successName.textContent = answers.name || 'there';
+        }
+        if (current === 1) updateBudgetUI();
+        if (current === totalSteps - 1) { showSendStep(); return; }
+        current++;
+        show(current);
+      });
+
+      btnBack.addEventListener('click', () => {
+        if (current > 0) { current--; show(current); }
+      });
+
+      // Enter advances (except inside textarea)
+      document.addEventListener('keydown', e => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          const activeStep = wizard.querySelector('.sap-q.active');
+          if (!activeStep) return;
+          if (activeStep.querySelector('textarea:focus')) return;
+          if (activeStep.getAttribute('data-q') === 'send') return; // don't auto-advance on send step
+          e.preventDefault();
+          btnNext.click();
+        }
+      });
+
+      // Option pill click handling (auto-advance unless "Other")
+      function wireOptionGroup(groupId, hasOther) {
+        const group = document.getElementById(groupId);
+        if (!group) return;
+        group.querySelectorAll('.sap-option').forEach(opt => {
+          opt.addEventListener('click', () => {
+            group.querySelectorAll('.sap-option').forEach(o => o.classList.remove('selected'));
+            opt.classList.add('selected');
+            // Show "Other" text field if applicable
+            if (hasOther) {
+              const otherWrap = document.getElementById(`${groupId}-other-wrap`);
+              if (opt.dataset.value === 'Other') {
+                otherWrap.classList.add('show');
+                setTimeout(() => otherWrap.querySelector('input').focus(), 50);
+              } else {
+                otherWrap.classList.remove('show');
+                otherWrap.querySelector('input').value = '';
+              }
+            }
+            // Auto-advance unless "Other"
+            if (opt.dataset.value !== 'Other') {
+              setTimeout(() => btnNext.click(), 200);
+            }
+          });
+        });
+      }
+      wireOptionGroup('q-location', false);
+      wireOptionGroup('q-service', true);
+      wireOptionGroup('q-timeline', false);
+      wireOptionGroup('q-budget', false);
+
+      // ---------- send paths ----------
+      // (A) WhatsApp
+      document.getElementById('send-whatsapp').addEventListener('click', () => {
+        const msg = buildWAMessage();
+        const url = `https://wa.me/${WA}?text=${encodeURIComponent(msg)}`;
+        window.open(url, '_blank');
+      });
+
+      // (B) Email
+      document.getElementById('send-email').addEventListener('click', () => {
+        const raw = buildWAMessage();
+        const plain = raw.replace(/\*/g, '').replace(/_/g, '');
+        const subject = `New Project Request from ${answers.name || 'Website'}`;
+        const url = `mailto:${EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(plain)}`;
+        window.location.href = url;
+      });
+
+      // (C) Call/text instead → reveal contact form
+      document.getElementById('send-db').addEventListener('click', () => {
+        document.querySelectorAll('.sap-send-btn').forEach(b => b.style.display = 'none');
+        const form = document.getElementById('sapContactForm');
+        form.classList.add('show');
+        setTimeout(() => document.getElementById('q-contact').focus(), 50);
+      });
+
+      // Contact form submit
+      document.getElementById('btn-submit-db').addEventListener('click', () => {
+        const contact = document.getElementById('q-contact').value.trim();
+        if (!contact) {
+          const el = document.getElementById('q-contact');
+          el.classList.add('sap-invalid');
+          setTimeout(() => el.classList.remove('sap-invalid'), 600);
+          return;
+        }
+        const btn = document.getElementById('btn-submit-db');
+        const label = document.getElementById('submit-db-label');
+        const originalHTML = btn.innerHTML;
+        btn.disabled = true;
+        label.textContent = 'Sending...';
+
+        // Simulate brief async submission (no backend wired up)
+        setTimeout(() => {
+          // Restore the success card
+          document.getElementById('sapContactForm').classList.remove('show');
+          document.getElementById('sapSuccess').classList.add('show');
+          bar.parentElement.style.display = 'none';
+          btn.disabled = false;
+          btn.innerHTML = originalHTML;
+          label.textContent = 'Submit Request';
+          // Log to console for now (could be wired to a webhook later)
+          try { console.log('[Akay Mighty Concept] Lead captured:', { ...answers, contact }); } catch (e) {}
+        }, 900);
+      });
+
+      // Restart
+      document.getElementById('sapRestart').addEventListener('click', () => {
+        current = 0;
+        Object.keys(answers).forEach(k => delete answers[k]);
+        // Clear inputs
+        wizard.querySelectorAll('.sap-input, .sap-textarea').forEach(i => i.value = '');
+        wizard.querySelectorAll('.sap-option.selected').forEach(o => o.classList.remove('selected'));
+        wizard.querySelectorAll('.sap-other-wrap').forEach(w => w.classList.remove('show'));
+        // Reset UI
+        document.getElementById('sapSuccess').classList.remove('show');
+        document.getElementById('sapContactForm').classList.remove('show');
+        document.querySelectorAll('.sap-send-btn').forEach(b => b.style.display = '');
+        bar.parentElement.style.display = '';
+        nav.style.display = '';
+        bar.style.width = '0%';
+        show(0);
+      });
+
+      // Initialize
+      show(0);
+    })();
+  </script>
+</body>
+</html>
