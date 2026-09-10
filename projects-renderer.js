@@ -177,6 +177,11 @@ function renderWebShowcase(items) {
     if (strip2) strip2.innerHTML = row2Html + row2Html;
   }
 
+  // These cards are injected after the page's one-time scroll-reveal
+  // observer already ran, so it never sees them and they'd stay at
+  // opacity:0 forever. Mark them visible immediately instead.
+  section.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
+
   if (window.initShowcase) {
     setTimeout(() => window.initShowcase(), 100);
   }
@@ -211,6 +216,8 @@ function renderWebPortfolio(items) {
       grid.appendChild(card);
     }
   });
+
+  grid.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
 }
 
 function renderServiceSection(sectionId, items) {
@@ -238,6 +245,8 @@ function renderServiceSection(sectionId, items) {
       grid.appendChild(card);
     }
   });
+
+  grid.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
 }
 
 function renderLoadingState(section) {
