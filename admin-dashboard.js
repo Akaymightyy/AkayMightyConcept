@@ -1333,8 +1333,15 @@ async function moveProject(id, direction) {
 }
 
 async function seedDefaultProjects() {
-  if (!confirm('This will ADD 12 default projects to your showcase. You can edit or delete them afterwards. Continue?')) return;
+  // Use a custom confirm instead of window.confirm (more reliable on mobile)
+  const ok = await new Promise(resolve => {
+    showConfirm('Add 12 default projects to your showcase? You can edit or delete them afterwards.', resolve);
+  });
+  if (!ok) return;
+
   toast('Adding 12 default projects…', 'info');
+  console.log('[projects] seeding 12 defaults...');
+
   const newProjects = PROJECTS_DEFAULTS.map((p, i) => ({
     id: `proj-seed-${Date.now()}-${i}`,
     title: p.title,
@@ -1345,18 +1352,57 @@ async function seedDefaultProjects() {
     order: state.projects.length + i
   }));
   const updated = [...state.projects, ...newProjects];
-  const ok = await saveProjects(updated);
-  if (ok) toast('12 default projects added', 'success');
+  console.log('[projects] saving', updated.length, 'projects to Firestore');
+  const saveOk = await saveProjects(updated);
+  if (saveOk) {
+    toast('✓ 12 default projects added', 'success');
+    console.log('[projects] seed successful');
+  } else {
+    console.error('[projects] seed failed');
+  }
+}
+
+// Custom confirm dialog (more reliable on mobile than window.confirm)
+function showConfirm(message, callback) {
+  let modal = $('#akayConfirmModal');
+  if (modal) modal.remove();
+
+  modal = document.createElement('div');
+  modal.id = 'akayConfirmModal';
+  modal.className = 'akay-modal is-open';
+  modal.innerHTML = `
+    <div class="akay-modal__panel" style="max-width:380px;text-align:center;">
+      <p style="font:500 14px/1.5 'Poppins',sans-serif;color:#fff;margin:0 0 20px;">${message}</p>
+      <div style="display:flex;gap:10px;justify-content:center;">
+        <button class="dash-btn dash-btn--ghost" id="cfCancel">Cancel</button>
+        <button class="dash-btn dash-btn--primary" id="cfOk">Yes, continue</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+
+  const done = (result) => {
+    modal.remove();
+    callback(result);
+  };
+
+  modal.querySelector('#cfCancel').addEventListener('click', () => done(false));
+  modal.querySelector('#cfOk').addEventListener('click', () => done(true));
+  modal.addEventListener('click', e => { if (e.target === modal) done(false); });
 }
 
 async function saveProjects(arr) {
+  console.log('[projects] saveProjects called with', arr.length, 'items');
   try {
+    console.log('[projects] calling setDoc...');
     await setDoc(doc(db, 'content', 'projects'),
       { items: arr, _updatedAt: serverTimestamp() },
       { merge: true });
+    console.log('[projects] setDoc succeeded');
     toast(`✓ Projects saved (${arr.length})`, 'success');
     return true;
   } catch (e) {
+    console.error('[projects] saveProjects FAILED:', e);
     if (e.code === 'permission-denied' || /permission|denied|rules/i.test(e.message)) {
       toast('SAVE FAILED — Firestore rules rejected the write. See Settings tab.', 'error');
       state.rulesOk = false;
