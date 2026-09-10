@@ -23,9 +23,17 @@ function initShowcase() {
 window.initShowcase = initShowcase;
 
 function initWrap(wrap) {
-  // Skip if already initialized
-  if (wrap.dataset.akayShowcaseInit === '1') return;
-  wrap.dataset.akayShowcaseInit = '1';
+  // If a previous init already started an animation loop (e.g. it ran
+  // once on page load before real cards existed, measuring width 0),
+  // cancel that loop first so re-running this doesn't stack a second
+  // loop on top of it and fight over wrap.scrollLeft.
+  if (wrap._akayShowcaseRafId) {
+    cancelAnimationFrame(wrap._akayShowcaseRafId);
+    wrap._akayShowcaseRafId = null;
+  }
+  if (wrap._akayShowcaseIO) {
+    wrap._akayShowcaseIO.disconnect();
+  }
 
   const strip = wrap.querySelector('.showcase-strip');
   if (!strip) return;
@@ -81,8 +89,33 @@ function initWrap(wrap) {
       wrap.classList.remove('is-autoplaying');
     }
     rafId = requestAnimationFrame(tick);
+    wrap._akayShowcaseRafId = rafId;
   }
   rafId = requestAnimationFrame(tick);
+  wrap._akayShowcaseRafId = rafId;
+
+  // Interaction listeners only need attaching once ever — they don't
+  // depend on the content inside the strip, so re-running initWrap
+  // (to restart the scroll loop with real content) must not stack
+  // duplicate listeners.
+  if (wrap.dataset.akayShowcaseListenersInit === '1') {
+    const io = new IntersectionObserver(entries => {
+      entries.forEach(en => {
+        if (!en.isIntersecting) {
+          cancelAnimationFrame(rafId);
+          wrap._akayShowcaseRafId = null;
+        } else if (!wrap._akayShowcaseRafId) {
+          lastFrame = performance.now();
+          rafId = requestAnimationFrame(tick);
+          wrap._akayShowcaseRafId = rafId;
+        }
+      });
+    }, { threshold: 0 });
+    io.observe(wrap);
+    wrap._akayShowcaseIO = io;
+    return;
+  }
+  wrap.dataset.akayShowcaseListenersInit = '1';
 
   // ---- Pause on hover (desktop) ----
   wrap.addEventListener('mouseenter', () => {
@@ -129,14 +162,16 @@ function initWrap(wrap) {
     entries.forEach(en => {
       if (!en.isIntersecting) {
         cancelAnimationFrame(rafId);
-        rafId = null;
-      } else if (!rafId) {
+        wrap._akayShowcaseRafId = null;
+      } else if (!wrap._akayShowcaseRafId) {
         lastFrame = performance.now();
         rafId = requestAnimationFrame(tick);
+        wrap._akayShowcaseRafId = rafId;
       }
     });
   }, { threshold: 0 });
   io.observe(wrap);
+  wrap._akayShowcaseIO = io;
 }
 
 // Auto-init on page load

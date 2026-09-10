@@ -174,23 +174,42 @@ function renderWebShowcase(items) {
   const row1 = items.slice(0, mid);
   const row2 = items.slice(mid);
 
-  const row1Html = row1.map(renderCard).join('');
-  const row2Html = row2.map(renderCard).join('');
+  // Repeat each row enough times to look like a flowing marquee loop
+  // rather than an obvious "same card twice" duplicate when there are
+  // only 1–3 real projects. Once there are enough projects, this
+  // naturally settles down to just a couple of repeats.
+  function repeatToFill(row, minCopies = 2, maxCopies = 6) {
+    if (!row.length) return '';
+    const copies = Math.min(maxCopies, Math.max(minCopies, Math.ceil(6 / row.length)));
+    let html = '';
+    for (let i = 0; i < copies; i++) html += row.map(renderCard).join('');
+    return html;
+  }
+
+  const row1Html = repeatToFill(row1);
+  const row2Html = repeatToFill(row2);
 
   const wraps = section.querySelectorAll('.showcase-track-wrap');
   if (wraps[0]) {
     const strip1 = wraps[0].querySelector('.showcase-strip');
-    if (strip1) strip1.innerHTML = row1Html + row1Html;
+    if (strip1) strip1.innerHTML = row1Html;
   }
   if (wraps[1]) {
     const strip2 = wraps[1].querySelector('.showcase-strip');
-    if (strip2) strip2.innerHTML = row2Html + row2Html;
+    if (strip2) strip2.innerHTML = row2Html;
   }
 
   // These cards are injected after the page's one-time scroll-reveal
   // observer already ran, so it never sees them and they'd stay at
   // opacity:0 forever. Mark them visible immediately instead.
   section.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
+
+  // showcase-scroll.js marks each track as "already initialized" the
+  // first time it runs — which happens on page load, BEFORE these real
+  // cards exist (the strips are empty at that point, so it measures a
+  // width of 0 and never auto-plays). Clear that flag so it properly
+  // re-measures and starts scrolling now that real content is here.
+  wraps.forEach(w => { delete w.dataset.akayShowcaseInit; });
 
   if (window.initShowcase) {
     setTimeout(() => window.initShowcase(), 100);
