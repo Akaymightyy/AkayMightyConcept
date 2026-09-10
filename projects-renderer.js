@@ -1,18 +1,15 @@
 // =====================================================================
-//  projects-renderer.js  v26
+//  projects-renderer.js  v27
 //  ---------------------------------------------------------------------
 //  Subscribes to Firestore 'content/projects' doc and renders projects
 //  into the correct section based on the 'section' field:
-//    - web-showcase     → Recent Web Work marquee
+//    - web-showcase     → Recent Web Work marquee (image cards)
+//    - web-portfolio    → Websites I've Built (browser-style cards w/ live URL)
 //    - design-services  → Design Services grid
 //    - print-services   → Print Services grid
 //
-//  For the web showcase, projects are split into 2 rows (forward/reverse)
-//  and duplicated for seamless loop.
-//
-//  For design-services and print-services, projects are appended to the
-//  existing grid (after the fixed slots). If no projects exist for a
-//  section, that section is left as-is.
+//  FIX v27: Added onerror handler on images so broken URLs show a
+//  "broken image" icon instead of black blank.
 // =====================================================================
 
 import { db, doc, onSnapshot } from "./firebase-config.js";
@@ -25,6 +22,15 @@ function escapeHtml(s) {
 function escapeAttr(s) {
   return String(s || '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
+
+// Broken image placeholder — shows when image URL fails to load
+const BROKEN_IMG_SVG = `data:image/svg+xml,${encodeURIComponent(`
+  <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 250'>
+    <rect width='400' height='250' fill='#1a1a1a'/>
+    <text x='200' y='120' font-family='Montserrat,Arial,sans-serif' font-size='14' fill='#5a5a5a' text-anchor='middle'>Image failed to load</text>
+    <text x='200' y='145' font-family='monospace' font-size='10' fill='#3a3a3a' text-anchor='middle'>Check the image URL</text>
+  </svg>
+`)}`;
 
 function renderCard(item) {
   const url = escapeAttr(item.imageUrl || '');
@@ -40,7 +46,7 @@ function renderCard(item) {
     <div class="showcase-card reveal">
       ${openLink}
       <div class="showcase-card-img">
-        ${url ? `<img src="${url}" alt="${escapeAttr(title)}" loading="lazy" />` : ''}
+        ${url ? `<img src="${url}" alt="${escapeAttr(title)}" loading="lazy" onerror="this.onerror=null;this.src='${BROKEN_IMG_SVG}';console.warn('[projects] image failed:', this.src);" />` : ''}
       </div>
       <div class="showcase-card-meta">
         ${category ? `<span class="showcase-card-tag">${category}</span>` : ''}
@@ -52,7 +58,40 @@ function renderCard(item) {
   `;
 }
 
-// Render a card for design/print services grid (smaller, different layout)
+// Render a web-portfolio card (browser-style with live URL)
+function renderWebPortfolioCard(item) {
+  const url = escapeAttr(item.imageUrl || '');
+  const title = escapeHtml(item.title || 'Untitled');
+  const category = escapeHtml(item.category || '');
+  const desc = escapeHtml(item.description || '');
+  const liveUrl = escapeAttr(item.liveUrl || '');
+
+  // Extract domain from liveUrl for the browser URL bar
+  let domain = '';
+  try { if (liveUrl) domain = new URL(liveUrl).hostname; } catch {}
+
+  return `
+    <div class="wp-card reveal" data-url="${liveUrl}" data-name="${escapeAttr(title)}" data-desc="${escapeAttr(desc)}">
+      <div class="wp-browser"><div class="wp-dots"><span></span><span></span><span></span></div><div class="wp-url">${escapeHtml(domain)}</div></div>
+      <div class="wp-preview" style="background:linear-gradient(135deg,#0a0a0a,#1a0505);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;position:relative;overflow:hidden;">
+        ${url ? `<img src="${url}" alt="${escapeAttr(title)}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" loading="lazy" onerror="this.style.display='none';" />` : ''}
+        <div style="position:relative;z-index:1;text-align:center;padding:20px;">
+          <span style="color:rgba(255,255,255,0.8);font-size:13px;font-weight:600;letter-spacing:2px;text-transform:uppercase;">${title}</span>
+          ${category ? `<br><span style="color:rgba(255,255,255,0.4);font-size:11px;">${category}</span>` : ''}
+        </div>
+        <div class="zoom-hint" aria-label="Click to zoom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg></div>
+      </div>
+      <div class="wp-body">
+        <span class="wp-tag">${category || 'Web'}</span>
+        <h4 class="wp-name">${title}</h4>
+        <p class="wp-desc">${desc}</p>
+        <span class="wp-btn">Watch it scroll →</span>
+      </div>
+    </div>
+  `;
+}
+
+// Render a card for design/print services grid
 function renderServiceCard(item) {
   const url = escapeAttr(item.imageUrl || '');
   const title = escapeHtml(item.title || 'Untitled');
@@ -67,7 +106,7 @@ function renderServiceCard(item) {
     <div class="service-card reveal" style="cursor:pointer;">
       ${openLink}
       <div class="service-card-img clickable-img" data-img="${url}" style="background:linear-gradient(135deg,#0a0a0a,#1a0505);">
-        ${url ? `<img src="${url}" alt="${escapeAttr(title)}" style="width:100%;height:100%;object-fit:cover;" />` : ''}
+        ${url ? `<img src="${url}" alt="${escapeAttr(title)}" style="width:100%;height:100%;object-fit:cover;" loading="lazy" onerror="this.style.display='none';" />` : ''}
       </div>
       <div style="padding:12px 14px;">
         ${category ? `<div style="font:600 10px/1 'Montserrat',sans-serif;letter-spacing:1.5px;text-transform:uppercase;color:#ff1a1a;margin-bottom:6px;">${category}</div>` : ''}
@@ -82,30 +121,26 @@ function renderServiceCard(item) {
 function renderProjects(items) {
   console.log('[projects] renderProjects called with', items.length, 'items');
 
-  // Split by section
   const webShowcase = items.filter(p => !p.section || p.section === 'web-showcase');
+  const webPortfolio = items.filter(p => p.section === 'web-portfolio');
   const designServices = items.filter(p => p.section === 'design-services');
   const printServices = items.filter(p => p.section === 'print-services');
 
-  console.log('[projects] web-showcase:', webShowcase.length, 'design:', designServices.length, 'print:', printServices.length);
+  console.log('[projects] web-showcase:', webShowcase.length, 'web-portfolio:', webPortfolio.length, 'design:', designServices.length, 'print:', printServices.length);
 
   renderWebShowcase(webShowcase);
+  renderWebPortfolio(webPortfolio);
   renderServiceSection('design-services', designServices);
   renderServiceSection('print-services', printServices);
 }
 
 function renderWebShowcase(items) {
   const section = document.getElementById('web-showcase');
-  if (!section) {
-    console.warn('[projects] web-showcase section not found');
-    return;
-  }
+  if (!section) return;
 
-  // ALWAYS show the section
   section.style.display = '';
 
   if (!items.length) {
-    console.log('[projects] no web-showcase items — showing placeholder');
     const wraps = section.querySelectorAll('.showcase-track-wrap');
     if (wraps[0]) {
       const strip1 = wraps[0].querySelector('.showcase-strip');
@@ -124,12 +159,7 @@ function renderWebShowcase(items) {
     return;
   }
 
-  console.log('[projects] rendering', items.length, 'web-showcase projects');
-
-  // Sort by order
   items.sort((a, b) => (a.order || 0) - (b.order || 0));
-
-  // Split into 2 rows
   const mid = Math.ceil(items.length / 2);
   const row1 = items.slice(0, mid);
   const row2 = items.slice(mid);
@@ -140,10 +170,7 @@ function renderWebShowcase(items) {
   const wraps = section.querySelectorAll('.showcase-track-wrap');
   if (wraps[0]) {
     const strip1 = wraps[0].querySelector('.showcase-strip');
-    if (strip1) {
-      strip1.innerHTML = row1Html + row1Html;
-      console.log('[projects] injected row1:', strip1.children.length, 'cards');
-    }
+    if (strip1) strip1.innerHTML = row1Html + row1Html;
   }
   if (wraps[1]) {
     const strip2 = wraps[1].querySelector('.showcase-strip');
@@ -155,19 +182,44 @@ function renderWebShowcase(items) {
   }
 }
 
+function renderWebPortfolio(items) {
+  const section = document.getElementById('web-portfolio');
+  if (!section) return;
+
+  const grid = section.querySelector('.web-grid');
+  if (!grid) {
+    console.warn('[projects] no .web-grid found in #web-portfolio');
+    return;
+  }
+
+  // Remove previously-injected dynamic cards
+  const oldDynamic = grid.querySelectorAll('[data-dynamic-project]');
+  oldDynamic.forEach(el => el.remove());
+
+  if (!items.length) return;
+
+  console.log(`[projects] injecting ${items.length} projects into #web-portfolio`);
+
+  items.sort((a, b) => (a.order || 0) - (b.order || 0));
+
+  items.forEach(item => {
+    const temp = document.createElement('div');
+    temp.innerHTML = renderWebPortfolioCard(item).trim();
+    const card = temp.firstChild;
+    if (card) {
+      card.setAttribute('data-dynamic-project', item.id);
+      grid.appendChild(card);
+    }
+  });
+}
+
 function renderServiceSection(sectionId, items) {
   const section = document.getElementById(sectionId);
   if (!section) return;
 
-  // Find the existing grid container in this section
-  // Design services and print services have a grid of service-card elements
   const grid = section.querySelector('.services-grid, .service-grid, .grid');
-  if (!grid) {
-    console.warn(`[projects] no grid found in #${sectionId}`);
-    return;
-  }
+  if (!grid) return;
 
-  // Remove any previously-injected dynamic cards (marked with data-dynamic)
   const oldDynamic = grid.querySelectorAll('[data-dynamic-project]');
   oldDynamic.forEach(el => el.remove());
 
@@ -175,14 +227,11 @@ function renderServiceSection(sectionId, items) {
 
   console.log(`[projects] injecting ${items.length} projects into #${sectionId}`);
 
-  // Sort by order
   items.sort((a, b) => (a.order || 0) - (b.order || 0));
 
-  // Append new cards to the grid
   items.forEach(item => {
-    const cardHtml = renderServiceCard(item);
     const temp = document.createElement('div');
-    temp.innerHTML = cardHtml.trim();
+    temp.innerHTML = renderServiceCard(item).trim();
     const card = temp.firstChild;
     if (card) {
       card.setAttribute('data-dynamic-project', item.id);
@@ -201,8 +250,6 @@ function init() {
 
   try {
     const docRef = doc(db, 'content', 'projects');
-    console.log('[projects] docRef:', docRef);
-
     onSnapshot(docRef, snap => {
       console.log('[projects] onSnapshot fired, exists:', snap.exists());
       if (!snap.exists()) {
@@ -216,7 +263,6 @@ function init() {
     }, err => {
       console.error('[projects] onSnapshot error:', err.message);
     });
-
     console.log('[projects] onSnapshot subscribed');
   } catch (e) {
     console.error('[projects] init error:', e.message);

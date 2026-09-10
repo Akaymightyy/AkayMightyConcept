@@ -1177,7 +1177,7 @@ function renderProjects() {
             </label>
             <span class="dash-project-card__order">#${originalIndex + 1}</span>
             <span class="dash-project-card__tag">${escapeHtml(p.category || '')}</span>
-            <span class="dash-project-card__section">${escapeHtml(p.section === 'design-services' ? 'Design' : p.section === 'print-services' ? 'Print' : 'Web Showcase')}</span>
+            <span class="dash-project-card__section">${escapeHtml(p.section === 'design-services' ? 'Design' : p.section === 'print-services' ? 'Print' : p.section === 'web-portfolio' ? 'Web Portfolio' : 'Web Showcase')}</span>
           </div>
           <div class="dash-project-card__btns">
             <button class="dash-btn dash-btn--ghost dash-btn--mini" data-act="up" title="Move up">↑</button>
@@ -1298,6 +1298,7 @@ function showProjectForm(project) {
           <span>Show in section *</span>
           <select id="pf-section" required>
             <option value="web-showcase" ${p.section === 'web-showcase' ? 'selected' : ''}>Recent Web Work (showcase marquee)</option>
+            <option value="web-portfolio" ${p.section === 'web-portfolio' ? 'selected' : ''}>Websites I've Built (clickable browser cards)</option>
             <option value="design-services" ${p.section === 'design-services' ? 'selected' : ''}>Design Services</option>
             <option value="print-services" ${p.section === 'print-services' ? 'selected' : ''}>Print Services</option>
           </select>
