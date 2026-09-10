@@ -42,9 +42,19 @@ function renderCard(item) {
   const openLink = liveUrl ? `<a href="${liveUrl}" target="_blank" rel="noopener" style="text-decoration:none;color:inherit;">` : '';
   const closeLink = liveUrl ? `</a>` : '';
 
+  // Extract domain for the browser URL bar — only shown when a live URL is set
+  let domain = '';
+  if (liveUrl) {
+    try { domain = new URL(item.liveUrl).hostname; } catch {}
+  }
+  const browserBar = domain
+    ? `<div class="wp-browser"><div class="wp-dots"><span></span><span></span><span></span></div><div class="wp-url">${escapeHtml(domain)}</div></div>`
+    : '';
+
   return `
     <div class="showcase-card reveal">
       ${openLink}
+      ${browserBar}
       <div class="showcase-card-img">
         ${url ? `<img src="${url}" alt="${escapeAttr(title)}" loading="lazy" onerror="this.onerror=null;this.src='${BROKEN_IMG_SVG}';console.warn('[projects] image failed:', this.src);" />` : ''}
       </div>
