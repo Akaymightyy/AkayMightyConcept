@@ -1470,6 +1470,37 @@ async function seedDefaultProjects() {
   }
 }
 
+// Seed the 8 existing hardcoded web-portfolio projects into Firestore
+// so they become editable from the admin dashboard.
+async function seedWebPortfolioDefaults() {
+  const ok = await new Promise(resolve => {
+    showConfirm('Make your 8 existing "Websites I\'ve Built" projects editable from the dashboard? This copies them into Firestore so you can edit, delete, and reorder them. The original hardcoded cards will be replaced by the editable versions.', resolve);
+  });
+  if (!ok) return;
+
+  toast('Making web projects editable…', 'info');
+
+  const newProjects = PROJECTS_DEFAULTS.map((p, i) => ({
+    id: `proj-wp-${Date.now()}-${i}`,
+    title: p.title,
+    section: 'web-portfolio',
+    category: p.category,
+    description: p.description,
+    imageUrl: p.liveUrl ? `https://s0.wp.com/mshots/v1/${encodeURIComponent(p.liveUrl)}?w=1200&h=900` : '',
+    liveUrl: p.liveUrl || '',
+    order: i
+  }));
+
+  // Remove any existing web-portfolio projects, then add the new ones
+  const others = state.projects.filter(p => p.section !== 'web-portfolio');
+  const updated = [...others, ...newProjects];
+
+  const saveOk = await saveProjects(updated);
+  if (saveOk) {
+    toast(`✓ ${newProjects.length} web projects are now editable`, 'success');
+  }
+}
+
 // Custom confirm dialog (more reliable on mobile than window.confirm)
 function showConfirm(message, callback) {
   let modal = $('#akayConfirmModal');
@@ -1568,6 +1599,8 @@ function boot() {
   if (btnAddProject) btnAddProject.addEventListener('click', addNewProject);
   const btnSeedProjects = $('#btnSeedProjects');
   if (btnSeedProjects) btnSeedProjects.addEventListener('click', seedDefaultProjects);
+  const btnSeedWebPortfolio = $('#btnSeedWebPortfolio');
+  if (btnSeedWebPortfolio) btnSeedWebPortfolio.addEventListener('click', seedWebPortfolioDefaults);
   const btnRefreshProjects = $('#btnRefreshProjects');
   if (btnRefreshProjects) btnRefreshProjects.addEventListener('click', () => {
     renderProjects();

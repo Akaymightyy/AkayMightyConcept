@@ -230,9 +230,18 @@ function renderWebPortfolio(items) {
   const oldDynamic = grid.querySelectorAll('[data-dynamic-project]');
   oldDynamic.forEach(el => el.remove());
 
-  if (!items.length) return;
+  // Find hardcoded cards (ones without data-dynamic-project)
+  const hardcodedCards = grid.querySelectorAll('.wp-card:not([data-dynamic-project])');
 
-  console.log(`[projects] injecting ${items.length} projects into #web-portfolio`);
+  if (!items.length) {
+    // No Firestore projects — show hardcoded cards (don't destroy anything)
+    hardcodedCards.forEach(card => card.style.display = '');
+    return;
+  }
+
+  // Firestore has web-portfolio projects — hide hardcoded cards, show dynamic ones
+  console.log(`[projects] replacing ${hardcodedCards.length} hardcoded cards with ${items.length} Firestore cards`);
+  hardcodedCards.forEach(card => card.style.display = 'none');
 
   items.sort((a, b) => (a.order || 0) - (b.order || 0));
 
