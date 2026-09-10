@@ -20,12 +20,12 @@
   <style>
     /* About-page specific styles */
     #about-hero { padding: 140px 0 80px; position: relative; overflow: hidden; }
-    .about-hero-bg { position: absolute; inset: 0; background: radial-gradient(ellipse at 70% 30%, rgba(74,74,213,0.22) 0%, transparent 55%), radial-gradient(ellipse at 20% 80%, rgba(22,22,110,0.18) 0%, transparent 45%), var(--bg); z-index: -3; }
+    .about-hero-bg { position: absolute; inset: 0; background: radial-gradient(ellipse at 70% 30%, rgba(91,91,245,0.22) 0%, transparent 55%), radial-gradient(ellipse at 20% 80%, rgba(22,22,110,0.18) 0%, transparent 45%), var(--bg); z-index: -3; }
     .about-hero-grid { display: grid; grid-template-columns: 0.9fr 1.1fr; gap: 60px; align-items: center; width: 100%; }
     @media (max-width: 900px) { .about-hero-grid { grid-template-columns: 1fr; gap: 40px; } }
     .about-img-wrap { position: relative; max-width: 100%; }
     .about-img { width: 100%; aspect-ratio: 1; border-radius: var(--radius-lg); border: 1px solid var(--border-red); box-shadow: 0 30px 60px rgba(0,0,0,0.6); object-fit: cover; }
-    .about-badge { position: absolute; bottom: -20px; right: -10px; background: var(--gradient-red); padding: 18px 22px; border-radius: var(--radius); display: flex; align-items: center; gap: 12px; box-shadow: 0 10px 30px rgba(74,74,213,0.4); }
+    .about-badge { position: absolute; bottom: -20px; right: -10px; background: var(--gradient-red); padding: 18px 22px; border-radius: var(--radius); display: flex; align-items: center; gap: 12px; box-shadow: 0 10px 30px rgba(91,91,245,0.4); }
     .about-badge .num { font-family: var(--font-heading); font-weight: 900; font-size: 32px; color: white; line-height: 1; }
     .about-badge .label { font-size: 11px; color: rgba(255,255,255,0.85); letter-spacing: 1px; text-transform: uppercase; line-height: 1.3; }
     @media (max-width: 900px) { .about-badge { right: 10px; bottom: -10px; padding: 14px 18px; } .about-badge .num { font-size: 26px; } }
@@ -35,7 +35,7 @@
     .about-hero-title span { color: var(--red); }
     .about-hero-intro { font-size: 17px; color: var(--text-muted); line-height: 1.8; margin-bottom: 24px; max-width: 540px; }
     .about-hero-meta { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 24px; }
-    .about-meta-pill { display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 100px; background: rgba(42,42,133,0.1); border: 1px solid var(--border-red); font-size: 12px; color: var(--text); font-weight: 500; }
+    .about-meta-pill { display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 100px; background: rgba(91,91,245,0.1); border: 1px solid var(--border-red); font-size: 12px; color: var(--text); font-weight: 500; }
     .about-meta-pill svg { width: 14px; height: 14px; color: var(--red); }
 
     /* Full story section */
@@ -56,7 +56,7 @@
     @media (max-width: 900px) { .skills-grid { grid-template-columns: repeat(2, 1fr); } }
     .skill-block { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px 18px; text-align: center; transition: all 0.3s; }
     .skill-block:hover { border-color: var(--border-red); transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,0.4); }
-    .skill-block-icon { width: 48px; height: 48px; margin: 0 auto 12px; border-radius: 12px; background: rgba(42,42,133,0.1); border: 1px solid var(--border-red); display: flex; align-items: center; justify-content: center; color: var(--red); }
+    .skill-block-icon { width: 48px; height: 48px; margin: 0 auto 12px; border-radius: 12px; background: rgba(91,91,245,0.1); border: 1px solid var(--border-red); display: flex; align-items: center; justify-content: center; color: var(--red); }
     .skill-block-icon svg { width: 22px; height: 22px; }
     .skill-block-title { font-family: var(--font-heading); font-size: 14px; font-weight: 700; margin-bottom: 6px; }
     .skill-block-desc { font-size: 12px; color: var(--text-muted); line-height: 1.5; }
@@ -64,7 +64,7 @@
     /* Skills tags */
     .skill-tags-wrap { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 32px; justify-content: center; }
     .skill-tag { padding: 7px 14px; background: var(--bg3); border: 1px solid var(--border); border-radius: 100px; font-size: 12px; color: var(--text-muted); transition: 0.25s; cursor: pointer; }
-    .skill-tag:hover { color: var(--red); border-color: var(--red); background: rgba(42,42,133,0.06); transform: translateY(-2px); }
+    .skill-tag:hover { color: var(--red); border-color: var(--red); background: rgba(91,91,245,0.06); transform: translateY(-2px); }
 
     /* Personal note */
     .personal-note { padding: 32px; background: var(--bg2); border-left: 3px solid var(--red); border-radius: 0 var(--radius) var(--radius) 0; margin-top: 48px; max-width: 760px; }

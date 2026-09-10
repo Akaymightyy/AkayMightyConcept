@@ -23,9 +23,9 @@
   <style>
     /* ============ Hero (homepage specific) ============ */
     #home-hero { position: relative; min-height: 100vh; display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 120px 0 80px; text-align: center; }
-    .home-hero-bg { position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 30%, rgba(74,74,213,0.22) 0%, transparent 55%), radial-gradient(ellipse at 20% 80%, rgba(22,22,110,0.18) 0%, transparent 45%), var(--bg); z-index: -3; }
+    .home-hero-bg { position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 30%, rgba(91,91,245,0.22) 0%, transparent 55%), radial-gradient(ellipse at 20% 80%, rgba(22,22,110,0.18) 0%, transparent 45%), var(--bg); z-index: -3; }
     .home-hero-overlay { position: absolute; inset: 0; background: linear-gradient(180deg, transparent 0%, rgba(10,10,10,0.3) 60%, var(--bg) 100%); z-index: -2; }
-    .home-hero-glow { position: absolute; top: 45%; left: 50%; transform: translate(-50%, -50%); width: 700px; height: 700px; max-width: 100vw; background: radial-gradient(circle, rgba(74,74,213,0.28) 0%, transparent 70%); z-index: -2; animation: glowPulse 6s ease-in-out infinite; filter: blur(50px); pointer-events: none; }
+    .home-hero-glow { position: absolute; top: 45%; left: 50%; transform: translate(-50%, -50%); width: 700px; height: 700px; max-width: 100vw; background: radial-gradient(circle, rgba(91,91,245,0.28) 0%, transparent 70%); z-index: -2; animation: glowPulse 6s ease-in-out infinite; filter: blur(50px); pointer-events: none; }
     .hero-container { display: flex; flex-direction: column; align-items: center; gap: 40px; width: 100%; max-width: 900px; position: relative; z-index: 1; }
     .hero-content { max-width: 720px; text-align: center; }
     .hero-name { font-family: var(--font-heading); font-size: clamp(15px, 2vw, 18px); color: var(--text-muted); margin-bottom: 14px; font-weight: 500; }
@@ -45,8 +45,8 @@
     .hero-avatar::before { content: ''; position: absolute; inset: -8px; border-radius: 50%; background: conic-gradient(from var(--border-angle), transparent 0%, transparent 30%, var(--red) 50%, var(--red-bright) 60%, transparent 80%, transparent 100%); animation: drawBorder 3s linear infinite; filter: blur(1px); z-index: -1; }
     .hero-avatar::after { content: ''; position: absolute; inset: -2px; border-radius: 50%; background: conic-gradient(from var(--border-angle), var(--red) 0%, transparent 25%, transparent 50%, var(--red) 75%, transparent 100%); animation: drawBorder 4s linear infinite reverse; opacity: 0.6; z-index: -1; }
     @keyframes drawBorder { to { --border-angle: 360deg; } }
-    .hero-avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 4px solid var(--bg); box-shadow: 0 0 80px rgba(74,74,213,0.4), inset 0 0 40px rgba(0,0,0,0.5); }
-    .hero-prop { position: absolute; width: 130px; height: 170px; border-radius: 14px; background: var(--bg3); border: 1px solid var(--border-red); box-shadow: 0 20px 50px rgba(0,0,0,0.6), 0 0 30px rgba(74,74,213,0.2); z-index: 4; transform-style: preserve-3d; transition: transform 0.4s cubic-bezier(0.4,0,0.2,1); overflow: hidden; }
+    .hero-avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 4px solid var(--bg); box-shadow: 0 0 80px rgba(91,91,245,0.4), inset 0 0 40px rgba(0,0,0,0.5); }
+    .hero-prop { position: absolute; width: 130px; height: 170px; border-radius: 14px; background: var(--bg3); border: 1px solid var(--border-red); box-shadow: 0 20px 50px rgba(0,0,0,0.6), 0 0 30px rgba(91,91,245,0.2); z-index: 4; transform-style: preserve-3d; transition: transform 0.4s cubic-bezier(0.4,0,0.2,1); overflow: hidden; }
     .hero-prop.left { left: -10px; top: 40px; transform: rotate(-12deg); }
     .hero-prop.right { right: -10px; bottom: 40px; transform: rotate(12deg); }
     .hero-prop-inner { position: absolute; inset: 0; padding: 14px; display: flex; flex-direction: column; gap: 8px; background: linear-gradient(135deg, var(--bg3), var(--bg4)); }
@@ -102,7 +102,7 @@
     @media (max-width: 900px) { .services-overview-grid { grid-template-columns: 1fr; } }
     .service-overview-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 32px 28px; transition: all 0.3s; }
     .service-overview-card:hover { border-color: var(--border-red); transform: translateY(-4px); box-shadow: 0 16px 40px rgba(0,0,0,0.4); }
-    .service-overview-icon { width: 56px; height: 56px; border-radius: 14px; background: rgba(42,42,133,0.1); border: 1px solid var(--border-red); display: flex; align-items: center; justify-content: center; color: var(--red); margin-bottom: 18px; }
+    .service-overview-icon { width: 56px; height: 56px; border-radius: 14px; background: rgba(91,91,245,0.1); border: 1px solid var(--border-red); display: flex; align-items: center; justify-content: center; color: var(--red); margin-bottom: 18px; }
     .service-overview-icon svg { width: 26px; height: 26px; }
     .service-overview-title { font-family: var(--font-heading); font-size: 20px; font-weight: 800; margin-bottom: 8px; }
     .service-overview-desc { font-size: 14px; color: var(--text-muted); line-height: 1.7; margin-bottom: 16px; }
@@ -169,7 +169,7 @@
           <div class="hero-prop-inner">
             <div class="hero-prop-label">Design</div>
             <div class="hero-prop-title">Brand &amp; Print</div>
-            <div class="hero-prop-art" style="background: linear-gradient(135deg, #16166e, #2a2a85);">
+            <div class="hero-prop-art" style="background: linear-gradient(135deg, #3b3bd5, #5b5bf5);">
               <svg viewBox="0 0 100 100" preserveAspectRatio="none">
                 <circle cx="50" cy="38" r="16" fill="rgba(255,255,255,0.3)" />
                 <rect x="22" y="60" width="56" height="4" rx="2" fill="rgba(255,255,255,0.4)" />
@@ -435,7 +435,7 @@
         { name: 'Firebase', color: '#ffca28', svg: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M3.89 15.673L6.255.461A.542.542 0 017.27.287l2.543 4.771zm16.794 3.692l-2.25-13.951a.543.543 0 00-.919-.295L3.316 19.365l7.856 4.414a1.62 1.62 0 001.588 0zM14.3 7.148L12.634 3.847a.543.543 0 00-.96 0L3.53 17.984z"/></svg>' },
         { name: 'Vercel', color: '#ffffff', svg: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M24 22.521H0L12 1.5l12 21.021z"/></svg>' },
         { name: 'Figma', color: '#f24e1e', svg: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8.5 24c2.5 0 4.5-2 4.5-4.5V15H8.5C6 15 4 17 4 19.5S6 24 8.5 24zM4 12c0-2.5 2-4.5 4.5-4.5H13v9H8.5C6 16.5 4 14.5 4 12zM4 4.5C4 2 6 0 8.5 0H13v9H8.5C6 9 4 7 4 4.5zM13 0h4.5C20 0 22 2 22 4.5S20 9 17.5 9H13V0zm9 7.5c0-2.5 2-4.5 4.5-4.5S31 5 31 7.5 29 12 26.5 12H22V7.5z"/></svg>' },
-        { name: 'CorelDRAW', color: '#2a2a85', svg: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>' },
+        { name: 'CorelDRAW', color: '#5b5bf5', svg: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>' },
         { name: 'Photoshop', color: '#31a8ff', svg: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 3h18v18H3V3zm9.5 5.5h-3v7h1.5v-2h1.5c1.38 0 2.5-1.12 2.5-2.5s-1.12-2.5-2.5-2.5zm-1.5 3.5V10h1.5c.55 0 1 .45 1 1s-.45 1-1 1H11z"/></svg>' }
       ];
       const track = document.getElementById('stackTrack');
