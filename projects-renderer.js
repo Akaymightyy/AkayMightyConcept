@@ -54,11 +54,29 @@ function renderProjects(items) {
   const section = document.getElementById('web-showcase');
   if (!section) return;
 
+  // ALWAYS show the section — never hide it.
+  // If no projects, show a placeholder so the section is still visible.
+  section.style.display = '';
+
   if (!items.length) {
-    section.style.display = 'none';
+    // Show placeholder instead of hiding
+    const wraps = section.querySelectorAll('.showcase-track-wrap');
+    if (wraps[0]) {
+      const strip1 = wraps[0].querySelector('.showcase-strip');
+      if (strip1) strip1.innerHTML = `
+        <div class="showcase-card reveal" style="opacity:0.5;">
+          <div class="showcase-card-img" style="display:flex;align-items:center;justify-content:center;">
+            <span style="color:#5a5a5a;font:600 12px/1.4 'Montserrat',sans-serif;text-align:center;padding:20px;">No projects yet.<br>Add some from the admin dashboard.</span>
+          </div>
+        </div>
+      `;
+    }
+    if (wraps[1]) {
+      const strip2 = wraps[1].querySelector('.showcase-strip');
+      if (strip2) strip2.innerHTML = '';
+    }
     return;
   }
-  section.style.display = '';
 
   // Sort by order field
   items.sort((a, b) => (a.order || 0) - (b.order || 0));
