@@ -1177,6 +1177,7 @@ function renderProjects() {
             </label>
             <span class="dash-project-card__order">#${originalIndex + 1}</span>
             <span class="dash-project-card__tag">${escapeHtml(p.category || '')}</span>
+            <span class="dash-project-card__section">${escapeHtml(p.section === 'design-services' ? 'Design' : p.section === 'print-services' ? 'Print' : 'Web Showcase')}</span>
           </div>
           <div class="dash-project-card__btns">
             <button class="dash-btn dash-btn--ghost dash-btn--mini" data-act="up" title="Move up">↑</button>
@@ -1275,9 +1276,9 @@ function editProject(project) {
 
 function showProjectForm(project) {
   const isEdit = !!project;
-  const p = project || { title: '', category: '', description: '', imageUrl: '', liveUrl: '' };
+  const p = project || { title: '', category: '', description: '', imageUrl: '', liveUrl: '', section: 'web-showcase' };
 
-  // Build modal
+  // Build modal — scrollable on mobile
   let modal = $('#projectFormModal');
   if (modal) modal.remove();
 
@@ -1285,13 +1286,21 @@ function showProjectForm(project) {
   modal.id = 'projectFormModal';
   modal.className = 'akay-modal is-open';
   modal.innerHTML = `
-    <div class="akay-modal__panel" style="max-width:480px;">
+    <div class="akay-modal__panel dash-project-form-modal" style="max-width:480px;max-height:90vh;overflow-y:auto;">
       <button class="akay-modal__close" type="button" id="pfClose">×</button>
       <h2 class="akay-modal__title">${isEdit ? 'Edit Project' : 'Add New Project'}</h2>
       <form id="projectForm" class="dash-form">
         <label class="dash-field">
           <span>Title *</span>
           <input type="text" id="pf-title" required value="${escapeAttr(p.title)}" placeholder="e.g. Chardonic Oil & Gas" />
+        </label>
+        <label class="dash-field">
+          <span>Show in section *</span>
+          <select id="pf-section" required>
+            <option value="web-showcase" ${p.section === 'web-showcase' ? 'selected' : ''}>Recent Web Work (showcase marquee)</option>
+            <option value="design-services" ${p.section === 'design-services' ? 'selected' : ''}>Design Services</option>
+            <option value="print-services" ${p.section === 'print-services' ? 'selected' : ''}>Print Services</option>
+          </select>
         </label>
         <label class="dash-field">
           <span>Category / Tag</span>
@@ -1306,17 +1315,17 @@ function showProjectForm(project) {
           <input type="url" id="pf-liveurl" value="${escapeAttr(p.liveUrl)}" placeholder="https://example.com" />
         </label>
         <label class="dash-field">
-          <span>Image URL</span>
-          <input type="url" id="pf-imageurl" value="${escapeAttr(p.imageUrl)}" placeholder="https://res.cloudinary.com/..." />
+          <span>Image URL *</span>
+          <input type="text" id="pf-imageurl" value="${escapeAttr(p.imageUrl)}" placeholder="https://res.cloudinary.com/..." />
         </label>
         <div class="dash-project-form__upload">
           <button type="button" class="dash-btn dash-btn--primary" id="pf-upload-btn">Upload Image</button>
           <span style="font-size:12px;color:var(--akay-text-mute);">or paste a URL above</span>
         </div>
         <div id="pf-preview" style="margin-top:8px;">
-          ${p.imageUrl ? `<img src="${escapeAttr(p.imageUrl)}" style="width:100%;border-radius:8px;border:1px solid var(--akay-border);" />` : ''}
+          ${p.imageUrl ? `<img src="${escapeAttr(p.imageUrl)}" style="width:100%;border-radius:8px;border:1px solid var(--akay-border);" onerror="this.style.display='none';" />` : ''}
         </div>
-        <button type="submit" class="dash-btn dash-btn--primary dash-btn--block" style="margin-top:16px;">${isEdit ? 'Save Changes' : 'Add Project'}</button>
+        <button type="submit" class="dash-btn dash-btn--primary dash-btn--block" style="margin-top:16px;position:sticky;bottom:0;">${isEdit ? 'Save Changes' : 'Add Project'}</button>
         <p class="dash-form__err" id="pf-err"></p>
       </form>
     </div>
@@ -1364,6 +1373,7 @@ function showProjectForm(project) {
   modal.querySelector('#projectForm').addEventListener('submit', async e => {
     e.preventDefault();
     const title = modal.querySelector('#pf-title').value.trim();
+    const section = modal.querySelector('#pf-section').value;
     const category = modal.querySelector('#pf-category').value.trim();
     const description = modal.querySelector('#pf-description').value.trim();
     const liveUrl = modal.querySelector('#pf-liveurl').value.trim();
@@ -1371,24 +1381,30 @@ function showProjectForm(project) {
     const errEl = modal.querySelector('#pf-err');
 
     if (!title) { errEl.textContent = 'Title is required'; return; }
-    if (!imageUrl) { errEl.textContent = 'Image is required (upload or paste URL)'; return; }
+    if (!imageUrl) {
+      errEl.textContent = 'Image is required — click "Upload Image" or paste a full URL starting with https://';
+      return;
+    }
+    // Validate image URL is a full URL (must start with http:// or https://)
+    if (!/^https?:\/\//.test(imageUrl)) {
+      errEl.textContent = 'Image URL must start with https:// — looks like you have a partial URL. Click "Upload Image" to get a proper Cloudinary URL.';
+      return;
+    }
 
     errEl.textContent = '';
 
     if (isEdit) {
-      // Update existing
       const updated = state.projects.map(p =>
         p.id === project.id
-          ? { ...p, title, category, description, liveUrl, imageUrl }
+          ? { ...p, title, section, category, description, liveUrl, imageUrl }
           : p
       );
       const ok = await saveProjects(updated);
       if (ok) { toast('Project updated', 'success'); modal.remove(); }
     } else {
-      // Add new
       const newItem = {
         id: `proj-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-        title, category, description, liveUrl, imageUrl,
+        title, section: section || 'web-showcase', category, description, liveUrl, imageUrl,
         order: state.projects.length
       };
       const updated = [...state.projects, newItem];
@@ -1435,6 +1451,7 @@ async function seedDefaultProjects() {
   const newProjects = PROJECTS_DEFAULTS.map((p, i) => ({
     id: `proj-seed-${Date.now()}-${i}`,
     title: p.title,
+    section: 'web-showcase',
     category: p.category,
     description: p.description,
     imageUrl: `https://picsum.photos/seed/akay-web-${i + 1}/800/600`,

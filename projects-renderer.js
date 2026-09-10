@@ -1,11 +1,18 @@
 // =====================================================================
-//  projects-renderer.js  v25
+//  projects-renderer.js  v26
 //  ---------------------------------------------------------------------
-//  FIX: Added aggressive logging at every step to diagnose why
-//  onSnapshot callback isn't firing on the live site.
+//  Subscribes to Firestore 'content/projects' doc and renders projects
+//  into the correct section based on the 'section' field:
+//    - web-showcase     → Recent Web Work marquee
+//    - design-services  → Design Services grid
+//    - print-services   → Print Services grid
 //
-//  Also: section is ALWAYS visible (never hidden). If no projects,
-//  shows a placeholder card.
+//  For the web showcase, projects are split into 2 rows (forward/reverse)
+//  and duplicated for seamless loop.
+//
+//  For design-services and print-services, projects are appended to the
+//  existing grid (after the fixed slots). If no projects exist for a
+//  section, that section is left as-is.
 // =====================================================================
 
 import { db, doc, onSnapshot } from "./firebase-config.js";
@@ -45,20 +52,60 @@ function renderCard(item) {
   `;
 }
 
+// Render a card for design/print services grid (smaller, different layout)
+function renderServiceCard(item) {
+  const url = escapeAttr(item.imageUrl || '');
+  const title = escapeHtml(item.title || 'Untitled');
+  const category = escapeHtml(item.category || '');
+  const desc = escapeHtml(item.description || '');
+  const liveUrl = escapeAttr(item.liveUrl || '');
+
+  const openLink = liveUrl ? `<a href="${liveUrl}" target="_blank" rel="noopener" style="text-decoration:none;color:inherit;">` : '';
+  const closeLink = liveUrl ? `</a>` : '';
+
+  return `
+    <div class="service-card reveal" style="cursor:pointer;">
+      ${openLink}
+      <div class="service-card-img clickable-img" data-img="${url}" style="background:linear-gradient(135deg,#0a0a0a,#1a0505);">
+        ${url ? `<img src="${url}" alt="${escapeAttr(title)}" style="width:100%;height:100%;object-fit:cover;" />` : ''}
+      </div>
+      <div style="padding:12px 14px;">
+        ${category ? `<div style="font:600 10px/1 'Montserrat',sans-serif;letter-spacing:1.5px;text-transform:uppercase;color:#ff1a1a;margin-bottom:6px;">${category}</div>` : ''}
+        <h4 style="font:700 14px/1.3 'Montserrat',sans-serif;color:#fff;margin:0 0 4px;">${title}</h4>
+        ${desc ? `<p style="font:400 11px/1.4 'Poppins',sans-serif;color:#8a8a8a;margin:0;">${desc}</p>` : ''}
+      </div>
+      ${closeLink}
+    </div>
+  `;
+}
+
 function renderProjects(items) {
   console.log('[projects] renderProjects called with', items.length, 'items');
+
+  // Split by section
+  const webShowcase = items.filter(p => !p.section || p.section === 'web-showcase');
+  const designServices = items.filter(p => p.section === 'design-services');
+  const printServices = items.filter(p => p.section === 'print-services');
+
+  console.log('[projects] web-showcase:', webShowcase.length, 'design:', designServices.length, 'print:', printServices.length);
+
+  renderWebShowcase(webShowcase);
+  renderServiceSection('design-services', designServices);
+  renderServiceSection('print-services', printServices);
+}
+
+function renderWebShowcase(items) {
   const section = document.getElementById('web-showcase');
   if (!section) {
-    console.error('[projects] web-showcase section not found in DOM!');
+    console.warn('[projects] web-showcase section not found');
     return;
   }
-  console.log('[projects] section found, making visible');
 
   // ALWAYS show the section
   section.style.display = '';
 
   if (!items.length) {
-    console.log('[projects] no items — showing placeholder');
+    console.log('[projects] no web-showcase items — showing placeholder');
     const wraps = section.querySelectorAll('.showcase-track-wrap');
     if (wraps[0]) {
       const strip1 = wraps[0].querySelector('.showcase-strip');
@@ -77,98 +124,107 @@ function renderProjects(items) {
     return;
   }
 
-  console.log('[projects] rendering', items.length, 'projects into cards');
+  console.log('[projects] rendering', items.length, 'web-showcase projects');
 
-  // Sort by order field
+  // Sort by order
   items.sort((a, b) => (a.order || 0) - (b.order || 0));
 
   // Split into 2 rows
   const mid = Math.ceil(items.length / 2);
   const row1 = items.slice(0, mid);
   const row2 = items.slice(mid);
-  console.log('[projects] row1:', row1.length, 'row2:', row2.length);
 
-  // Build HTML for each row (duplicated for seamless loop)
   const row1Html = row1.map(renderCard).join('');
   const row2Html = row2.map(renderCard).join('');
 
-  // Inject into the strips
   const wraps = section.querySelectorAll('.showcase-track-wrap');
-  console.log('[projects] found', wraps.length, 'track wraps');
-
   if (wraps[0]) {
     const strip1 = wraps[0].querySelector('.showcase-strip');
     if (strip1) {
       strip1.innerHTML = row1Html + row1Html;
-      console.log('[projects] injected row1 HTML, length:', strip1.innerHTML.length);
-    } else {
-      console.error('[projects] strip1 not found inside wrap[0]!');
+      console.log('[projects] injected row1:', strip1.children.length, 'cards');
     }
-  } else {
-    console.error('[projects] wrap[0] not found!');
   }
-
   if (wraps[1]) {
     const strip2 = wraps[1].querySelector('.showcase-strip');
-    if (strip2) {
-      strip2.innerHTML = row2Html + row2Html;
-      console.log('[projects] injected row2 HTML, length:', strip2.innerHTML.length);
-    }
+    if (strip2) strip2.innerHTML = row2Html + row2Html;
   }
 
-  // Re-init the showcase scrolling
   if (window.initShowcase) {
-    console.log('[projects] calling window.initShowcase()');
     setTimeout(() => window.initShowcase(), 100);
-  } else {
-    console.warn('[projects] window.initShowcase not available');
   }
+}
+
+function renderServiceSection(sectionId, items) {
+  const section = document.getElementById(sectionId);
+  if (!section) return;
+
+  // Find the existing grid container in this section
+  // Design services and print services have a grid of service-card elements
+  const grid = section.querySelector('.services-grid, .service-grid, .grid');
+  if (!grid) {
+    console.warn(`[projects] no grid found in #${sectionId}`);
+    return;
+  }
+
+  // Remove any previously-injected dynamic cards (marked with data-dynamic)
+  const oldDynamic = grid.querySelectorAll('[data-dynamic-project]');
+  oldDynamic.forEach(el => el.remove());
+
+  if (!items.length) return;
+
+  console.log(`[projects] injecting ${items.length} projects into #${sectionId}`);
+
+  // Sort by order
+  items.sort((a, b) => (a.order || 0) - (b.order || 0));
+
+  // Append new cards to the grid
+  items.forEach(item => {
+    const cardHtml = renderServiceCard(item);
+    const temp = document.createElement('div');
+    temp.innerHTML = cardHtml.trim();
+    const card = temp.firstChild;
+    if (card) {
+      card.setAttribute('data-dynamic-project', item.id);
+      grid.appendChild(card);
+    }
+  });
 }
 
 function init() {
   console.log('[projects] init() called');
   const section = document.getElementById('web-showcase');
   if (!section) {
-    console.error('[projects] web-showcase section not found — renderer will not run');
+    console.error('[projects] web-showcase section not found');
     return;
   }
-  console.log('[projects] section found, setting up onSnapshot...');
 
   try {
     const docRef = doc(db, 'content', 'projects');
-    console.log('[projects] docRef created:', docRef);
+    console.log('[projects] docRef:', docRef);
 
-    const unsub = onSnapshot(docRef, snap => {
-      console.log('[projects] onSnapshot callback fired!');
-      console.log('[projects] snap type:', typeof snap);
-      console.log('[projects] snap.exists():', snap.exists());
-
+    onSnapshot(docRef, snap => {
+      console.log('[projects] onSnapshot fired, exists:', snap.exists());
       if (!snap.exists()) {
-        console.log('[projects] doc does not exist — showing placeholder');
         renderProjects([]);
         return;
       }
       const data = snap.data();
-      console.log('[projects] data keys:', Object.keys(data));
       const items = Array.isArray(data.items) ? data.items : [];
-      console.log('[projects] received', items.length, 'projects from Firestore');
-      if (items[0]) console.log('[projects] first item:', items[0]);
+      console.log('[projects] received', items.length, 'projects');
       renderProjects(items);
     }, err => {
-      console.error('[projects] onSnapshot ERROR:', err.message);
+      console.error('[projects] onSnapshot error:', err.message);
     });
 
-    console.log('[projects] onSnapshot subscribed, unsub function:', typeof unsub);
+    console.log('[projects] onSnapshot subscribed');
   } catch (e) {
-    console.error('[projects] init() threw error:', e.message);
-    console.error(e.stack);
+    console.error('[projects] init error:', e.message);
   }
 }
 
 if (document.readyState === 'loading') {
-  console.log('[projects] DOM still loading, waiting for DOMContentLoaded');
   document.addEventListener('DOMContentLoaded', init);
 } else {
-  console.log('[projects] DOM already loaded, calling init() immediately');
   init();
 }
