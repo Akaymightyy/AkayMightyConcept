@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+  <title>Blog — Insights from 8+ Years of Building | Akay Mighty Concept</title>
+  <meta name="description" content="Design tips, web dev insights, and lessons from 8+ years of building for clients. Real, practical articles from Awwal Abdulhakeem." />
+  <meta name="theme-color" content="#0a0a0a" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Blog — Akay Mighty Concept" />
+  <meta property="og:description" content="Design tips, web dev insights, and lessons from 8+ years of building for clients." />
+
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%230a0a0a'/%3E%3Ctext x='50' y='68' font-family='Montserrat,Arial,sans-serif' font-size='52' font-weight='900' fill='%23ff1a1a' text-anchor='middle'%3EA%3C/text%3E%3C/svg%3E" />
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;900&family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./site.css" />
+  <link rel="stylesheet" href="./admin.css" />
+
+  <style>
+    /* Blog-page specific styles */
+    #blog-page { padding: 60px 0 100px; }
+    .blog-grid { margin-bottom: 48px; }
+    .blog-card { display: flex; flex-direction: column; }
+  </style>
+</head>
+<body>
+
+  <!-- ============ PAGE BANNER ============ -->
+  <section class="page-banner hero-base">
+    <div class="hero-bg"></div>
+    <div class="hero-overlay"></div>
+    <div class="container">
+      <p class="page-banner-eyebrow reveal">Insights</p>
+      <h1 class="page-banner-title reveal reveal-delay-1">From the <span>Blog</span></h1>
+      <p class="page-banner-sub reveal reveal-delay-2">Design tips, web dev insights, and lessons from 8+ years of building for clients. Real, practical articles — no fluff.</p>
+    </div>
+  </section>
+
+  <!-- ============ BLOG GRID ============ -->
+  <section id="blog-page">
+    <div class="container">
+      <div class="blog-grid" id="blogGrid">
+        <!-- Blog cards injected by JS below -->
+      </div>
+
+      <!-- Coming-soon note -->
+      <div class="empty-state">
+        <div class="empty-state-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        </div>
+        <h2 class="empty-state-title">More posts coming soon</h2>
+        <p class="empty-state-text">I'm publishing new articles every month — design breakdowns, web dev tutorials, and lessons from real client projects. Want me to write about something specific? Drop me a message.</p>
+        <a href="/start-a-project.html" class="btn btn-primary">Suggest a Topic</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ NEWSLETTER-STYLE CTA ============ -->
+  <section class="cta-section glow-bg">
+    <div class="container">
+      <div class="cta-wrap">
+        <h2 class="cta-title reveal">Want me to write about <span>your topic</span>?</h2>
+        <p class="cta-desc reveal reveal-delay-1">Have a question about web design, branding, or print? I'll turn the best questions into full articles. Send yours via WhatsApp.</p>
+        <div class="hero-btns reveal reveal-delay-2" style="justify-content:center;">
+          <a href="https://wa.me/2349049541318?text=Hi%2C%20I%20have%20a%20blog%20topic%20suggestion" target="_blank" class="btn btn-primary">Suggest on WhatsApp</a>
+          <a href="/start-a-project.html" class="btn btn-outline">Start a Project</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE-SPECIFIC SCRIPTS ============ -->
+  <script type="module">
+    import { initLayout } from './layout.js';
+    initLayout('blog');
+
+    import { BLOG_POSTS } from './site-config.js';
+
+    // ---- Render blog cards ----
+    (function() {
+      const grid = document.getElementById('blogGrid');
+      if (!grid) return;
+      grid.innerHTML = BLOG_POSTS.map((post, i) => `
+        <a href="/blog-post.html?slug=${post.slug}" class="blog-card reveal${i > 0 ? ' reveal-delay-' + Math.min(i + 1, 4) : ''}">
+          <img class="blog-img" src="${post.image}" alt="${post.title}" loading="lazy" onerror="this.style.opacity='0.3';" />
+          <div class="blog-body">
+            <div class="blog-meta">
+              <span class="blog-cat">${post.category}</span>
+              <span class="blog-date">${post.date}</span>
+            </div>
+            <h3 class="blog-title">${post.title}</h3>
+            <p class="blog-excerpt">${post.excerpt}</p>
+            <span class="blog-read-more">Read more <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></span>
+          </div>
+        </a>`).join('');
+    })();
+  </script>
+</body>
+</html>

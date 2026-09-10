@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+  <title>Akay Mighty Concept — Website Developer &amp; Graphics Designer</title>
+  <meta name="description" content="I'm Awwal Abdulhakeem — a Website Developer & Graphics Designer with 8+ years building converting websites, brand identities, flyers, and print. Based in Kaduna, working worldwide." />
+  <meta name="theme-color" content="#0a0a0a" />
+  <meta name="author" content="Awwal Abdulhakeem" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Awwal Abdulhakeem — Website Developer & Graphics Designer" />
+  <meta property="og:description" content="Website Developer & Graphics Designer with 8+ years building converting websites, brand identities, flyers, and print." />
+  <meta property="og:image" content="https://akaymightyconcept.com/og-cover.jpg" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%230a0a0a'/%3E%3Ctext x='50' y='68' font-family='Montserrat,Arial,sans-serif' font-size='52' font-weight='900' fill='%23ff1a1a' text-anchor='middle'%3EA%3C/text%3E%3C/svg%3E" />
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;900&family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./site.css" />
+  <link rel="stylesheet" href="./admin.css" />
+
+  <style>
+    /* ============ Hero (homepage specific) ============ */
+    #home-hero { position: relative; min-height: 100vh; display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 120px 0 80px; text-align: center; }
+    .home-hero-bg { position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 30%, rgba(74,74,213,0.22) 0%, transparent 55%), radial-gradient(ellipse at 20% 80%, rgba(22,22,110,0.18) 0%, transparent 45%), var(--bg); z-index: -3; }
+    .home-hero-overlay { position: absolute; inset: 0; background: linear-gradient(180deg, transparent 0%, rgba(10,10,10,0.3) 60%, var(--bg) 100%); z-index: -2; }
+    .home-hero-glow { position: absolute; top: 45%; left: 50%; transform: translate(-50%, -50%); width: 700px; height: 700px; max-width: 100vw; background: radial-gradient(circle, rgba(74,74,213,0.28) 0%, transparent 70%); z-index: -2; animation: glowPulse 6s ease-in-out infinite; filter: blur(50px); pointer-events: none; }
+    .hero-container { display: flex; flex-direction: column; align-items: center; gap: 40px; width: 100%; max-width: 900px; position: relative; z-index: 1; }
+    .hero-content { max-width: 720px; text-align: center; }
+    .hero-name { font-family: var(--font-heading); font-size: clamp(15px, 2vw, 18px); color: var(--text-muted); margin-bottom: 14px; font-weight: 500; }
+    .hero-name span { color: var(--red); font-weight: 700; }
+    .hero-title { font-size: clamp(38px, 7vw, 76px); font-weight: 900; line-height: 1.05; margin-bottom: 22px; letter-spacing: -2px; }
+    .hero-title .dev { display: block; color: var(--red); background: var(--gradient-red); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .hero-title .amp { color: var(--text-muted); font-weight: 400; font-size: 0.6em; font-style: italic; display: inline-block; margin: 0 8px; vertical-align: middle; }
+    .rotating-words { display: inline-block; position: relative; color: var(--text); min-width: 1ch; vertical-align: baseline; }
+    .rotating-words .word { display: inline-block; opacity: 0; transform: translateY(20px) scale(0.9); filter: blur(8px); transition: all 0.5s cubic-bezier(0.4,0,0.2,1); position: absolute; left: 0; top: 0; white-space: nowrap; }
+    .rotating-words .word.active { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); position: relative; }
+    .hero-tagline { font-size: clamp(14px, 1.6vw, 17px); color: var(--text-muted); line-height: 1.7; margin: 0 auto 32px; max-width: 580px; }
+    .hero-btns { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+
+    /* Hero photo + props */
+    .hero-visual { position: relative; display: flex; align-items: center; justify-content: center; perspective: 1200px; width: 100%; max-width: 500px; min-height: 420px; }
+    .hero-avatar { position: relative; width: min(340px, 72vw); aspect-ratio: 1; border-radius: 50%; z-index: 3; }
+    .hero-avatar::before { content: ''; position: absolute; inset: -8px; border-radius: 50%; background: conic-gradient(from var(--border-angle), transparent 0%, transparent 30%, var(--red) 50%, var(--red-bright) 60%, transparent 80%, transparent 100%); animation: drawBorder 3s linear infinite; filter: blur(1px); z-index: -1; }
+    .hero-avatar::after { content: ''; position: absolute; inset: -2px; border-radius: 50%; background: conic-gradient(from var(--border-angle), var(--red) 0%, transparent 25%, transparent 50%, var(--red) 75%, transparent 100%); animation: drawBorder 4s linear infinite reverse; opacity: 0.6; z-index: -1; }
+    @keyframes drawBorder { to { --border-angle: 360deg; } }
+    .hero-avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 4px solid var(--bg); box-shadow: 0 0 80px rgba(74,74,213,0.4), inset 0 0 40px rgba(0,0,0,0.5); }
+    .hero-prop { position: absolute; width: 130px; height: 170px; border-radius: 14px; background: var(--bg3); border: 1px solid var(--border-red); box-shadow: 0 20px 50px rgba(0,0,0,0.6), 0 0 30px rgba(74,74,213,0.2); z-index: 4; transform-style: preserve-3d; transition: transform 0.4s cubic-bezier(0.4,0,0.2,1); overflow: hidden; }
+    .hero-prop.left { left: -10px; top: 40px; transform: rotate(-12deg); }
+    .hero-prop.right { right: -10px; bottom: 40px; transform: rotate(12deg); }
+    .hero-prop-inner { position: absolute; inset: 0; padding: 14px; display: flex; flex-direction: column; gap: 8px; background: linear-gradient(135deg, var(--bg3), var(--bg4)); }
+    .hero-prop-label { font-size: 9px; font-weight: 700; letter-spacing: 2px; color: var(--red); text-transform: uppercase; }
+    .hero-prop-title { font-family: var(--font-heading); font-weight: 800; font-size: 14px; color: var(--text); line-height: 1.2; }
+    .hero-prop-art { flex: 1; border-radius: 8px; background: var(--gradient-red); position: relative; overflow: hidden; min-height: 60px; }
+    .hero-prop-art svg { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0.85; }
+    .hero-prop-art::after { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.25), transparent 60%); }
+    .hero-scroll { position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 10px; font-size: 10px; letter-spacing: 3px; color: var(--text-dim); text-transform: uppercase; pointer-events: none; }
+    .scroll-line { width: 1px; height: 50px; background: var(--border); position: relative; overflow: hidden; }
+    .scroll-line::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 30%; background: var(--red); animation: scrollAnim 2s ease-in-out infinite; }
+    @keyframes scrollAnim { 0% { top: -30%; } 100% { top: 100%; } }
+
+    @media (max-width: 900px) {
+      #home-hero { padding: 100px 0 60px; }
+      .hero-container { gap: 30px; }
+      .hero-title { font-size: clamp(32px, 9vw, 52px); }
+      .hero-visual { max-width: 360px; min-height: 360px; }
+      .hero-avatar { width: min(260px, 68vw); }
+      .hero-prop { width: 95px; height: 125px; }
+      .hero-prop.left { left: 0; top: 20px; }
+      .hero-prop.right { right: 0; bottom: 20px; }
+    }
+    @media (max-width: 480px) {
+      .hero-prop { width: 80px; height: 105px; }
+      .hero-prop.left { left: -5px; top: 30px; }
+      .hero-prop.right { right: -5px; bottom: 30px; }
+      .hero-avatar { width: min(220px, 65vw); }
+    }
+
+    .showcase-track-wrap + .showcase-track-wrap { margin-top: 24px; }
+
+    /* HOMEPAGE OVERRIDE — make the auto-scroll showcase cards tiny
+       landscape rectangles with NO text overlay (image only).
+       We hide the meta block + shrink the card to a small landscape
+       rectangle. projects-renderer.js is unchanged. */
+    #web-showcase .showcase-card { width: 200px; }
+    #web-showcase .showcase-card-img { height: 110px; }
+    #web-showcase .showcase-card-meta { display: none; }
+    @media (max-width: 640px) {
+      #web-showcase .showcase-card { width: 170px; }
+      #web-showcase .showcase-card-img { height: 95px; }
+    }
+
+    /* ============ Featured Projects strip ============ */
+    #featured-projects { padding: 100px 0; background: var(--bg2); }
+    .featured-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+    @media (max-width: 900px) { .featured-grid { grid-template-columns: 1fr; max-width: 500px; margin: 0 auto; } }
+
+    /* ============ Services overview strip ============ */
+    #services-overview { padding: 100px 0; }
+    .services-overview-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+    @media (max-width: 900px) { .services-overview-grid { grid-template-columns: 1fr; } }
+    .service-overview-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 32px 28px; transition: all 0.3s; }
+    .service-overview-card:hover { border-color: var(--border-red); transform: translateY(-4px); box-shadow: 0 16px 40px rgba(0,0,0,0.4); }
+    .service-overview-icon { width: 56px; height: 56px; border-radius: 14px; background: rgba(42,42,133,0.1); border: 1px solid var(--border-red); display: flex; align-items: center; justify-content: center; color: var(--red); margin-bottom: 18px; }
+    .service-overview-icon svg { width: 26px; height: 26px; }
+    .service-overview-title { font-family: var(--font-heading); font-size: 20px; font-weight: 800; margin-bottom: 8px; }
+    .service-overview-desc { font-size: 14px; color: var(--text-muted); line-height: 1.7; margin-bottom: 16px; }
+    .service-overview-link { font-size: 13px; color: var(--red); font-weight: 600; display: inline-flex; align-items: center; gap: 6px; transition: gap 0.2s; }
+    .service-overview-card:hover .service-overview-link { gap: 10px; }
+
+    /* ============ Pricing wrapper on home ============ */
+    #home-pricing { padding: 100px 0; background: var(--bg2); }
+
+    /* ============ CTA band on home ============ */
+    #home-cta { padding: 100px 0; }
+  </style>
+</head>
+<body>
+
+  <!-- ============ HERO ============ -->
+  <section id="home-hero">
+    <div class="home-hero-bg"></div>
+    <div class="home-hero-overlay"></div>
+    <div class="home-hero-glow"></div>
+    <div class="container hero-container">
+      <div class="hero-content">
+        <div class="hero-badge"><span class="pulse-dot"></span>Available for Work</div>
+        <p class="hero-name">Hi, I'm <span>Awwal Abdulhakeem</span> 👋</p>
+        <h1 class="hero-title">
+          I'm a <span class="dev">Website Developer</span>
+          <span class="amp">&amp;</span>
+          <span class="rotating-words" id="rotatingWords"><span class="word active">Graphics Designer</span><span class="word">Brand Strategist</span><span class="word">UI/UX Designer</span><span class="word">Digital Printer</span><span class="word">Creative Director</span></span>
+        </h1>
+        <p class="hero-tagline">I design and build websites that turn visitors into customers — plus branding, flyers, and print that make your business unforgettable. 8+ years crafting bold visuals and converting websites.</p>
+        <div class="hero-btns">
+          <a href="/start-a-project.html" class="btn btn-primary">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+            Start a Project
+          </a>
+          <a href="/projects.html" class="btn btn-outline">View My Work</a>
+          <a href="/Akay-CV.jpg" download class="btn btn-ghost">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download CV
+          </a>
+        </div>
+      </div>
+      <div class="hero-visual" id="heroVisual">
+        <div class="hero-prop left" data-depth="0.4">
+          <div class="hero-prop-inner">
+            <div class="hero-prop-label">Web</div>
+            <div class="hero-prop-title">Website Dev</div>
+            <div class="hero-prop-art">
+              <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+                <rect x="15" y="20" width="70" height="50" rx="4" fill="rgba(255,255,255,0.25)" />
+                <circle cx="22" cy="28" r="2" fill="rgba(255,255,255,0.5)" />
+                <circle cx="30" cy="28" r="2" fill="rgba(255,255,255,0.5)" />
+                <rect x="20" y="38" width="40" height="3" rx="1.5" fill="rgba(255,255,255,0.4)" />
+                <rect x="20" y="46" width="55" height="3" rx="1.5" fill="rgba(255,255,255,0.25)" />
+                <rect x="20" y="54" width="30" height="3" rx="1.5" fill="rgba(255,255,255,0.25)" />
+              </svg>
+            </div>
+          </div>
+        </div>
+        <div class="hero-avatar">
+          <img src="./akay-headshot.png" alt="Awwal Abdulhakeem — Website Developer & Graphics Designer" data-img-slot="img:headshot">
+        </div>
+        <div class="hero-prop right" data-depth="0.6">
+          <div class="hero-prop-inner">
+            <div class="hero-prop-label">Design</div>
+            <div class="hero-prop-title">Brand &amp; Print</div>
+            <div class="hero-prop-art" style="background: linear-gradient(135deg, #16166e, #2a2a85);">
+              <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+                <circle cx="50" cy="38" r="16" fill="rgba(255,255,255,0.3)" />
+                <rect x="22" y="60" width="56" height="4" rx="2" fill="rgba(255,255,255,0.4)" />
+                <rect x="32" y="70" width="36" height="3" rx="1.5" fill="rgba(255,255,255,0.25)" />
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="hero-scroll"><div class="scroll-line"></div><span>Scroll</span></div>
+  </section>
+
+  <!-- ============ TECH STACK MARQUEE ============ -->
+  <section class="stack-carousel" aria-label="Tools I use">
+    <div class="stack-track" id="stackTrack"></div>
+  </section>
+
+  <!-- ============ RECENT WEB WORK — AUTO-SCROLL SHOWCASE ============ -->
+  <section class="web-showcase" id="web-showcase">
+    <div class="showcase-header">
+      <span class="showcase-eyebrow">Recent Web Work</span>
+      <h2 class="showcase-title">Websites that turn visitors into <span>customers</span></h2>
+      <p class="showcase-sub">A rolling showcase of recent web builds — corporate, e-commerce, SaaS, landing pages, and brand sites. Hover to pause.</p>
+    </div>
+    <div class="showcase-track-wrap">
+      <div class="showcase-strip" data-direction="left">
+        <!-- Projects rendered dynamically by projects-renderer.js -->
+      </div>
+    </div>
+    <div class="showcase-track-wrap">
+      <div class="showcase-strip" data-direction="right">
+        <!-- Projects rendered dynamically by projects-renderer.js -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FEATURED PROJECTS (3 case studies) ============ -->
+  <section id="featured-projects">
+    <div class="container">
+      <div class="section-header">
+        <p class="section-label reveal">Featured Work</p>
+        <h2 class="section-title reveal reveal-delay-1">Recent <span>Case Studies</span></h2>
+        <p class="section-desc reveal reveal-delay-2">A deeper look at three projects — the challenge, the solution, and the result. Each links to a full case study page.</p>
+      </div>
+      <div class="featured-grid" id="featuredGrid">
+        <!-- Featured cards injected by featured-projects.js (inline below) -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SERVICES OVERVIEW ============ -->
+  <section id="services-overview" class="glow-bg">
+    <div class="container">
+      <div class="section-header">
+        <p class="section-label reveal">What I Do</p>
+        <h2 class="section-title reveal reveal-delay-1">Three ways to <span>work together</span></h2>
+        <p class="section-desc reveal reveal-delay-2">From a single landing page to a full website, or a brand & print package — pick the service that fits where your business is right now.</p>
+      </div>
+      <div class="services-overview-grid">
+        <a href="/services.html#web" class="service-overview-card reveal">
+          <div class="service-overview-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          </div>
+          <h3 class="service-overview-title">Web</h3>
+          <p class="service-overview-desc">High-converting websites — landing pages, full multi-page sites, e-commerce, and admin dashboards. Built mobile-first, deployed to your domain.</p>
+          <span class="service-overview-link">View Web Services →</span>
+        </a>
+        <a href="/services.html#brand" class="service-overview-card reveal reveal-delay-1">
+          <div class="service-overview-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+          </div>
+          <h3 class="service-overview-title">Brand &amp; Design</h3>
+          <p class="service-overview-desc">Logo design, brand identity kits, social media graphics, and ad creative. Bold visuals that make your business unforgettable.</p>
+          <span class="service-overview-link">View Brand Services →</span>
+        </a>
+        <a href="/services.html#print" class="service-overview-card reveal reveal-delay-2">
+          <div class="service-overview-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          </div>
+          <h3 class="service-overview-title">Print</h3>
+          <p class="service-overview-desc">Flyers, business cards, banners, packaging, and branded merch. CMYK print-ready files delivered fast — 24–72hr turnaround on most jobs.</p>
+          <span class="service-overview-link">View Print Services →</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PRICING ============ -->
+  <section id="home-pricing" class="glow-bg">
+    <div class="container">
+      <div class="section-header">
+        <p class="section-label reveal">Investment</p>
+        <h2 class="section-title reveal reveal-delay-1">Simple, Transparent <span>Packages</span></h2>
+        <p class="section-desc reveal reveal-delay-2">Pick the package that fits where your business is right now. Every project includes a free consultation and revisions until you're happy.</p>
+      </div>
+      <div class="pricing-grid" id="homePricingGrid">
+        <!-- Pricing cards injected by home-pricing.js (inline below) -->
+      </div>
+      <p class="pricing-note reveal reveal-delay-3">Custom quotes available for e-commerce, SaaS dashboards, and larger projects — <a href="/start-a-project.html" style="color:var(--red);font-weight:600;">get a free quote →</a></p>
+    </div>
+  </section>
+
+  <!-- ============ TESTIMONIALS ============ -->
+  <section id="testimonials">
+    <div class="container">
+      <div class="ts-wrap">
+        <div class="ts-left">
+          <p class="section-label reveal">Testimonials</p>
+          <h2 class="section-title reveal reveal-delay-1">What <span>Clients Say</span></h2>
+          <p class="section-desc reveal reveal-delay-2">Real words from real clients I've had the pleasure to work with.</p>
+          <div class="ts-emoji reveal reveal-delay-3">💬</div>
+        </div>
+        <div class="ts-right reveal reveal-delay-2">
+          <svg class="ts-quote-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M9.983 3v7.391c0 5.704-3.731 9.57-8.983 10.609l-.995-2.151c2.432-.917 3.995-3.638 3.995-5.849h-4v-10h9.983zm14.017 0v7.391c0 5.704-3.748 9.571-9 10.609l-.996-2.151c2.433-.917 3.996-3.638 3.996-5.849h-3.983v-10h9.983z"/></svg>
+          <div class="ts-slider" id="tsSlider">
+            <div class="ts-slide active">
+              <div class="ts-stars">★★★★★</div>
+              <p class="ts-text">"Awwal transformed our brand completely. The logo, flyers, and website he designed brought us more customers in three months than we had all year. Truly exceptional work."</p>
+              <div class="ts-author"><div class="ts-avatar">MO</div><div><div class="ts-name">Muyiwa O.</div><div class="ts-role">Co-founder, Marvel Oaks Solicitors</div></div></div>
+            </div>
+            <div class="ts-slide">
+              <div class="ts-stars">★★★★★</div>
+              <p class="ts-text">"The attention to detail is unmatched. Akay Mighty Concept handled our entire brand identity — from logo to packaging — and the result was beyond what we imagined. Highly recommend."</p>
+              <div class="ts-author"><div class="ts-avatar">AB</div><div><div class="ts-name">Aisha B.</div><div class="ts-role">CEO, Naya Foods &amp; Bakery</div></div></div>
+            </div>
+            <div class="ts-slide">
+              <div class="ts-stars">★★★★★</div>
+              <p class="ts-text">"Professional, fast, and incredibly talented. The website Awwal built for us loads fast, looks premium, and converts visitors. Working with him was the best decision we made this year."</p>
+              <div class="ts-author"><div class="ts-avatar">BE</div><div><div class="ts-name">Bosun E.</div><div class="ts-role">Founder, Bostrad Logistics</div></div></div>
+            </div>
+          </div>
+          <div class="ts-controls">
+            <button class="ts-btn" id="tsPrev" aria-label="Previous testimonial"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg></button>
+            <div class="ts-dots" id="tsDots"></div>
+            <button class="ts-btn" id="tsNext" aria-label="Next testimonial"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ STATS ============ -->
+  <section class="stats-section">
+    <div class="container">
+      <div class="stats-grid">
+        <div class="stat-item reveal"><div class="stat-num" data-target="150">0</div><div class="stat-label">Projects Delivered</div></div>
+        <div class="stat-item reveal reveal-delay-1"><div class="stat-num" data-target="80">0</div><div class="stat-label">Happy Clients</div></div>
+        <div class="stat-item reveal reveal-delay-2"><div class="stat-num" data-target="8">0</div><div class="stat-label">Years Experience</div></div>
+        <div class="stat-item reveal reveal-delay-3"><div class="stat-num" data-target="25">0</div><div class="stat-label">Awards &amp; Features</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CTA BAND ============ -->
+  <section id="home-cta" class="glow-bg">
+    <div class="container">
+      <div class="cta-wrap">
+        <h2 class="cta-title reveal">Ready to create something <span>bold</span>?</h2>
+        <p class="cta-desc reveal reveal-delay-1">Let's turn your idea into a brand people remember. Whether it's a website, a logo, or a full print campaign — I'm ready to deliver magic.</p>
+        <div class="hero-btns reveal reveal-delay-2" style="justify-content:center;">
+          <a href="/start-a-project.html" class="btn btn-primary">Start a Project</a>
+          <a href="/projects.html" class="btn btn-outline">View My Work</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE-SPECIFIC SCRIPTS ============ -->
+  <script type="module">
+    // Inject the shared header / footer / chrome
+    import { initLayout } from './layout.js';
+    initLayout('home');
+
+    // Render pricing cards from site-config
+    import { PRICING_TIERS, FEATURED_PROJECTS, FEATURED_FALLBACK } from './site-config.js';
+
+    // ---- Pricing cards ----
+    (function() {
+      const grid = document.getElementById('homePricingGrid');
+      if (!grid) return;
+      grid.innerHTML = PRICING_TIERS.map((t) => {
+        const featured = t.popular ? ' pricing-card--featured' : '';
+        const badge = t.badge ? `<span class="pricing-badge">${t.badge}</span>` : '';
+        const ctaClass = t.popular ? 'pricing-cta pricing-cta--filled' : 'pricing-cta';
+        const features = t.features.map(f => `<li>${f}</li>`).join('');
+        return `
+          <div class="pricing-card reveal${featured}">
+            ${badge}
+            <span class="pricing-tag">${t.name}</span>
+            <div class="pricing-amount"><span class="pricing-currency">${t.symbol}</span><span>${t.price}</span></div>
+            <p class="pricing-turnaround">${t.turnaround}</p>
+            <ul class="pricing-features">${features}</ul>
+            <a href="/start-a-project.html" class="${ctaClass}">Start This Project</a>
+          </div>`;
+      }).join('');
+    })();
+
+    // ---- Featured projects grid (fetch from Firestore, fallback to static) ----
+    (function() {
+      const grid = document.getElementById('featuredGrid');
+      if (!grid) return;
+
+      function renderFallback() {
+        grid.innerHTML = FEATURED_PROJECTS.map(slug => {
+          const p = FEATURED_FALLBACK[slug];
+          if (!p) return '';
+          return `
+            <a href="/project-detail.html?slug=${p.slug}" class="project-card reveal">
+              <div class="project-card-cover">
+                <img src="${p.cover}" alt="${p.title}" loading="lazy" onerror="this.style.opacity='0.3';" />
+              </div>
+              <div class="project-card-body">
+                <span class="project-card-tag">${p.category}</span>
+                <h3 class="project-card-name">${p.title}</h3>
+                <p class="project-card-desc">${p.summary}</p>
+                <span class="project-card-cta">View Case Study →</span>
+              </div>
+            </a>`;
+        }).join('');
+        grid.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
+      }
+
+      // Try Firestore first — if it fails or has nothing, use the static fallback
+      import('./firebase-config.js').then(({ db, doc, onSnapshot }) => {
+        try {
+          const docRef = doc(db, 'content', 'projects');
+          onSnapshot(docRef, snap => {
+            if (!snap.exists()) { renderFallback(); return; }
+            const data = snap.data();
+            const items = Array.isArray(data.items) ? data.items : [];
+            const featured = FEATURED_PROJECTS
+              .map(slug => items.find(it => it.slug === slug))
+              .filter(Boolean);
+            if (!featured.length) { renderFallback(); return; }
+            grid.innerHTML = featured.map(p => `
+              <a href="/project-detail.html?slug=${p.slug}" class="project-card reveal">
+                <div class="project-card-cover">
+                  ${p.imageUrl ? `<img src="${p.imageUrl}" alt="${p.title || ''}" loading="lazy" onerror="this.style.opacity='0.3';" />` : ''}
+                </div>
+                <div class="project-card-body">
+                  ${p.category ? `<span class="project-card-tag">${p.category}</span>` : ''}
+                  <h3 class="project-card-name">${p.title || 'Untitled'}</h3>
+                  ${p.description ? `<p class="project-card-desc">${p.description}</p>` : ''}
+                  <span class="project-card-cta">View Case Study →</span>
+                </div>
+              </a>`).join('');
+            grid.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
+          }, () => renderFallback());
+        } catch (e) { renderFallback(); }
+      }).catch(() => renderFallback());
+
+      // Hard fallback — if Firestore hasn't resolved in 6s, show static
+      setTimeout(() => { if (!grid.innerHTML.trim()) renderFallback(); }, 6000);
+    })();
+
+    // ---- Tech stack marquee (homepage-specific tools list) ----
+    (function() {
+      const tools = [
+        { name: 'HTML5', color: '#e34f26', svg: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 2l1.6 18L12 22l7.4-2L21 2H3zm14.5 5.5H8.7l.2 2.4h8.3l-.6 6.6-4.6 1.3-4.6-1.3-.3-3.5h2.2l.2 1.7 2.5.7 2.5-.7.3-2.8H7.5l-.5-6.5h10.7l-.2 2.1z"/></svg>' },
+        { name: 'CSS3', color: '#1572b6', svg: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M1.5 0h21l-1.91 21.563L11.977 24l-8.564-2.438L1.5 0z"/></svg>' },
+        { name: 'JavaScript', color: '#f7df1e', svg: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M0 0h24v24H0V0zm22.034 18.276c-.175-1.095-.888-2.015-3.003-2.873-.736-.345-1.554-.585-1.797-1.14-.091-.33-.105-.51-.046-.705.15-.646.915-.84 1.515-.66.39.12.75.42.976.9 1.034-.676 1.034-.676 1.755-1.125-.27-.42-.404-.601-.586-.78-.63-.705-1.469-1.065-2.834-1.034l-.705.089c-.676.165-1.32.525-1.71 1.005-1.14 1.291-.811 3.541.569 4.471 1.365 1.02 3.361 1.244 3.616 2.205.24 1.17-.87 1.545-1.966 1.41-.811-.18-1.26-.586-1.755-1.336l-1.83 1.051c.21.48.45.689.81 1.109 1.74 1.756 6.09 1.666 6.871-1.004.029-.09.24-.705.074-1.65l.046.067zm-8.983-7.245h-2.248c0 1.938-.009 3.864-.009 5.805 0 1.232.063 2.363-.138 2.71-.33.689-1.18.601-1.566.48-.396-.196-.597-.466-.83-.855-.063-.105-.11-.196-.127-.196l-1.825 1.125c.305.63.75 1.172 1.324 1.517.855.51 2.004.675 3.207.405.783-.226 1.458-.691 1.811-1.41.51-.93.402-2.07.397-3.346.012-2.064 0-4.128 0-6.191l.004-.053z"/></svg>' },
+        { name: 'Firebase', color: '#ffca28', svg: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M3.89 15.673L6.255.461A.542.542 0 017.27.287l2.543 4.771zm16.794 3.692l-2.25-13.951a.543.543 0 00-.919-.295L3.316 19.365l7.856 4.414a1.62 1.62 0 001.588 0zM14.3 7.148L12.634 3.847a.543.543 0 00-.96 0L3.53 17.984z"/></svg>' },
+        { name: 'Vercel', color: '#ffffff', svg: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M24 22.521H0L12 1.5l12 21.021z"/></svg>' },
+        { name: 'Figma', color: '#f24e1e', svg: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8.5 24c2.5 0 4.5-2 4.5-4.5V15H8.5C6 15 4 17 4 19.5S6 24 8.5 24zM4 12c0-2.5 2-4.5 4.5-4.5H13v9H8.5C6 16.5 4 14.5 4 12zM4 4.5C4 2 6 0 8.5 0H13v9H8.5C6 9 4 7 4 4.5zM13 0h4.5C20 0 22 2 22 4.5S20 9 17.5 9H13V0zm9 7.5c0-2.5 2-4.5 4.5-4.5S31 5 31 7.5 29 12 26.5 12H22V7.5z"/></svg>' },
+        { name: 'CorelDRAW', color: '#2a2a85', svg: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>' },
+        { name: 'Photoshop', color: '#31a8ff', svg: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 3h18v18H3V3zm9.5 5.5h-3v7h1.5v-2h1.5c1.38 0 2.5-1.12 2.5-2.5s-1.12-2.5-2.5-2.5zm-1.5 3.5V10h1.5c.55 0 1 .45 1 1s-.45 1-1 1H11z"/></svg>' }
+      ];
+      const track = document.getElementById('stackTrack');
+      if (!track) return;
+      const items = [...tools, ...tools];
+      items.forEach(t => {
+        const div = document.createElement('div');
+        div.className = 'stack-item';
+        div.dataset.label = t.name;
+        div.innerHTML = `<span style="color:${t.color};display:flex;align-items:center;">${t.svg}</span><span>${t.name}</span>`;
+        track.appendChild(div);
+      });
+    })();
+
+    // ---- Rotating words in the hero ----
+    (function() {
+      const words = ['Graphics Designer', 'UI/UX Designer', 'Brand Designer', 'Digital Printer', 'Web Designer'];
+      const container = document.getElementById('rotatingWords');
+      if (!container) return;
+      let i = 0;
+      setInterval(() => {
+        i = (i + 1) % words.length;
+        const old = container.querySelector('.word.active');
+        if (old) {
+          old.classList.remove('active');
+          setTimeout(() => old.remove(), 500);
+        }
+        const next = document.createElement('span');
+        next.className = 'word active';
+        next.textContent = words[i];
+        container.appendChild(next);
+      }, 2500);
+    })();
+
+    // ---- Hero 3D parallax (desktop only) ----
+    (function() {
+      if (window.matchMedia('(max-width: 900px)').matches) return;
+      const visual = document.getElementById('heroVisual');
+      if (!visual) return;
+      const avatar = visual.querySelector('.hero-avatar');
+      const props = visual.querySelectorAll('.hero-prop');
+      let tx = 0, ty = 0, cx = 0, cy = 0;
+      visual.addEventListener('mousemove', e => {
+        const r = visual.getBoundingClientRect();
+        tx = ((e.clientX - r.left) / r.width - 0.5) * 2;
+        ty = ((e.clientY - r.top) / r.height - 0.5) * 2;
+      });
+      visual.addEventListener('mouseleave', () => { tx = 0; ty = 0; });
+      function tick() {
+        cx += (tx - cx) * 0.08;
+        cy += (ty - cy) * 0.08;
+        if (avatar) avatar.style.transform = `rotateY(${cx * 8}deg) rotateX(${-cy * 8}deg)`;
+        props.forEach((p, idx) => {
+          const depth = parseFloat(p.dataset.depth || '0.5');
+          const dir = idx === 0 ? -1 : 1;
+          const baseRot = dir * 12;
+          p.style.transform = `rotateY(${cx * 15 * depth}deg) rotateX(${-cy * 10 * depth}deg) rotate(${baseRot + cx * 5}deg) translateX(${cx * 20 * depth * dir}px) translateY(${-cy * 15 * depth}px) translateZ(${depth * 40}px)`;
+        });
+        requestAnimationFrame(tick);
+      }
+      tick();
+    })();
+  </script>
+</body>
+</html>
