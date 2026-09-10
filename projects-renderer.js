@@ -39,22 +39,8 @@ function renderCard(item) {
   const desc = escapeHtml(item.description || '');
   const liveUrl = escapeAttr(item.liveUrl || '');
 
-  const openLink = liveUrl ? `<a href="${liveUrl}" target="_blank" rel="noopener" style="text-decoration:none;color:inherit;">` : '';
-  const closeLink = liveUrl ? `</a>` : '';
-
-  // Extract domain for the browser URL bar — only shown when a live URL is set
-  let domain = '';
-  if (liveUrl) {
-    try { domain = new URL(item.liveUrl).hostname; } catch {}
-  }
-  const browserBar = domain
-    ? `<div class="wp-browser"><div class="wp-dots"><span></span><span></span><span></span></div><div class="wp-url">${escapeHtml(domain)}</div></div>`
-    : '';
-
   return `
-    <div class="showcase-card reveal">
-      ${openLink}
-      ${browserBar}
+    <div class="showcase-card reveal" data-url="${liveUrl}" data-name="${escapeAttr(title)}" data-desc="${escapeAttr(desc)}">
       <div class="showcase-card-img">
         ${url ? `<img src="${url}" alt="${escapeAttr(title)}" loading="lazy" onerror="this.onerror=null;this.src='${BROKEN_IMG_SVG}';console.warn('[projects] image failed:', this.src);" />` : ''}
       </div>
@@ -63,12 +49,12 @@ function renderCard(item) {
         <h4 class="showcase-card-title">${title}</h4>
         ${desc ? `<p class="showcase-card-cat">${desc}</p>` : ''}
       </div>
-      ${closeLink}
     </div>
   `;
 }
 
-// Render a web-portfolio card (browser-style with live URL)
+// Render a web-portfolio card — clean landscape style like sievoratech
+// No browser dots, no URL bar — just the screenshot + title/category below
 function renderWebPortfolioCard(item) {
   const url = escapeAttr(item.imageUrl || '');
   const title = escapeHtml(item.title || 'Untitled');
@@ -76,25 +62,16 @@ function renderWebPortfolioCard(item) {
   const desc = escapeHtml(item.description || '');
   const liveUrl = escapeAttr(item.liveUrl || '');
 
-  // Extract domain from liveUrl for the browser URL bar
-  let domain = '';
-  try { if (liveUrl) domain = new URL(liveUrl).hostname; } catch {}
-
   return `
     <div class="wp-card reveal" data-url="${liveUrl}" data-name="${escapeAttr(title)}" data-desc="${escapeAttr(desc)}">
-      <div class="wp-browser"><div class="wp-dots"><span></span><span></span><span></span></div><div class="wp-url">${escapeHtml(domain)}</div></div>
-      <div class="wp-preview" style="background:linear-gradient(135deg,#0a0a0a,#1a0505);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;position:relative;overflow:hidden;">
+      <div class="wp-preview" style="aspect-ratio:16/10;background:linear-gradient(135deg,#0a0a0a,#1a0505);position:relative;overflow:hidden;">
         ${url ? `<img src="${url}" alt="${escapeAttr(title)}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" loading="lazy" onerror="this.style.display='none';" />` : ''}
-        <div style="position:relative;z-index:1;text-align:center;padding:20px;">
-          <span style="color:rgba(255,255,255,0.8);font-size:13px;font-weight:600;letter-spacing:2px;text-transform:uppercase;">${title}</span>
-          ${category ? `<br><span style="color:rgba(255,255,255,0.4);font-size:11px;">${category}</span>` : ''}
-        </div>
-        <div class="zoom-hint" aria-label="Click to zoom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg></div>
+        <div class="zoom-hint" aria-label="Click to watch live"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg></div>
       </div>
       <div class="wp-body">
-        <span class="wp-tag">${category || 'Web'}</span>
+        ${category ? `<span class="wp-tag">${category}</span>` : ''}
         <h4 class="wp-name">${title}</h4>
-        <p class="wp-desc">${desc}</p>
+        ${desc ? `<p class="wp-desc">${desc}</p>` : ''}
         <span class="wp-btn">Watch it scroll →</span>
       </div>
     </div>

@@ -2308,20 +2308,27 @@
       let paused = false;
       let currentUrl = '';
 
-      document.querySelectorAll('.wp-card').forEach(card => {
-        card.addEventListener('click', () => {
-          const url = card.dataset.url;
-          const name = card.dataset.name;
-          currentUrl = url;
-          titleEl.textContent = name;
-          urlEl.textContent = url.replace(/^https?:\/\//, '').replace(/\/$/, '');
-          iframe.src = url;
-          viewer.classList.add('open');
-          document.body.style.overflow = 'hidden';
-          paused = false;
-          pauseBtn.textContent = '⏸ Pause';
-          startAutoScroll();
-        });
+      // Use event delegation so dynamically-added cards also work
+      document.addEventListener('click', e => {
+        const card = e.target.closest('.wp-card, .showcase-card[data-url], .showcase-card a');
+        if (!card) return;
+        // If it's a showcase-card with an <a> inside, let the link work normally
+        if (card.tagName === 'A') return;
+        // Find the actual card element
+        const cardEl = card.closest('.wp-card') || (card.matches('.showcase-card[data-url]') ? card : null);
+        if (!cardEl) return;
+        const url = cardEl.dataset.url;
+        if (!url) return; // no live URL — do nothing
+        const name = cardEl.dataset.name || cardEl.querySelector('.showcase-card-title')?.textContent || 'Project';
+        currentUrl = url;
+        titleEl.textContent = name;
+        urlEl.textContent = url.replace(/^https?:\/\//, '').replace(/\/$/, '');
+        iframe.src = url;
+        viewer.classList.add('open');
+        document.body.style.overflow = 'hidden';
+        paused = false;
+        pauseBtn.textContent = '⏸ Pause';
+        startAutoScroll();
       });
 
       function startAutoScroll() {
