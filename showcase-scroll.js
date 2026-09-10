@@ -13,7 +13,7 @@
 //  after dynamically rendering project cards.
 // =====================================================================
 
-const SPEED = 0.2;           // px per ms
+const SPEED = 0.12;          // px per ms (slowed down)
 const RESUME_DELAY = 2500;  // ms after last interaction before auto-play resumes
 
 function initShowcase() {

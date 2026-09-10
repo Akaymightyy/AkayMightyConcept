@@ -248,6 +248,32 @@ body.akay-edit-mode .showcase-card-img { outline: 2px dashed rgba(255,26,26,.45)
 .pricing-cta--filled:hover { opacity: 0.9; transform: translateY(-2px); }
 .pricing-note { text-align: center; margin-top: 32px; font-size: 14px; color: var(--text-muted); }
 
+/* ===== Tier cards (services page detailed pricing) ===== */
+.tier-card { position: relative; background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 36px 28px; display: flex; flex-direction: column; transition: var(--transition); overflow: hidden; }
+.tier-card--featured { background: var(--bg3); border: 1px solid var(--red); box-shadow: 0 0 60px rgba(91,91,245,0.25); }
+.tier-card--featured::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--gradient-red); }
+.tier-card:hover { transform: translateY(-6px); border-color: var(--border-red); box-shadow: 0 20px 50px rgba(0,0,0,0.4); }
+.tier-badge { position: absolute; top: -14px; left: 50%; transform: translateX(-50%); background: var(--gradient-red); color: #fff; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; padding: 6px 16px; border-radius: 999px; white-space: nowrap; }
+.tier-header { margin-bottom: 20px; }
+.tier-name { font-family: var(--font-heading); font-size: 20px; font-weight: 800; color: var(--text); margin-bottom: 8px; }
+.tier-price { font-family: var(--font-heading); font-size: 42px; font-weight: 900; color: var(--text); display: flex; align-items: baseline; gap: 2px; }
+.tier-price .currency { font-size: 22px; color: var(--red-bright); font-weight: 700; }
+.tier-turnaround { font-size: 13px; color: var(--text-muted); margin-top: 6px; }
+.tier-summary { font-size: 14px; color: var(--text-muted); line-height: 1.7; margin-bottom: 24px; }
+.tier-deliverables { margin-bottom: 24px; }
+.tier-section-label { font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--red-bright); margin-bottom: 12px; }
+.tier-deliverables ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.tier-deliverables li { font-size: 14px; color: var(--text); padding-left: 24px; position: relative; }
+.tier-deliverables li::before { content: '✓'; position: absolute; left: 0; color: var(--red-bright); font-weight: 700; }
+.tier-best-for { margin-bottom: 24px; }
+.tier-best-for-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+.tier-best-for-tag { font-size: 12px; color: var(--text-muted); background: var(--bg4); padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border); }
+.tier-cta-wrap { margin-top: auto; }
+.tier-cta { display: block; text-align: center; padding: 14px; border-radius: var(--radius); border: 1px solid var(--border-red); color: var(--text); font-weight: 600; font-size: 14px; transition: var(--transition); text-decoration: none; }
+.tier-cta:hover { background: var(--bg4); }
+.tier-cta--filled { background: var(--gradient-red); border: none; color: #fff; }
+.tier-cta--filled:hover { opacity: 0.9; transform: translateY(-2px); }
+
 /* ============ TESTIMONIALS ============ */
 #testimonials { padding: 100px 0; background: var(--bg2); position: relative; overflow: hidden; width: 100%; }
 .ts-wrap { display: grid; grid-template-columns: 1fr 1.4fr; gap: 60px; align-items: center; width: 100%; }

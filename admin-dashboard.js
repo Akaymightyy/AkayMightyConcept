@@ -33,6 +33,15 @@ import {
   cloudinaryDeleteEndpoint,
   publicIdFromCloudinaryUrl
 } from "./cloudinary-config.js";
+import {
+  PROJECT_CASE_STUDIES,
+  BLOG_POSTS,
+  DOWNLOADS,
+  SITE_CONTENT_DEFAULTS,
+  PRICING_TIERS,
+  TESTIMONIALS,
+  STATS
+} from "./site-config.js";
 
 // =====================================================================
 //  IMAGE-SLOT REGISTRY — grouped by section for the dashboard UI.
@@ -86,6 +95,14 @@ const state = {
   unsubTexts: null,
   unsubCustom: null,
   unsubProjects: null,
+  unsubCaseStudies: null,
+  unsubBlogPosts: null,
+  unsubDownloads: null,
+  unsubSiteContent: null,
+  caseStudies: [],          // Firestore content/case-studies items only (admin-curated)
+  blogPosts: [],            // Firestore content/blog-posts items only (admin-curated)
+  downloads: [],            // Firestore content/downloads items only (admin-curated)
+  siteContent: {},          // Firestore content/site-content overrides (flat key/value)
   rulesOk: null
 };
 
@@ -240,6 +257,61 @@ function startSync() {
     renderStats();
   }, err => {
     console.error('[dash] projects sync error:', err);
+  });
+
+  state.unsubCaseStudies = onSnapshot(doc(db, 'content', 'case-studies'), snap => {
+    if (snap.exists()) {
+      const data = snap.data();
+      state.caseStudies = Array.isArray(data.items) ? data.items : [];
+    } else {
+      state.caseStudies = [];
+    }
+    renderCaseStudies();
+    renderStats();
+  }, err => {
+    console.error('[dash] case-studies sync error:', err);
+  });
+
+  state.unsubBlogPosts = onSnapshot(doc(db, 'content', 'blog-posts'), snap => {
+    if (snap.exists()) {
+      const data = snap.data();
+      state.blogPosts = Array.isArray(data.items) ? data.items : [];
+    } else {
+      state.blogPosts = [];
+    }
+    renderBlogPosts();
+    renderStats();
+  }, err => {
+    console.error('[dash] blog-posts sync error:', err);
+  });
+
+  state.unsubDownloads = onSnapshot(doc(db, 'content', 'downloads'), snap => {
+    if (snap.exists()) {
+      const data = snap.data();
+      state.downloads = Array.isArray(data.items) ? data.items : [];
+    } else {
+      state.downloads = [];
+    }
+    renderDownloadsEditor();
+    renderStats();
+  }, err => {
+    console.error('[dash] downloads sync error:', err);
+  });
+
+  state.unsubSiteContent = onSnapshot(doc(db, 'content', 'site-content'), snap => {
+    if (snap.exists()) {
+      const data = snap.data();
+      // Strip the internal _updatedAt key — everything else is a flat override
+      const overrides = { ...data };
+      delete overrides._updatedAt;
+      state.siteContent = overrides;
+    } else {
+      state.siteContent = {};
+    }
+    renderSiteContentEditor();
+    renderStats();
+  }, err => {
+    console.error('[dash] site-content sync error:', err);
   });
 
   // Verify write permission by attempting a no-op merge
@@ -449,6 +521,9 @@ function renderStats() {
   setText('navCountTexts', textCount);
   setText('navCountCustom', state.customImages.length);
   setText('navCountProjects', state.projects.length);
+  setText('navCountCaseStudies', buildMergedListCaseStudies().length);
+  setText('navCountBlogPosts', buildMergedListBlogPosts().length);
+  setText('navCountDownloads', buildMergedListDownloads().length);
 }
 
 // =====================================================================
@@ -906,11 +981,15 @@ async function resetAll() {
 //  STEP 9 — sidebar navigation
 // =====================================================================
 const VIEW_TITLES = {
-  images:   { title: 'All Images',         sub: 'Manage every image on your site from one place' },
-  projects: { title: 'Web Projects',       sub: 'Add, edit, delete, and reorder projects in the Recent Web Work showcase' },
-  custom:   { title: 'Custom Images',      sub: 'Upload additional product shots and recent work — auto-appears on the site' },
-  texts:    { title: 'Captions & Text',    sub: 'Edit every heading, label, and description' },
-  settings: { title: 'Settings & Status',  sub: 'Connection health and configuration' }
+  images:        { title: 'All Images',         sub: 'Manage every image on your site from one place' },
+  projects:      { title: 'Web Projects',       sub: 'Add, edit, delete, and reorder projects in the Recent Web Work showcase' },
+  'case-studies':{ title: 'Project Case Studies', sub: 'Full case-study pages on /project-detail.html — challenge, solution, tools, screenshots' },
+  'blog-posts':  { title: 'Blog Posts',         sub: 'Full blog articles on /blog-post.html — content, tags, author' },
+  downloads:     { title: 'Downloads',           sub: 'Manage the CV, corporate profile, and brand deck PDFs on /downloads.html' },
+  'site-content':{ title: 'Site Content',        sub: 'Edit homepage hero text, stats, pricing, testimonials, and CTA band' },
+  custom:        { title: 'Custom Images',      sub: 'Upload additional product shots and recent work — auto-appears on the site' },
+  texts:         { title: 'Captions & Text',    sub: 'Edit every heading, label, and description' },
+  settings:      { title: 'Settings & Status',  sub: 'Connection health and configuration' }
 };
 
 function initNav() {
@@ -1109,6 +1188,25 @@ const PROJECTS_DEFAULTS = [
   { title: "Reedah's Delight",                category: 'Cake Brand',      description: 'Web · Product Showcase',   liveUrl: 'https://reedah-s-delight.vercel.app' },
   { title: 'Victorian Bloom Hotel & Resort',  category: 'Hotel & Resort',  description: 'Web · Booking Flow',       liveUrl: 'https://victoria-bloom-hotel-resort.onrender.com' },
   { title: 'Abbas Galaxy',                    category: 'Real Estate',     description: 'Web · Location Maps',      liveUrl: 'https://abbasgalaxy.onrender.com' }
+];
+
+// Design (branding) projects — these show in the Design filter on /projects.html
+const DESIGN_PROJECTS_DEFAULTS = [
+  { title: 'Adenike\'s Jewelry Logo',     category: 'Logo Design',     description: 'Brand identity · Monogram',   imageUrl: 'https://cdn.kord.live/serve/ZoCtg7SPBWlc.jpg' },
+  { title: 'Chi38v\'s Brand Identity',    category: 'Brand Identity',  description: 'Logo · Colors · Typography',  imageUrl: 'https://cdn.kord.live/serve/4cG5RghDuw9w.jpg' },
+  { title: 'Sicily Standard Menu',        category: 'Menu Design',     description: 'Restaurant · Print-ready',    imageUrl: 'https://cdn.kord.live/serve/NRlPY4VLxSVG.jpg' },
+  { title: 'Onazy Brand Package',         category: 'Brand Package',   description: 'Logo · Business Card · Social', imageUrl: 'https://cdn.kord.live/serve/KWXIC3QcBiFj.jpg' },
+  { title: 'Club Event Flyer',            category: 'Flyer Design',    description: 'Nightclub · Bold · Eye-catching', imageUrl: 'https://cdn.kord.live/serve/mH1YnwxDaQUi.jpg' },
+  { title: 'Web3 Crypto Flyer',           category: 'Crypto Flyer',    description: 'Web3 · Modern · Tech',        imageUrl: 'https://cdn.kord.live/serve/lJJcUHt93XsB.jpg' }
+];
+
+// Print projects — these show in the Print filter on /projects.html
+const PRINT_PROJECTS_DEFAULTS = [
+  { title: 'Business Card Print',         category: 'Business Card',   description: 'CMYK · Print-ready · 350gsm',  imageUrl: 'https://cdn.kord.live/serve/009RDmkmQA0x.jpg' },
+  { title: 'Leather Print Job',           category: 'Leather Print',   description: 'Custom leather · Hot foil',    imageUrl: 'https://cdn.kord.live/serve/bmVs49dmCNWa.jpg' },
+  { title: 'Paper Bag Branding',          category: 'Paper Bag',       description: 'Brown kraft · Logo print',     imageUrl: 'https://cdn.kord.live/serve/ASqKSjkDcDCF.jpg' },
+  { title: 'Custom Bag Print',            category: 'Custom Bag',      description: 'Premium · Branded · Full color', imageUrl: 'https://cdn.kord.live/serve/xk5l1BNebbMK.jpg' },
+  { title: 'Branded Merchandise',         category: 'Branded Merch',   description: 'T-shirts · Mugs · Caps',      imageUrl: 'https://cdn.kord.live/serve/kZ3AhQCgS6Yr.jpg' }
 ];
 
 // Track which projects are marked for deletion
@@ -1501,6 +1599,54 @@ async function seedWebPortfolioDefaults() {
   }
 }
 
+// Seed design (branding) projects — these show in the Design filter
+async function seedDesignProjects() {
+  const ok = await new Promise(resolve => {
+    showConfirm('Add 6 design/branding projects to the Projects page? These will show under the "Branding" filter. You can edit or delete them afterwards.', resolve);
+  });
+  if (!ok) return;
+
+  toast('Adding design projects…', 'info');
+  const newProjects = DESIGN_PROJECTS_DEFAULTS.map((p, i) => ({
+    id: `proj-design-${Date.now()}-${i}`,
+    title: p.title,
+    section: 'design-services',
+    category: p.category,
+    description: p.description,
+    imageUrl: p.imageUrl,
+    liveUrl: '',
+    order: state.projects.filter(pr => pr.section === 'design-services').length + i
+  }));
+  const others = state.projects.filter(p => p.section !== 'design-services');
+  const updated = [...others, ...newProjects];
+  const saveOk = await saveProjects(updated);
+  if (saveOk) toast(`✓ ${newProjects.length} design projects added`, 'success');
+}
+
+// Seed print projects — these show in the Print filter
+async function seedPrintProjects() {
+  const ok = await new Promise(resolve => {
+    showConfirm('Add 5 print projects to the Projects page? These will show under the "Print" filter. You can edit or delete them afterwards.', resolve);
+  });
+  if (!ok) return;
+
+  toast('Adding print projects…', 'info');
+  const newProjects = PRINT_PROJECTS_DEFAULTS.map((p, i) => ({
+    id: `proj-print-${Date.now()}-${i}`,
+    title: p.title,
+    section: 'print-services',
+    category: p.category,
+    description: p.description,
+    imageUrl: p.imageUrl,
+    liveUrl: '',
+    order: state.projects.filter(pr => pr.section === 'print-services').length + i
+  }));
+  const others = state.projects.filter(p => p.section !== 'print-services');
+  const updated = [...others, ...newProjects];
+  const saveOk = await saveProjects(updated);
+  if (saveOk) toast(`✓ ${newProjects.length} print projects added`, 'success');
+}
+
 // Custom confirm dialog (more reliable on mobile than window.confirm)
 function showConfirm(message, callback) {
   let modal = $('#akayConfirmModal');
@@ -1542,6 +1688,938 @@ async function saveProjects(arr) {
     return true;
   } catch (e) {
     console.error('[projects] saveProjects FAILED:', e);
+    if (e.code === 'permission-denied' || /permission|denied|rules/i.test(e.message)) {
+      toast('SAVE FAILED — Firestore rules rejected the write. See Settings tab.', 'error');
+      state.rulesOk = false;
+      renderRulesStatus();
+    } else if (/offline|network|timed out|unreachable/i.test(e.message)) {
+      toast('NETWORK — cannot reach Firestore. Try again.', 'error');
+    } else {
+      toast('Save failed: ' + e.message, 'error');
+    }
+    return false;
+  }
+}
+
+// =====================================================================
+//  STEP 11.6 — CASE STUDIES CRUD (project-detail pages)
+//  ---------------------------------------------------------------------
+//  Static defaults live in site-config.js PROJECT_CASE_STUDIES (the 3
+//  featured projects). Admin-curated case studies live in Firestore
+//  `content/case-studies` as an array of items. The public
+//  project-detail.html page merges both, with Firestore overriding the
+//  static entries by slug (so admin edits win).
+// =====================================================================
+
+// Merge static PROJECT_CASE_STUDIES with Firestore state.caseStudies.
+// Static entries come first (in their declared order); Firestore entries
+// override any static entry with the same slug, and new slugs are appended.
+function buildMergedListCaseStudies() {
+  const list = [];
+  const bySlug = new Map();
+
+  PROJECT_CASE_STUDIES.forEach(cs => {
+    if (!cs || !cs.slug) return;
+    bySlug.set(cs.slug, cs);
+  });
+
+  (state.caseStudies || []).forEach(cs => {
+    if (!cs || !cs.slug) return;
+    bySlug.set(cs.slug, cs);
+  });
+
+  const seen = new Set();
+  PROJECT_CASE_STUDIES.forEach(cs => {
+    if (!cs || !cs.slug) return;
+    if (bySlug.has(cs.slug)) { list.push(bySlug.get(cs.slug)); seen.add(cs.slug); }
+  });
+  (state.caseStudies || []).forEach(cs => {
+    if (!cs || !cs.slug) return;
+    if (seen.has(cs.slug)) return;
+    list.push(bySlug.get(cs.slug));
+    seen.add(cs.slug);
+  });
+
+  return list.sort((a, b) => (a.order || 0) - (b.order || 0));
+}
+
+function renderCaseStudies() {
+  const list = $('#caseStudiesList');
+  if (!list) return;
+  const merged = buildMergedListCaseStudies();
+
+  if (!merged.length) {
+    list.innerHTML = `
+      <div class="dash-card dash-card--empty">
+        <div class="dash-card__body">
+          <p>No case studies yet.</p>
+          <p style="margin-top:6px;font-size:12px;">Click <strong>+ Add New Case Study</strong> to create one.</p>
+        </div>
+      </div>`;
+    return;
+  }
+
+  list.innerHTML = merged.map((cs, i) => {
+    const isStatic = PROJECT_CASE_STUDIES.some(s => s.slug === cs.slug) && !(state.caseStudies || []).some(s => s.slug === cs.slug);
+    const originTag = isStatic
+      ? '<span class="dash-project-card__section" style="color:#8a8a8a;background:rgba(255,255,255,0.04);border-color:var(--akay-border);">Static default</span>'
+      : '<span class="dash-project-card__section">Firestore</span>';
+    const tools = Array.isArray(cs.tools) ? cs.tools : (Array.isArray(cs.tech) ? cs.tech : []);
+    const screenshots = Array.isArray(cs.screenshots) ? cs.screenshots : [];
+    const cover = cs.coverImage || cs.cover || '';
+    return `
+      <div class="dash-project-card" data-slug="${escapeAttr(cs.slug)}" style="grid-template-columns:160px 1fr;">
+        <div class="dash-project-card__preview">
+          ${cover ? `<img src="${escapeAttr(cover)}" alt="${escapeAttr(cs.title)}" loading="lazy" />` : '<span class="dash-project-card__noimg">No cover</span>'}
+        </div>
+        <div class="dash-project-card__body">
+          <div class="dash-project-card__head">
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+              <span class="dash-project-card__order">#${i + 1}</span>
+              <span class="dash-project-card__tag">${escapeHtml(cs.category || '')}</span>
+              <span class="dash-project-card__tag" style="color:${(cs.status||'').toLowerCase()==='delivered'?'#8a8a8a':'#2ecc71'};background:${(cs.status||'').toLowerCase()==='delivered'?'rgba(255,255,255,0.04)':'rgba(46,204,113,0.1)'};border:1px solid ${(cs.status||'').toLowerCase()==='delivered'?'var(--akay-border)':'rgba(46,204,113,0.25)'};">${escapeHtml(cs.status || 'Active')}</span>
+              ${originTag}
+            </div>
+            <div class="dash-project-card__btns">
+              <button class="dash-btn dash-btn--primary dash-btn--mini" data-act="edit">Edit</button>
+              <button class="dash-btn dash-btn--danger dash-btn--mini" data-act="delete" ${isStatic ? 'disabled title="Static defaults can be overridden by editing — but not deleted from here."' : ''}>Delete</button>
+            </div>
+          </div>
+          <h4 class="dash-project-card__title">${escapeHtml(cs.title || 'Untitled')}</h4>
+          <p class="dash-project-card__desc" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${escapeHtml((cs.challenge || '').slice(0, 240))}${(cs.challenge || '').length > 240 ? '…' : ''}</p>
+          <div style="display:flex;gap:14px;flex-wrap:wrap;font-size:11px;color:var(--akay-text-mute);margin-top:4px;">
+            <span>🛠 ${tools.length} tool${tools.length === 1 ? '' : 's'}</span>
+            <span>🖼 ${screenshots.length} screenshot${screenshots.length === 1 ? '' : 's'}</span>
+            ${cs.liveUrl ? `<a href="${escapeAttr(cs.liveUrl)}" target="_blank" class="dash-project-card__url">${escapeHtml(cs.liveUrl)}</a>` : '<span style="color:var(--akay-text-dim);">No live URL</span>'}
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+
+  // Wire buttons
+  list.querySelectorAll('.dash-project-card').forEach(card => {
+    const slug = card.getAttribute('data-slug');
+    card.querySelectorAll('button[data-act]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const act = btn.getAttribute('data-act');
+        const cs = merged.find(c => c.slug === slug);
+        if (!cs) return;
+        if (act === 'edit') showCaseStudyForm(cs);
+        if (act === 'delete') deleteCaseStudy(cs);
+      });
+    });
+  });
+}
+
+function showCaseStudyForm(cs) {
+  const isEdit = !!cs;
+  const base = cs || {
+    slug: '', title: '', category: '', status: 'Active', coverImage: '',
+    challenge: '', solution: '', tools: [], screenshots: [],
+    liveUrl: '', order: (state.caseStudies || []).length
+  };
+
+  let modal = $('#caseStudyFormModal');
+  if (modal) modal.remove();
+
+  modal = document.createElement('div');
+  modal.id = 'caseStudyFormModal';
+  modal.className = 'akay-modal is-open';
+  modal.innerHTML = `
+    <div class="akay-modal__panel dash-project-form-modal" style="max-width:560px;">
+      <button class="akay-modal__close" type="button" id="csClose">×</button>
+      <h2 class="akay-modal__title">${isEdit ? 'Edit Case Study' : 'Add New Case Study'}</h2>
+      <form id="caseStudyForm" class="dash-form">
+        <label class="dash-field">
+          <span>Title *</span>
+          <input type="text" id="cs-title" required value="${escapeAttr(base.title)}" placeholder="e.g. Scottish Essentials Beauty & Spa" />
+        </label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+          <label class="dash-field">
+            <span>Slug * (URL key)</span>
+            <input type="text" id="cs-slug" required value="${escapeAttr(base.slug)}" placeholder="scottish-essentials" ${isEdit ? 'readonly' : ''} />
+          </label>
+          <label class="dash-field">
+            <span>Status</span>
+            <select id="cs-status">
+              <option value="Active" ${(base.status || 'Active') === 'Active' ? 'selected' : ''}>Active</option>
+              <option value="Delivered" ${base.status === 'Delivered' ? 'selected' : ''}>Delivered</option>
+            </select>
+          </label>
+        </div>
+        <label class="dash-field">
+          <span>Category</span>
+          <input type="text" id="cs-category" value="${escapeAttr(base.category)}" placeholder="e.g. Web · Spa Brand" />
+        </label>
+        <label class="dash-field">
+          <span>Cover image URL *</span>
+          <input type="text" id="cs-coverimage" value="${escapeAttr(base.coverImage)}" placeholder="https://..." />
+        </label>
+        <div class="dash-project-form__upload">
+          <button type="button" class="dash-btn dash-btn--primary" id="cs-upload-btn">Upload Cover Image</button>
+          <span style="font-size:12px;color:var(--akay-text-mute);">or paste a URL above</span>
+        </div>
+        <div id="cs-preview" style="margin-top:8px;">
+          ${base.coverImage ? `<img src="${escapeAttr(base.coverImage)}" style="width:100%;border-radius:8px;border:1px solid var(--akay-border);" onerror="this.style.display='none';" />` : ''}
+        </div>
+        <label class="dash-field">
+          <span>Challenge (paragraph) *</span>
+          <textarea id="cs-challenge" rows="4" required placeholder="What problem was the client facing?">${escapeHtml(base.challenge || '')}</textarea>
+        </label>
+        <label class="dash-field">
+          <span>Solution (paragraph) *</span>
+          <textarea id="cs-solution" rows="4" required placeholder="What did you build? How does it work?">${escapeHtml(base.solution || '')}</textarea>
+        </label>
+        <label class="dash-field">
+          <span>Tools &amp; tech (comma-separated)</span>
+          <input type="text" id="cs-tools" value="${escapeAttr((Array.isArray(base.tools) ? base.tools : []).join(', '))}" placeholder="HTML5, CSS3, JavaScript, Firebase" />
+        </label>
+        <label class="dash-field">
+          <span>Screenshots (one URL per line)</span>
+          <textarea id="cs-screenshots" rows="3" placeholder="https://...&#10;https://...">${escapeHtml((Array.isArray(base.screenshots) ? base.screenshots : []).join('\n'))}</textarea>
+        </label>
+        <label class="dash-field">
+          <span>Live URL (optional)</span>
+          <input type="url" id="cs-liveurl" value="${escapeAttr(base.liveUrl)}" placeholder="https://example.com" />
+        </label>
+        <button type="submit" class="dash-btn dash-btn--primary dash-btn--block" style="margin-top:16px;">${isEdit ? 'Save Changes' : 'Add Case Study'}</button>
+        <p class="dash-form__err" id="cs-err"></p>
+      </form>
+    </div>`;
+  document.body.appendChild(modal);
+
+  modal.querySelector('#csClose').addEventListener('click', () => modal.remove());
+  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+
+  // Auto-slug from title (only on create, not edit)
+  if (!isEdit) {
+    modal.querySelector('#cs-title').addEventListener('input', e => {
+      const slug = e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+      modal.querySelector('#cs-slug').value = slug;
+    });
+  }
+
+  // Upload button
+  modal.querySelector('#cs-upload-btn').addEventListener('click', () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.style.display = 'none';
+    document.body.appendChild(input);
+    input.addEventListener('change', async () => {
+      const file = input.files[0];
+      if (!file) { input.remove(); return; }
+      if (file.size > 10 * 1024 * 1024) { toast('Max 10MB', 'error'); input.remove(); return; }
+      toast('Uploading…', 'info');
+      try {
+        const url = await uploadToCloudinary(file);
+        modal.querySelector('#cs-coverimage').value = url;
+        modal.querySelector('#cs-preview').innerHTML = `<img src="${url}" style="width:100%;border-radius:8px;border:1px solid var(--akay-border);" />`;
+        toast('Image uploaded', 'success');
+      } catch (e) {
+        toast('Upload failed: ' + e.message, 'error');
+      } finally {
+        input.remove();
+      }
+    });
+    input.click();
+  });
+
+  // Live preview on URL change
+  modal.querySelector('#cs-coverimage').addEventListener('input', e => {
+    const url = e.target.value.trim();
+    modal.querySelector('#cs-preview').innerHTML = url
+      ? `<img src="${escapeAttr(url)}" style="width:100%;border-radius:8px;border:1px solid var(--akay-border);" />`
+      : '';
+  });
+
+  // Submit
+  modal.querySelector('#caseStudyForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const title = modal.querySelector('#cs-title').value.trim();
+    const slug = modal.querySelector('#cs-slug').value.trim().toLowerCase().replace(/[^a-z0-9-]/g, '');
+    const status = modal.querySelector('#cs-status').value;
+    const category = modal.querySelector('#cs-category').value.trim();
+    const coverImage = modal.querySelector('#cs-coverimage').value.trim();
+    const challenge = modal.querySelector('#cs-challenge').value.trim();
+    const solution = modal.querySelector('#cs-solution').value.trim();
+    const tools = modal.querySelector('#cs-tools').value.split(',').map(s => s.trim()).filter(Boolean);
+    const screenshots = modal.querySelector('#cs-screenshots').value.split('\n').map(s => s.trim()).filter(Boolean);
+    const liveUrl = modal.querySelector('#cs-liveurl').value.trim();
+    const errEl = modal.querySelector('#cs-err');
+
+    if (!title) { errEl.textContent = 'Title is required'; return; }
+    if (!slug) { errEl.textContent = 'Slug is required'; return; }
+    if (!coverImage) { errEl.textContent = 'Cover image URL is required'; return; }
+    if (!/^https?:\/\//.test(coverImage)) { errEl.textContent = 'Cover image URL must start with https://'; return; }
+    if (!challenge) { errEl.textContent = 'Challenge paragraph is required'; return; }
+    if (!solution) { errEl.textContent = 'Solution paragraph is required'; return; }
+
+    errEl.textContent = '';
+
+    // Build the new item
+    const item = {
+      slug, title, category, status, coverImage,
+      challenge, solution, tools, screenshots, liveUrl,
+      order: isEdit ? (base.order || 0) : (state.caseStudies || []).length
+    };
+
+    let updated;
+    if (isEdit) {
+      // If we're editing a static default, push it as a Firestore override
+      const existing = (state.caseStudies || []).findIndex(c => c.slug === slug);
+      if (existing >= 0) {
+        updated = [...state.caseStudies];
+        updated[existing] = item;
+      } else {
+        // Editing a static default — create a Firestore override
+        updated = [...(state.caseStudies || []), item];
+      }
+    } else {
+      // New — check slug uniqueness against both static and Firestore
+      const allSlugs = new Set([
+        ...PROJECT_CASE_STUDIES.map(c => c.slug),
+        ...(state.caseStudies || []).map(c => c.slug)
+      ]);
+      if (allSlugs.has(slug)) {
+        errEl.textContent = `Slug "${slug}" already exists. Choose a different slug.`;
+        return;
+      }
+      updated = [...(state.caseStudies || []), item];
+    }
+
+    const ok = await saveCaseStudies(updated);
+    if (ok) { toast(isEdit ? 'Case study updated' : 'Case study added', 'success'); modal.remove(); }
+  });
+}
+
+async function deleteCaseStudy(cs) {
+  if (!cs || !cs.slug) return;
+  const ok = await new Promise(resolve => {
+    showConfirm(`Delete case study "${cs.title}"?\n\nThis removes it from /project-detail.html immediately. Static defaults can be re-added by editing site-config.js.`, resolve);
+  });
+  if (!ok) return;
+  const updated = (state.caseStudies || []).filter(c => c.slug !== cs.slug);
+  const saveOk = await saveCaseStudies(updated);
+  if (saveOk) toast('Case study deleted', 'info');
+}
+
+async function saveCaseStudies(arr) {
+  try {
+    await setDoc(doc(db, 'content', 'case-studies'),
+      { items: arr, _updatedAt: serverTimestamp() },
+      { merge: true });
+    toast(`✓ Case studies saved (${arr.length})`, 'success');
+    return true;
+  } catch (e) {
+    console.error('[case-studies] save failed:', e);
+    if (e.code === 'permission-denied' || /permission|denied|rules/i.test(e.message)) {
+      toast('SAVE FAILED — Firestore rules rejected the write. See Settings tab.', 'error');
+      state.rulesOk = false;
+      renderRulesStatus();
+    } else if (/offline|network|timed out|unreachable/i.test(e.message)) {
+      toast('NETWORK — cannot reach Firestore. Try again.', 'error');
+    } else {
+      toast('Save failed: ' + e.message, 'error');
+    }
+    return false;
+  }
+}
+
+// =====================================================================
+//  STEP 11.7 — BLOG POSTS CRUD
+//  ---------------------------------------------------------------------
+//  Static defaults live in site-config.js BLOG_POSTS (3 posts). Admin-
+//  curated posts live in Firestore `content/blog-posts`. The public
+//  blog.html + blog-post.html pages merge both, with Firestore overriding
+//  static posts by slug.
+// =====================================================================
+
+function buildMergedListBlogPosts() {
+  const list = [];
+  const bySlug = new Map();
+
+  BLOG_POSTS.forEach(p => { if (p && p.slug) bySlug.set(p.slug, p); });
+  (state.blogPosts || []).forEach(p => { if (p && p.slug) bySlug.set(p.slug, p); });
+
+  const seen = new Set();
+  BLOG_POSTS.forEach(p => {
+    if (!p || !p.slug) return;
+    if (bySlug.has(p.slug)) { list.push(bySlug.get(p.slug)); seen.add(p.slug); }
+  });
+  (state.blogPosts || []).forEach(p => {
+    if (!p || !p.slug) return;
+    if (seen.has(p.slug)) return;
+    list.push(bySlug.get(p.slug));
+    seen.add(p.slug);
+  });
+
+  return list;
+}
+
+function renderBlogPosts() {
+  const list = $('#blogPostsList');
+  if (!list) return;
+  const merged = buildMergedListBlogPosts();
+
+  if (!merged.length) {
+    list.innerHTML = `
+      <div class="dash-card dash-card--empty">
+        <div class="dash-card__body">
+          <p>No blog posts yet.</p>
+          <p style="margin-top:6px;font-size:12px;">Click <strong>+ Add New Post</strong> to create one.</p>
+        </div>
+      </div>`;
+    return;
+  }
+
+  list.innerHTML = merged.map((p, i) => {
+    const isStatic = BLOG_POSTS.some(s => s.slug === p.slug) && !(state.blogPosts || []).some(s => s.slug === p.slug);
+    const originTag = isStatic
+      ? '<span class="dash-project-card__section" style="color:#8a8a8a;background:rgba(255,255,255,0.04);border-color:var(--akay-border);">Static default</span>'
+      : '<span class="dash-project-card__section">Firestore</span>';
+    const cover = p.coverImage || p.image || '';
+    const tags = Array.isArray(p.tags) ? p.tags : [];
+    return `
+      <div class="dash-project-card" data-slug="${escapeAttr(p.slug)}" style="grid-template-columns:160px 1fr;">
+        <div class="dash-project-card__preview">
+          ${cover ? `<img src="${escapeAttr(cover)}" alt="${escapeAttr(p.title)}" loading="lazy" />` : '<span class="dash-project-card__noimg">No cover</span>'}
+        </div>
+        <div class="dash-project-card__body">
+          <div class="dash-project-card__head">
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+              <span class="dash-project-card__order">#${i + 1}</span>
+              <span class="dash-project-card__tag">${escapeHtml(p.category || '')}</span>
+              <span class="dash-project-card__tag" style="color:#ffd54f;background:rgba(255,213,79,0.08);border:1px solid rgba(255,213,79,0.2);">${escapeHtml(p.date || '')}</span>
+              ${originTag}
+            </div>
+            <div class="dash-project-card__btns">
+              <button class="dash-btn dash-btn--primary dash-btn--mini" data-act="edit">Edit</button>
+              <button class="dash-btn dash-btn--danger dash-btn--mini" data-act="delete" ${isStatic ? 'disabled title="Static defaults can be overridden by editing — but not deleted from here."' : ''}>Delete</button>
+            </div>
+          </div>
+          <h4 class="dash-project-card__title">${escapeHtml(p.title || 'Untitled')}</h4>
+          <p class="dash-project-card__desc" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${escapeHtml((p.excerpt || '').slice(0, 240))}${(p.excerpt || '').length > 240 ? '…' : ''}</p>
+          <div style="display:flex;gap:14px;flex-wrap:wrap;font-size:11px;color:var(--akay-text-mute);margin-top:4px;">
+            <span>✍ ${escapeHtml(p.author || 'Awwal Abdulhakeem')}</span>
+            <span>🏷 ${tags.length} tag${tags.length === 1 ? '' : 's'}</span>
+            <span>📄 ${((p.content || '').match(/<p>/g) || []).length} paragraph${((p.content || '').match(/<p>/g) || []).length === 1 ? '' : 's'}</span>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+
+  list.querySelectorAll('.dash-project-card').forEach(card => {
+    const slug = card.getAttribute('data-slug');
+    card.querySelectorAll('button[data-act]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const act = btn.getAttribute('data-act');
+        const post = merged.find(p => p.slug === slug);
+        if (!post) return;
+        if (act === 'edit') showBlogPostForm(post);
+        if (act === 'delete') deleteBlogPost(post);
+      });
+    });
+  });
+}
+
+function showBlogPostForm(post) {
+  const isEdit = !!post;
+  const base = post || {
+    slug: '', title: '', excerpt: '', date: new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
+    author: 'Awwal Abdulhakeem', category: 'Web Design', coverImage: '',
+    content: '<p>Write your article here. HTML is supported — use &lt;h2&gt;, &lt;h3&gt;, &lt;p&gt;, &lt;ul&gt;, &lt;a&gt; etc.</p>',
+    tags: []
+  };
+
+  let modal = $('#blogPostFormModal');
+  if (modal) modal.remove();
+
+  modal = document.createElement('div');
+  modal.id = 'blogPostFormModal';
+  modal.className = 'akay-modal is-open';
+  modal.innerHTML = `
+    <div class="akay-modal__panel dash-project-form-modal" style="max-width:680px;">
+      <button class="akay-modal__close" type="button" id="bpClose">×</button>
+      <h2 class="akay-modal__title">${isEdit ? 'Edit Blog Post' : 'Add New Blog Post'}</h2>
+      <form id="blogPostForm" class="dash-form">
+        <label class="dash-field">
+          <span>Title *</span>
+          <input type="text" id="bp-title" required value="${escapeAttr(base.title)}" placeholder="e.g. 5 Landing Page Mistakes That Kill Your Conversions" />
+        </label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+          <label class="dash-field">
+            <span>Slug * (URL key)</span>
+            <input type="text" id="bp-slug" required value="${escapeAttr(base.slug)}" placeholder="5-landing-page-mistakes" ${isEdit ? 'readonly' : ''} />
+          </label>
+          <label class="dash-field">
+            <span>Category</span>
+            <input type="text" id="bp-category" value="${escapeAttr(base.category)}" placeholder="Web Design" />
+          </label>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+          <label class="dash-field">
+            <span>Date</span>
+            <input type="text" id="bp-date" value="${escapeAttr(base.date)}" placeholder="Jun 2026" />
+          </label>
+          <label class="dash-field">
+            <span>Author</span>
+            <input type="text" id="bp-author" value="${escapeAttr(base.author)}" placeholder="Awwal Abdulhakeem" />
+          </label>
+        </div>
+        <label class="dash-field">
+          <span>Excerpt (1-2 sentence summary)</span>
+          <textarea id="bp-excerpt" rows="2" placeholder="A short summary that appears on the blog grid.">${escapeHtml(base.excerpt || '')}</textarea>
+        </label>
+        <label class="dash-field">
+          <span>Cover image URL</span>
+          <input type="text" id="bp-coverimage" value="${escapeAttr(base.coverImage)}" placeholder="https://..." />
+        </label>
+        <div class="dash-project-form__upload">
+          <button type="button" class="dash-btn dash-btn--primary" id="bp-upload-btn">Upload Cover Image</button>
+          <span style="font-size:12px;color:var(--akay-text-mute);">or paste a URL above</span>
+        </div>
+        <div id="bp-preview" style="margin-top:8px;">
+          ${base.coverImage ? `<img src="${escapeAttr(base.coverImage)}" style="width:100%;border-radius:8px;border:1px solid var(--akay-border);" onerror="this.style.display='none';" />` : ''}
+        </div>
+        <label class="dash-field">
+          <span>Content (HTML)</span>
+          <textarea id="bp-content" rows="12" style="font-family:'SFMono-Regular',Menlo,monospace;font-size:12px;line-height:1.5;" placeholder="<p>First paragraph...</p>&#10;<h2>Section heading</h2>&#10;<p>Body...</p>">${escapeHtml(base.content || '')}</textarea>
+        </label>
+        <label class="dash-field">
+          <span>Tags (comma-separated)</span>
+          <input type="text" id="bp-tags" value="${escapeAttr((Array.isArray(base.tags) ? base.tags : []).join(', '))}" placeholder="Web Design, Conversion, UX" />
+        </label>
+        <button type="submit" class="dash-btn dash-btn--primary dash-btn--block" style="margin-top:16px;">${isEdit ? 'Save Changes' : 'Add Post'}</button>
+        <p class="dash-form__err" id="bp-err"></p>
+      </form>
+    </div>`;
+  document.body.appendChild(modal);
+
+  modal.querySelector('#bpClose').addEventListener('click', () => modal.remove());
+  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+
+  if (!isEdit) {
+    modal.querySelector('#bp-title').addEventListener('input', e => {
+      const slug = e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+      modal.querySelector('#bp-slug').value = slug;
+    });
+  }
+
+  modal.querySelector('#bp-upload-btn').addEventListener('click', () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.style.display = 'none';
+    document.body.appendChild(input);
+    input.addEventListener('change', async () => {
+      const file = input.files[0];
+      if (!file) { input.remove(); return; }
+      if (file.size > 10 * 1024 * 1024) { toast('Max 10MB', 'error'); input.remove(); return; }
+      toast('Uploading…', 'info');
+      try {
+        const url = await uploadToCloudinary(file);
+        modal.querySelector('#bp-coverimage').value = url;
+        modal.querySelector('#bp-preview').innerHTML = `<img src="${url}" style="width:100%;border-radius:8px;border:1px solid var(--akay-border);" />`;
+        toast('Image uploaded', 'success');
+      } catch (e) {
+        toast('Upload failed: ' + e.message, 'error');
+      } finally {
+        input.remove();
+      }
+    });
+    input.click();
+  });
+
+  modal.querySelector('#bp-coverimage').addEventListener('input', e => {
+    const url = e.target.value.trim();
+    modal.querySelector('#bp-preview').innerHTML = url
+      ? `<img src="${escapeAttr(url)}" style="width:100%;border-radius:8px;border:1px solid var(--akay-border);" />`
+      : '';
+  });
+
+  modal.querySelector('#blogPostForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const title = modal.querySelector('#bp-title').value.trim();
+    const slug = modal.querySelector('#bp-slug').value.trim().toLowerCase().replace(/[^a-z0-9-]/g, '');
+    const category = modal.querySelector('#bp-category').value.trim();
+    const date = modal.querySelector('#bp-date').value.trim();
+    const author = modal.querySelector('#bp-author').value.trim();
+    const excerpt = modal.querySelector('#bp-excerpt').value.trim();
+    const coverImage = modal.querySelector('#bp-coverimage').value.trim();
+    const content = modal.querySelector('#bp-content').value;
+    const tags = modal.querySelector('#bp-tags').value.split(',').map(s => s.trim()).filter(Boolean);
+    const errEl = modal.querySelector('#bp-err');
+
+    if (!title) { errEl.textContent = 'Title is required'; return; }
+    if (!slug) { errEl.textContent = 'Slug is required'; return; }
+    if (!content.trim()) { errEl.textContent = 'Content is required'; return; }
+
+    errEl.textContent = '';
+
+    const item = {
+      slug, title, category, date, author, excerpt, coverImage, content, tags
+    };
+
+    let updated;
+    if (isEdit) {
+      const existing = (state.blogPosts || []).findIndex(p => p.slug === slug);
+      if (existing >= 0) {
+        updated = [...state.blogPosts];
+        updated[existing] = item;
+      } else {
+        updated = [...(state.blogPosts || []), item];
+      }
+    } else {
+      const allSlugs = new Set([
+        ...BLOG_POSTS.map(p => p.slug),
+        ...(state.blogPosts || []).map(p => p.slug)
+      ]);
+      if (allSlugs.has(slug)) {
+        errEl.textContent = `Slug "${slug}" already exists. Choose a different slug.`;
+        return;
+      }
+      updated = [...(state.blogPosts || []), item];
+    }
+
+    const ok = await saveBlogPosts(updated);
+    if (ok) { toast(isEdit ? 'Post updated' : 'Post added', 'success'); modal.remove(); }
+  });
+}
+
+async function deleteBlogPost(post) {
+  if (!post || !post.slug) return;
+  const ok = await new Promise(resolve => {
+    showConfirm(`Delete blog post "${post.title}"?\n\nThis removes it from /blog-post.html immediately.`, resolve);
+  });
+  if (!ok) return;
+  const updated = (state.blogPosts || []).filter(p => p.slug !== post.slug);
+  const saveOk = await saveBlogPosts(updated);
+  if (saveOk) toast('Blog post deleted', 'info');
+}
+
+async function saveBlogPosts(arr) {
+  try {
+    await setDoc(doc(db, 'content', 'blog-posts'),
+      { items: arr, _updatedAt: serverTimestamp() },
+      { merge: true });
+    toast(`✓ Blog posts saved (${arr.length})`, 'success');
+    return true;
+  } catch (e) {
+    console.error('[blog-posts] save failed:', e);
+    if (e.code === 'permission-denied' || /permission|denied|rules/i.test(e.message)) {
+      toast('SAVE FAILED — Firestore rules rejected the write. See Settings tab.', 'error');
+      state.rulesOk = false;
+      renderRulesStatus();
+    } else if (/offline|network|timed out|unreachable/i.test(e.message)) {
+      toast('NETWORK — cannot reach Firestore. Try again.', 'error');
+    } else {
+      toast('Save failed: ' + e.message, 'error');
+    }
+    return false;
+  }
+}
+
+// =====================================================================
+//  STEP 11.8 — DOWNLOADS editor
+//  ---------------------------------------------------------------------
+//  3 fixed slots: CV, Corporate Profile, Brand Deck. Static defaults
+//  live in site-config.js DOWNLOADS. Admin uploads a PDF (or pastes a
+//  URL) for each slot — saved to Firestore `content/downloads`.
+// =====================================================================
+
+function buildMergedListDownloads() {
+  const byId = new Map();
+  DOWNLOADS.forEach(d => { if (d && d.id) byId.set(d.id, d); });
+  (state.downloads || []).forEach(d => { if (d && d.id) byId.set(d.id, d); });
+
+  const list = [];
+  const seen = new Set();
+  DOWNLOADS.forEach(d => {
+    if (!d || !d.id) return;
+    if (byId.has(d.id)) { list.push(byId.get(d.id)); seen.add(d.id); }
+  });
+  (state.downloads || []).forEach(d => {
+    if (!d || !d.id) return;
+    if (seen.has(d.id)) return;
+    list.push(byId.get(d.id));
+    seen.add(d.id);
+  });
+  return list;
+}
+
+function renderDownloadsEditor() {
+  const wrap = $('#downloadsList');
+  if (!wrap) return;
+  const merged = buildMergedListDownloads();
+
+  if (!merged.length) {
+    wrap.innerHTML = '<p class="dash-panel__hint">No download slots configured.</p>';
+    return;
+  }
+
+  wrap.innerHTML = merged.map(d => {
+    const isStatic = DOWNLOADS.some(s => s.id === d.id) && !(state.downloads || []).some(s => s.id === d.id);
+    const available = d.available !== false && !!d.fileUrl;
+    const fileExt = (d.fileUrl || '').split('.').pop().toUpperCase();
+    const format = fileExt && fileExt.length <= 5 ? fileExt : (available ? 'FILE' : '—');
+    return `
+      <div class="dash-download-card" data-id="${escapeAttr(d.id)}">
+        <div class="dash-download-card__head">
+          <div>
+            <h4 class="dash-download-card__title">${escapeHtml(d.name || '')}</h4>
+            <span class="dash-download-card__id">id: ${escapeHtml(d.id || '')} · ${format} · ${available ? '<span style="color:#2ecc71;">Available</span>' : '<span style="color:var(--akay-text-dim);">Coming soon</span>'}</span>
+          </div>
+          <span class="dash-project-card__section" style="${isStatic ? 'color:#8a8a8a;background:rgba(255,255,255,0.04);border-color:var(--akay-border);' : ''}">${isStatic ? 'Static default' : 'Firestore'}</span>
+        </div>
+        <label class="dash-field">
+          <span>Display name</span>
+          <input type="text" data-field="name" value="${escapeAttr(d.name || '')}" />
+        </label>
+        <label class="dash-field">
+          <span>Description</span>
+          <textarea data-field="description" rows="2">${escapeHtml(d.description || '')}</textarea>
+        </label>
+        <label class="dash-field">
+          <span>File URL (paste a direct link to the PDF)</span>
+          <input type="text" data-field="fileUrl" value="${escapeAttr(d.fileUrl || '')}" placeholder="https://res.cloudinary.com/.../akay-cv.pdf" />
+        </label>
+        <div class="dash-project-form__upload">
+          <button type="button" class="dash-btn dash-btn--primary" data-act="upload">Upload PDF</button>
+          <span style="font-size:12px;color:var(--akay-text-mute);">or paste a URL above</span>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap;">
+          <label class="dash-field" style="flex:0 0 auto;display:flex;align-items:center;gap:8px;flex-direction:row;">
+            <input type="checkbox" data-field="available" ${available ? 'checked' : ''} />
+            <span style="text-transform:none;letter-spacing:0;font-size:12px;color:var(--akay-text-mute);">Available for download</span>
+          </label>
+          <button type="button" class="dash-btn dash-btn--primary dash-btn--mini" data-act="save" style="margin-left:auto;">Save</button>
+        </div>
+      </div>`;
+  }).join('');
+
+  // Wire buttons + upload handlers
+  wrap.querySelectorAll('.dash-download-card').forEach(card => {
+    const id = card.getAttribute('data-id');
+
+    card.querySelector('[data-act="save"]').addEventListener('click', () => {
+      const name = card.querySelector('[data-field="name"]').value.trim();
+      const description = card.querySelector('[data-field="description"]').value.trim();
+      const fileUrl = card.querySelector('[data-field="fileUrl"]').value.trim();
+      const available = card.querySelector('[data-field="available"]').checked;
+      saveDownloadSlot({ id, name, description, fileUrl, available });
+    });
+
+    card.querySelector('[data-act="upload"]').addEventListener('click', () => {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'application/pdf,image/*';
+      input.style.display = 'none';
+      document.body.appendChild(input);
+      input.addEventListener('change', async () => {
+        const file = input.files[0];
+        if (!file) { input.remove(); return; }
+        if (file.size > 10 * 1024 * 1024) { toast('Max 10MB', 'error'); input.remove(); return; }
+        toast('Uploading…', 'info');
+        try {
+          const url = await uploadToCloudinary(file);
+          card.querySelector('[data-field="fileUrl"]').value = url;
+          card.querySelector('[data-field="available"]').checked = true;
+          toast('File uploaded — click Save to apply', 'success');
+        } catch (e) {
+          toast('Upload failed: ' + e.message, 'error');
+        } finally {
+          input.remove();
+        }
+      });
+      input.click();
+    });
+  });
+}
+
+async function saveDownloadSlot(item) {
+  // Merge with the existing list (override by id)
+  const others = (state.downloads || []).filter(d => d.id !== item.id);
+  const updated = [...others, item];
+  try {
+    await setDoc(doc(db, 'content', 'downloads'),
+      { items: updated, _updatedAt: serverTimestamp() },
+      { merge: true });
+    toast(`✓ "${item.name || item.id}" saved`, 'success');
+    return true;
+  } catch (e) {
+    console.error('[downloads] save failed:', e);
+    if (e.code === 'permission-denied' || /permission|denied|rules/i.test(e.message)) {
+      toast('SAVE FAILED — Firestore rules rejected the write. See Settings tab.', 'error');
+      state.rulesOk = false;
+      renderRulesStatus();
+    } else {
+      toast('Save failed: ' + e.message, 'error');
+    }
+    return false;
+  }
+}
+
+// =====================================================================
+//  STEP 11.9 — SITE CONTENT editor
+//  ---------------------------------------------------------------------
+//  Flat key/value overrides on top of SITE_CONTENT_DEFAULTS. Saved to
+//  Firestore `content/site-content` as a flat object. The homepage
+//  reads from the same doc at load time and overrides the static
+//  defaults. The admin form groups fields by section for clarity.
+// =====================================================================
+
+// Define the editable fields, grouped by section. Each field knows its
+// label, type (text/textarea/number), and help text.
+const SITE_CONTENT_FIELDS = [
+  {
+    section: 'Homepage Hero',
+    fields: [
+      { key: 'heroBadge',     label: 'Hero badge text',      type: 'text',    help: 'Small pill above the H1 (e.g. "Available for Work")' },
+      { key: 'heroName',      label: 'Hero name line',       type: 'text',    help: 'Greeting line under the badge' },
+      { key: 'heroTitleLead', label: 'Hero title (lead)',    type: 'text',    help: 'The fixed part of the H1 before the rotating word' },
+      { key: 'heroRotatingWords', label: 'Rotating words',   type: 'text',    help: 'Pipe-separated list of words that rotate in the H1' },
+      { key: 'heroTagline',   label: 'Hero tagline',         type: 'textarea',help: 'Paragraph below the H1' }
+    ]
+  },
+  {
+    section: 'Stats',
+    fields: [
+      { key: 'statProjects',  label: 'Projects delivered',   type: 'number',  help: 'Number shown on the homepage stats bar' },
+      { key: 'statClients',   label: 'Happy clients',        type: 'number',  help: 'Number shown on the homepage stats bar' },
+      { key: 'statYears',     label: 'Years experience',     type: 'number',  help: 'Number shown on the homepage stats bar' },
+      { key: 'statAwards',    label: 'Awards & features',    type: 'number',  help: 'Number shown on the homepage stats bar' }
+    ]
+  },
+  {
+    section: 'CTA Band',
+    fields: [
+      { key: 'ctaTitle',      label: 'CTA title',            type: 'text',    help: 'Heading on the bottom CTA band' },
+      { key: 'ctaDesc',       label: 'CTA description',      type: 'textarea',help: 'Paragraph on the bottom CTA band' }
+    ]
+  }
+];
+
+function getSiteContentValue(key) {
+  if (Object.prototype.hasOwnProperty.call(state.siteContent, key)) {
+    return state.siteContent[key];
+  }
+  if (Object.prototype.hasOwnProperty.call(SITE_CONTENT_DEFAULTS, key)) {
+    return SITE_CONTENT_DEFAULTS[key];
+  }
+  return '';
+}
+
+function renderSiteContentEditor() {
+  const wrap = $('#siteContentForm');
+  if (!wrap) return;
+
+  wrap.innerHTML = SITE_CONTENT_FIELDS.map(group => `
+    <div class="dash-section">
+      <div class="dash-section__head">
+        <div class="dash-section__bar"></div>
+        <h4 class="dash-section__title">${escapeHtml(group.section)}</h4>
+      </div>
+      <div class="dash-sitecontent-grid">
+        ${group.fields.map(f => {
+          const val = getSiteContentValue(f.key);
+          const isCustom = Object.prototype.hasOwnProperty.call(state.siteContent, f.key) && state.siteContent[f.key] !== SITE_CONTENT_DEFAULTS[f.key];
+          const inputId = `sc-${f.key}`;
+          if (f.type === 'textarea') {
+            return `
+              <div class="dash-textcard ${isCustom ? 'is-custom' : ''}" data-key="${escapeAttr(f.key)}" style="grid-template-columns:1fr;">
+                <div>
+                  <div class="dash-textcard__slot">${escapeHtml(f.label)}<small>${escapeHtml(f.help || '')}</small></div>
+                </div>
+                <textarea class="dash-textcard__input" id="${inputId}" rows="3">${escapeHtml(val)}</textarea>
+                <div class="dash-textcard__btns">
+                  <button class="dash-btn dash-btn--primary dash-btn--mini" data-act="save">Save</button>
+                  <button class="dash-btn dash-btn--danger dash-btn--mini" data-act="reset">Reset</button>
+                </div>
+              </div>`;
+          }
+          return `
+            <div class="dash-textcard ${isCustom ? 'is-custom' : ''}" data-key="${escapeAttr(f.key)}" style="grid-template-columns:1fr;">
+              <div>
+                <div class="dash-textcard__slot">${escapeHtml(f.label)}<small>${escapeHtml(f.help || '')}</small></div>
+              </div>
+              <input type="${f.type === 'number' ? 'number' : 'text'}" class="dash-textcard__input" id="${inputId}" value="${escapeAttr(val)}" />
+              <div class="dash-textcard__btns">
+                <button class="dash-btn dash-btn--primary dash-btn--mini" data-act="save">Save</button>
+                <button class="dash-btn dash-btn--danger dash-btn--mini" data-act="reset">Reset</button>
+              </div>
+            </div>`;
+        }).join('')}
+      </div>
+    </div>
+  `).join('') + `
+    <div class="dash-section">
+      <div class="dash-section__head">
+        <div class="dash-section__bar" style="background:linear-gradient(180deg,#ff5252,#c41414);"></div>
+        <h4 class="dash-section__title">Reset all site content</h4>
+      </div>
+      <p class="dash-panel__hint" style="margin:0 0 12px;">
+        Wipe every override on this page and revert to the defaults baked into <code>site-config.js</code>.
+        Useful if you've made lots of experimental edits and want to start fresh.
+      </p>
+      <button class="dash-btn dash-btn--danger" id="btnResetSiteContent">Reset ALL site content overrides</button>
+    </div>
+  `;
+
+  // Wire save/reset buttons
+  wrap.querySelectorAll('.dash-textcard').forEach(card => {
+    const key = card.getAttribute('data-key');
+    const input = card.querySelector('input, textarea');
+    card.querySelector('[data-act="save"]').addEventListener('click', async () => {
+      const val = input.value;
+      const ok = await saveSiteContentKey(key, val);
+      if (ok) toast(`✓ ${key} saved`, 'success');
+    });
+    card.querySelector('[data-act="reset"]').addEventListener('click', async () => {
+      const ok = await saveSiteContentKey(key, '');
+      if (ok) {
+        const def = Object.prototype.hasOwnProperty.call(SITE_CONTENT_DEFAULTS, key) ? SITE_CONTENT_DEFAULTS[key] : '';
+        input.value = def;
+        toast(`${key} reset to default`, 'info');
+      }
+    });
+    if (input.tagName === 'INPUT') {
+      input.addEventListener('keydown', e => {
+        if (e.key === 'Enter') { e.preventDefault(); card.querySelector('[data-act="save"]').click(); }
+      });
+    }
+  });
+
+  // Wire the reset-all button
+  const btnReset = $('#btnResetSiteContent');
+  if (btnReset) {
+    btnReset.addEventListener('click', async () => {
+      const ok = await new Promise(resolve => {
+        showConfirm('Reset ALL site content overrides? This wipes every custom value on this page and reverts to the defaults in site-config.js.', resolve);
+      });
+      if (!ok) return;
+      // Build a blank object with every key set to ''
+      const blank = {};
+      Object.keys(SITE_CONTENT_DEFAULTS).forEach(k => { blank[k] = ''; });
+      blank._updatedAt = serverTimestamp();
+      try {
+        await setDoc(doc(db, 'content', 'site-content'), blank, { merge: true });
+        toast('✓ All site content reset to defaults', 'success');
+      } catch (e) {
+        toast('Reset failed: ' + e.message, 'error');
+      }
+    });
+  }
+}
+
+async function saveSiteContentKey(key, value) {
+  try {
+    await setDoc(doc(db, 'content', 'site-content'),
+      { [key]: value, _updatedAt: serverTimestamp() },
+      { merge: true });
+    return true;
+  } catch (e) {
+    console.error('[site-content] save failed:', e);
     if (e.code === 'permission-denied' || /permission|denied|rules/i.test(e.message)) {
       toast('SAVE FAILED — Firestore rules rejected the write. See Settings tab.', 'error');
       state.rulesOk = false;
@@ -1601,6 +2679,10 @@ function boot() {
   if (btnSeedProjects) btnSeedProjects.addEventListener('click', seedDefaultProjects);
   const btnSeedWebPortfolio = $('#btnSeedWebPortfolio');
   if (btnSeedWebPortfolio) btnSeedWebPortfolio.addEventListener('click', seedWebPortfolioDefaults);
+  const btnSeedDesign = $('#btnSeedDesign');
+  if (btnSeedDesign) btnSeedDesign.addEventListener('click', seedDesignProjects);
+  const btnSeedPrint = $('#btnSeedPrint');
+  if (btnSeedPrint) btnSeedPrint.addEventListener('click', seedPrintProjects);
   const btnRefreshProjects = $('#btnRefreshProjects');
   if (btnRefreshProjects) btnRefreshProjects.addEventListener('click', () => {
     renderProjects();
@@ -1620,6 +2702,38 @@ function boot() {
   if (btnDeleteMarked) btnDeleteMarked.addEventListener('click', deleteMarkedProjects);
   const btnClearMarks = $('#btnClearMarks');
   if (btnClearMarks) btnClearMarks.addEventListener('click', clearAllMarks);
+
+  // Case Studies buttons
+  const btnAddCaseStudy = $('#btnAddCaseStudy');
+  if (btnAddCaseStudy) btnAddCaseStudy.addEventListener('click', () => showCaseStudyForm(null));
+  const btnRefreshCaseStudies = $('#btnRefreshCaseStudies');
+  if (btnRefreshCaseStudies) btnRefreshCaseStudies.addEventListener('click', () => {
+    renderCaseStudies();
+    toast('Refreshed', 'info');
+  });
+
+  // Blog Posts buttons
+  const btnAddBlogPost = $('#btnAddBlogPost');
+  if (btnAddBlogPost) btnAddBlogPost.addEventListener('click', () => showBlogPostForm(null));
+  const btnRefreshBlogPosts = $('#btnRefreshBlogPosts');
+  if (btnRefreshBlogPosts) btnRefreshBlogPosts.addEventListener('click', () => {
+    renderBlogPosts();
+    toast('Refreshed', 'info');
+  });
+
+  // Downloads buttons
+  const btnRefreshDownloads = $('#btnRefreshDownloads');
+  if (btnRefreshDownloads) btnRefreshDownloads.addEventListener('click', () => {
+    renderDownloadsEditor();
+    toast('Refreshed', 'info');
+  });
+
+  // Site Content buttons
+  const btnRefreshSiteContent = $('#btnRefreshSiteContent');
+  if (btnRefreshSiteContent) btnRefreshSiteContent.addEventListener('click', () => {
+    renderSiteContentEditor();
+    toast('Refreshed', 'info');
+  });
 
   // Show the delete endpoint in Settings
   const ep = $('#settingsDeleteEndpoint');
