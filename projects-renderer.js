@@ -94,13 +94,16 @@ function init() {
   if (!section) return;
 
   onSnapshot(doc(db, 'content', 'projects'), snap => {
-    if (!snap.exists) {
+    // snap.exists is a FUNCTION (matches Firebase SDK API) — must call it
+    if (!snap.exists()) {
+      console.log('[projects] doc does not exist — hiding section');
       renderProjects([]);
       return;
     }
     const data = snap.data();
     const items = Array.isArray(data.items) ? data.items : [];
     console.log(`[projects] received ${items.length} projects from Firestore`);
+    console.log('[projects] first item sample:', items[0]);
     renderProjects(items);
   }, err => {
     console.error('[projects] sync error:', err.message);
