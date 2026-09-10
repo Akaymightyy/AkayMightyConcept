@@ -76,25 +76,110 @@
     initLayout('blog');
 
     import { BLOG_POSTS } from './site-config.js';
+    import { db, doc, onSnapshot } from './firebase-config.js';
+
+    function escapeAttr(s) {
+      return String(s || '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+    function escapeHtml(s) {
+      return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    // Merge static BLOG_POSTS with Firestore `content/blog-posts`.
+    // Static posts are overridden by Firestore posts with the same slug
+    // (so admin edits show up live). Firestore posts with new slugs are
+    // appended to the end of the list.
+    function buildMergedList(firestorePosts) {
+      const list = [];
+      const bySlug = new Map();
+
+      // 1. Static defaults first
+      BLOG_POSTS.forEach(p => {
+        if (!p || !p.slug) return;
+        bySlug.set(p.slug, p);
+      });
+
+      // 2. Override + append from Firestore
+      if (Array.isArray(firestorePosts)) {
+        firestorePosts.forEach(p => {
+          if (!p || !p.slug) return;
+          bySlug.set(p.slug, p);
+        });
+      }
+
+      // Convert map back to an array, with static posts first in their
+      // declared order, then any Firestore-only posts in their declared
+      // order.
+      const seenSlugs = new Set();
+      BLOG_POSTS.forEach(p => {
+        if (!p || !p.slug) return;
+        if (bySlug.has(p.slug)) {
+          list.push(bySlug.get(p.slug));
+          seenSlugs.add(p.slug);
+        }
+      });
+      if (Array.isArray(firestorePosts)) {
+        firestorePosts.forEach(p => {
+          if (!p || !p.slug) return;
+          if (seenSlugs.has(p.slug)) return;
+          list.push(bySlug.get(p.slug));
+          seenSlugs.add(p.slug);
+        });
+      }
+
+      return list;
+    }
 
     // ---- Render blog cards ----
-    (function() {
+    function renderCards(posts) {
       const grid = document.getElementById('blogGrid');
       if (!grid) return;
-      grid.innerHTML = BLOG_POSTS.map((post, i) => `
-        <a href="/blog-post.html?slug=${post.slug}" class="blog-card reveal${i > 0 ? ' reveal-delay-' + Math.min(i + 1, 4) : ''}">
-          <img class="blog-img" src="${post.image}" alt="${post.title}" loading="lazy" onerror="this.style.opacity='0.3';" />
-          <div class="blog-body">
-            <div class="blog-meta">
-              <span class="blog-cat">${post.category}</span>
-              <span class="blog-date">${post.date}</span>
+      if (!posts.length) {
+        grid.innerHTML = '<p class="dash-panel__hint" style="grid-column:1/-1;text-align:center;color:var(--text-muted);">No posts published yet. Check back soon.</p>';
+        return;
+      }
+      grid.innerHTML = posts.map((post, i) => {
+        const cover = post.coverImage || post.image || '';
+        const category = post.category || 'Blog';
+        const date = post.date || '';
+        const title = post.title || 'Untitled';
+        const excerpt = post.excerpt || '';
+        return `
+          <a href="/blog-post.html?slug=${encodeURIComponent(post.slug)}" class="blog-card reveal${i > 0 ? ' reveal-delay-' + Math.min(i + 1, 4) : ''}">
+            ${cover ? `<img class="blog-img" src="${escapeAttr(cover)}" alt="${escapeAttr(title)}" loading="lazy" onerror="this.style.opacity='0.3';" />` : ''}
+            <div class="blog-body">
+              <div class="blog-meta">
+                <span class="blog-cat">${escapeHtml(category)}</span>
+                <span class="blog-date">${escapeHtml(date)}</span>
+              </div>
+              <h3 class="blog-title">${escapeHtml(title)}</h3>
+              <p class="blog-excerpt">${escapeHtml(excerpt)}</p>
+              <span class="blog-read-more">Read more <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></span>
             </div>
-            <h3 class="blog-title">${post.title}</h3>
-            <p class="blog-excerpt">${post.excerpt}</p>
-            <span class="blog-read-more">Read more <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></span>
-          </div>
-        </a>`).join('');
-    })();
+          </a>`;
+      }).join('');
+      grid.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
+    }
+
+    // Render static posts immediately so the page isn't empty while
+    // Firestore is loading.
+    renderCards(buildMergedList([]));
+
+    // Subscribe to Firestore for live admin edits
+    try {
+      onSnapshot(doc(db, 'content', 'blog-posts'), snap => {
+        let firestorePosts = [];
+        if (snap.exists()) {
+          const data = snap.data();
+          firestorePosts = Array.isArray(data.items) ? data.items : [];
+        }
+        renderCards(buildMergedList(firestorePosts));
+      }, err => {
+        console.warn('[blog-page] Firestore sync error:', err && err.message);
+      });
+    } catch (e) {
+      console.warn('[blog-page] init error:', e && e.message);
+    }
   </script>
 </body>
 </html>

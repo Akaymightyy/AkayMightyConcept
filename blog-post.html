@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+  <title>Article — Akay Mighty Concept</title>
+  <meta name="description" content="A full article from Awwal Abdulhakeem — practical insights on web design, branding, and print from 8+ years of client work." />
+  <meta name="theme-color" content="#0a0a0a" />
+
+  <meta property="og:type" content="article" />
+  <meta property="og:title" content="Article — Akay Mighty Concept" />
+  <meta property="og:description" content="A full article by Awwal Abdulhakeem." />
+
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%230a0a0a'/%3E%3Ctext x='50' y='68' font-family='Montserrat,Arial,sans-serif' font-size='52' font-weight='900' fill='%235b5bf5' text-anchor='middle'%3EA%3C/text%3E%3C/svg%3E" />
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;900&family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./site.css" />
+  <link rel="stylesheet" href="./admin.css" />
+
+  <style>
+    /* Page-specific styles for a blog article */
+    .blog-article { padding: 140px 0 80px; }
+    .bp-back { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-muted); margin-bottom: 24px; transition: color 0.2s; }
+    .bp-back:hover { color: var(--red); }
+
+    .bp-loading { padding: 200px 0; text-align: center; color: var(--text-muted); }
+    .bp-loading-spinner { width: 36px; height: 36px; border: 3px solid var(--border); border-top-color: var(--red); border-radius: 50%; margin: 0 auto 16px; animation: bpSpin 0.8s linear infinite; }
+    @keyframes bpSpin { to { transform: rotate(360deg); } }
+
+    .bp-container { max-width: 760px; margin: 0 auto; }
+    .bp-cover { width: 100%; aspect-ratio: 21/9; object-fit: cover; border-radius: var(--radius-lg); margin-bottom: 36px; border: 1px solid var(--border); }
+    .bp-meta { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; }
+    .bp-cat { padding: 5px 12px; border-radius: 50px; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; background: rgba(91,91,245,0.15); border: 1px solid var(--border-red); color: var(--red); }
+    .bp-date { font-size: 13px; color: var(--text-muted); }
+    .bp-author { font-size: 13px; color: var(--text); }
+    .bp-author span { color: var(--text-muted); }
+    .bp-title { font-family: var(--font-heading); font-size: clamp(28px, 4.5vw, 44px); font-weight: 900; line-height: 1.15; margin-bottom: 18px; letter-spacing: -1px; }
+    .bp-excerpt { font-size: 18px; color: var(--text-muted); line-height: 1.6; margin-bottom: 40px; padding-bottom: 32px; border-bottom: 1px solid var(--border); font-style: italic; }
+
+    /* Article content typography */
+    .bp-content { font-family: var(--font-body); font-size: 16px; line-height: 1.85; color: var(--text); }
+    .bp-content > *:first-child { margin-top: 0; }
+    .bp-content p { margin: 0 0 22px; color: var(--text); }
+    .bp-content h2 { font-family: var(--font-heading); font-size: 26px; font-weight: 800; margin: 36px 0 16px; letter-spacing: -0.5px; color: var(--text); }
+    .bp-content h3 { font-family: var(--font-heading); font-size: 19px; font-weight: 700; margin: 28px 0 12px; color: var(--text); }
+    .bp-content a { color: var(--red); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; transition: color 0.2s; }
+    .bp-content a:hover { color: var(--red-bright); }
+    .bp-content strong { color: #fff; font-weight: 700; }
+    .bp-content em { color: var(--text); font-style: italic; }
+    .bp-content ul, .bp-content ol { margin: 0 0 22px; padding-left: 24px; }
+    .bp-content li { margin-bottom: 8px; }
+    .bp-content blockquote { border-left: 3px solid var(--red); padding: 8px 0 8px 20px; margin: 0 0 22px; color: var(--text-muted); font-style: italic; }
+    .bp-content code { background: var(--bg3); border: 1px solid var(--border); border-radius: 4px; padding: 2px 6px; font-family: 'SFMono-Regular', Menlo, monospace; font-size: 13px; color: var(--red-bright); }
+
+    .bp-tags { display: flex; flex-wrap: wrap; gap: 8px; margin: 40px 0; padding-top: 28px; border-top: 1px solid var(--border); }
+    .bp-tag { padding: 6px 14px; border-radius: 50px; background: var(--bg3); border: 1px solid var(--border); font-size: 12px; font-weight: 600; color: var(--text-muted); }
+
+    .bp-next { padding: 28px; background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-lg); display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap; margin-top: 40px; }
+    .bp-next-label { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px; }
+    .bp-next-title { font-family: var(--font-heading); font-size: 18px; font-weight: 800; color: var(--text); }
+    .bp-next a { color: var(--red); font-weight: 600; font-size: 14px; display: inline-flex; align-items: center; gap: 8px; transition: gap 0.2s; }
+    .bp-next a:hover { gap: 12px; }
+
+    @media (max-width: 640px) {
+      .blog-article { padding: 110px 0 60px; }
+      .bp-cover { aspect-ratio: 16/9; }
+      .bp-content { font-size: 15px; }
+      .bp-content h2 { font-size: 22px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ============ BLOG ARTICLE (rendered by JS below) ============ -->
+  <section class="blog-article">
+    <div class="container">
+
+      <!-- Loading state -->
+      <div class="bp-loading" id="bpLoading">
+        <div class="bp-loading-spinner"></div>
+        <p>Loading article…</p>
+      </div>
+
+      <!-- Loaded article content (injected by JS) -->
+      <div id="bpContent" style="display:none;"></div>
+
+      <!-- Not-found state -->
+      <div class="empty-state" id="bpNotFound" style="display:none;">
+        <div class="empty-state-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        </div>
+        <h2 class="empty-state-title">Post not found</h2>
+        <p class="empty-state-text">This article doesn't exist or hasn't been published yet. Check out the full blog grid for what's new.</p>
+        <a href="/blog.html" class="btn btn-primary">Back to Blog</a>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ CTA ============ -->
+  <section class="cta-section glow-bg">
+    <div class="container">
+      <div class="cta-wrap">
+        <h2 class="cta-title reveal">Want a project like <span>this</span>?</h2>
+        <p class="cta-desc reveal reveal-delay-1">Liked what you read? Let's turn these ideas into something real for your business. Start a project today.</p>
+        <div class="hero-btns reveal reveal-delay-2" style="justify-content:center;">
+          <a href="/start-a-project.html" class="btn btn-primary">Start a Project</a>
+          <a href="/blog.html" class="btn btn-outline">More Articles</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE-SPECIFIC SCRIPTS ============ -->
+  <script type="module">
+    // Inject shared layout. blog-post.html doesn't need projects-renderer.
+    import { initLayout } from './layout.js';
+    initLayout('blog', { skip: ['./projects-renderer.js'] });
+
+    import { db, doc, onSnapshot } from './firebase-config.js';
+    import { BLOG_POSTS } from './site-config.js';
+
+    function getSlug() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get('slug') || '';
+    }
+
+    function escapeHtml(s) {
+      return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+    function escapeAttr(s) {
+      return String(s || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function normalizePost(p) {
+      if (!p) return null;
+      return {
+        slug: p.slug || '',
+        title: p.title || '',
+        excerpt: p.excerpt || '',
+        date: p.date || '',
+        author: p.author || 'Awwal Abdulhakeem',
+        category: p.category || 'Blog',
+        coverImage: p.coverImage || p.image || '',
+        content: p.content || '',
+        tags: Array.isArray(p.tags) ? p.tags : []
+      };
+    }
+
+    function renderPost(post, allPosts) {
+      const loading = document.getElementById('bpLoading');
+      const content = document.getElementById('bpContent');
+      const notFound = document.getElementById('bpNotFound');
+      loading.style.display = 'none';
+
+      if (!post) {
+        notFound.style.display = 'block';
+        document.title = 'Post not found — Akay Mighty Concept';
+        return;
+      }
+
+      document.title = `${post.title || 'Article'} — Akay Mighty Concept`;
+
+      // Find next post for "Next post" nav
+      const slug = post.slug;
+      let nextPost = null;
+      if (allPosts && allPosts.length) {
+        const idx = allPosts.findIndex(p => p.slug === slug);
+        if (idx >= 0) {
+          nextPost = allPosts[(idx + 1) % allPosts.length] || allPosts[0];
+        }
+      }
+
+      const tagsHTML = (post.tags || []).length
+        ? `<div class="bp-tags">${post.tags.map(t => `<span class="bp-tag">${escapeHtml(t)}</span>`).join('')}</div>`
+        : '';
+
+      const nextHTML = nextPost
+        ? `<div class="bp-next">
+            <div>
+              <div class="bp-next-label">Next Article</div>
+              <div class="bp-next-title">${escapeHtml(nextPost.title || '')}</div>
+            </div>
+            <a href="/blog-post.html?slug=${encodeURIComponent(nextPost.slug || '')}">Read Next →</a>
+          </div>`
+        : '';
+
+      content.innerHTML = `
+        <div class="bp-container">
+          <a href="/blog.html" class="bp-back">← Back to all articles</a>
+
+          ${post.coverImage ? `<img class="bp-cover" src="${escapeAttr(post.coverImage)}" alt="${escapeAttr(post.title)}" />` : ''}
+
+          <div class="bp-meta">
+            <span class="bp-cat">${escapeHtml(post.category)}</span>
+            <span class="bp-date">${escapeHtml(post.date)}</span>
+            <span class="bp-author"><span>by</span> ${escapeHtml(post.author)}</span>
+          </div>
+
+          <h1 class="bp-title">${escapeHtml(post.title)}</h1>
+          ${post.excerpt ? `<p class="bp-excerpt">${escapeHtml(post.excerpt)}</p>` : ''}
+
+          <div class="bp-content">${post.content || '<p>This article has no content yet.</p>'}</div>
+
+          ${tagsHTML}
+
+          <a href="/start-a-project.html" class="btn btn-primary" style="margin-top:8px;">Start a Project</a>
+
+          ${nextHTML}
+        </div>
+      `;
+      content.style.display = 'block';
+
+      // Trigger reveal animations on the freshly-injected content
+      content.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
+    }
+
+    function showNotFound() {
+      const loading = document.getElementById('bpLoading');
+      const notFound = document.getElementById('bpNotFound');
+      loading.style.display = 'none';
+      notFound.style.display = 'block';
+      document.title = 'Post not found — Akay Mighty Concept';
+    }
+
+    // ---- Build the merged list of all posts (static + Firestore) ----
+    function buildMergedList(firestorePosts) {
+      const list = [];
+      const bySlug = new Map();
+
+      BLOG_POSTS.forEach(p => {
+        if (!p || !p.slug) return;
+        bySlug.set(p.slug, normalizePost(p));
+      });
+
+      if (Array.isArray(firestorePosts)) {
+        firestorePosts.forEach(p => {
+          if (!p || !p.slug) return;
+          bySlug.set(p.slug, normalizePost(p));
+        });
+      }
+
+      const seen = new Set();
+      BLOG_POSTS.forEach(p => {
+        if (!p || !p.slug) return;
+        if (bySlug.has(p.slug)) { list.push(bySlug.get(p.slug)); seen.add(p.slug); }
+      });
+      if (Array.isArray(firestorePosts)) {
+        firestorePosts.forEach(p => {
+          if (!p || !p.slug) return;
+          if (seen.has(p.slug)) return;
+          list.push(bySlug.get(p.slug));
+          seen.add(p.slug);
+        });
+      }
+
+      return list;
+    }
+
+    // ---- Main: read slug, find post in merged list, render ----
+    const slug = getSlug();
+    if (!slug) {
+      showNotFound();
+    } else {
+      let rendered = false;
+
+      // Render immediately if the slug matches a static post
+      const staticMatch = BLOG_POSTS.find(p => p.slug === slug);
+      if (staticMatch) {
+        renderPost(normalizePost(staticMatch), buildMergedList([]));
+        rendered = true;
+      }
+
+      // Subscribe to Firestore for live admin edits / new posts
+      try {
+        onSnapshot(doc(db, 'content', 'blog-posts'), snap => {
+          let firestorePosts = [];
+          if (snap.exists()) {
+            const data = snap.data();
+            firestorePosts = Array.isArray(data.items) ? data.items : [];
+          }
+          const merged = buildMergedList(firestorePosts);
+          const match = merged.find(p => p.slug === slug);
+          if (match) {
+            renderPost(match, merged);
+            rendered = true;
+          } else if (!rendered) {
+            showNotFound();
+          }
+        }, err => {
+          console.warn('[blog-post] Firestore sync error:', err && err.message);
+          if (!rendered) showNotFound();
+        });
+      } catch (e) {
+        console.warn('[blog-post] init error:', e && e.message);
+        if (!rendered) showNotFound();
+      }
+
+      // Hard timeout — if nothing has rendered after 8s, show not-found
+      setTimeout(() => {
+        if (!rendered) showNotFound();
+      }, 8000);
+    }
+  </script>
+</body>
+</html>

@@ -63,6 +63,33 @@
         Projects
         <span class="dash-nav-item__count" id="navCountProjects">0</span>
       </button>
+      <button class="dash-nav-item" data-tab="case-studies">
+        <span class="dash-nav-item__icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        </span>
+        Case Studies
+        <span class="dash-nav-item__count" id="navCountCaseStudies">0</span>
+      </button>
+      <button class="dash-nav-item" data-tab="blog-posts">
+        <span class="dash-nav-item__icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        </span>
+        Blog Posts
+        <span class="dash-nav-item__count" id="navCountBlogPosts">0</span>
+      </button>
+      <button class="dash-nav-item" data-tab="downloads">
+        <span class="dash-nav-item__icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        </span>
+        Downloads
+        <span class="dash-nav-item__count" id="navCountDownloads">3</span>
+      </button>
+      <button class="dash-nav-item" data-tab="site-content">
+        <span class="dash-nav-item__icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        </span>
+        Site Content
+      </button>
       <button class="dash-nav-item" data-tab="texts">
         <span class="dash-nav-item__icon">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
@@ -187,6 +214,75 @@
         </div>
 
         <div id="projectsList"><!-- rendered by JS --></div>
+      </section>
+
+      <!-- ============ Case Studies tab ============ -->
+      <section class="dash-panel" id="tab-case-studies">
+        <div class="dash-panel__head">
+          <h3 class="dash-panel__title">Project Case Studies</h3>
+          <div class="dash-panel__actions">
+            <button class="dash-btn dash-btn--primary" id="btnAddCaseStudy">+ Add New Case Study</button>
+            <button class="dash-btn dash-btn--ghost" id="btnRefreshCaseStudies">↻ Refresh</button>
+          </div>
+        </div>
+        <p class="dash-panel__hint">
+          Each case study powers a <strong>/project-detail.html?slug=SLUG</strong> page on the live site —
+          the cover image, challenge, solution, tools, screenshots, and live-URL button.
+          The first 3 entries are static defaults baked into <code>site-config.js</code>; anything you
+          add here is saved to Firestore <code>content/case-studies</code> and shows up live.
+        </p>
+        <div id="caseStudiesList"><!-- rendered by JS --></div>
+      </section>
+
+      <!-- ============ Blog Posts tab ============ -->
+      <section class="dash-panel" id="tab-blog-posts">
+        <div class="dash-panel__head">
+          <h3 class="dash-panel__title">Blog Posts</h3>
+          <div class="dash-panel__actions">
+            <button class="dash-btn dash-btn--primary" id="btnAddBlogPost">+ Add New Post</button>
+            <button class="dash-btn dash-btn--ghost" id="btnRefreshBlogPosts">↻ Refresh</button>
+          </div>
+        </div>
+        <p class="dash-panel__hint">
+          Each post powers a <strong>/blog-post.html?slug=SLUG</strong> page on the live site.
+          The 3 default posts are baked into <code>site-config.js</code>; edits and new posts you
+          create here are saved to Firestore <code>content/blog-posts</code>. Use the content editor
+          for full HTML (paragraphs, headings, lists, links).
+        </p>
+        <div id="blogPostsList"><!-- rendered by JS --></div>
+      </section>
+
+      <!-- ============ Downloads tab ============ -->
+      <section class="dash-panel" id="tab-downloads">
+        <div class="dash-panel__head">
+          <h3 class="dash-panel__title">Downloadable Files</h3>
+          <div class="dash-panel__actions">
+            <button class="dash-btn dash-btn--ghost" id="btnRefreshDownloads">↻ Refresh</button>
+          </div>
+        </div>
+        <p class="dash-panel__hint">
+          Three download slots surfaced on the public <strong>/downloads.html</strong> page:
+          the CV, the corporate profile, and the brand deck. Upload a PDF (or paste a URL) to make
+          a slot available; slots without a file show "Coming soon". Saved to Firestore
+          <code>content/downloads</code>.
+        </p>
+        <div id="downloadsList"><!-- rendered by JS --></div>
+      </section>
+
+      <!-- ============ Site Content tab ============ -->
+      <section class="dash-panel" id="tab-site-content">
+        <div class="dash-panel__head">
+          <h3 class="dash-panel__title">Site Content</h3>
+          <div class="dash-panel__actions">
+            <button class="dash-btn dash-btn--ghost" id="btnRefreshSiteContent">↻ Refresh</button>
+          </div>
+        </div>
+        <p class="dash-panel__hint">
+          Edit the homepage hero text, stat numbers, pricing tiers, testimonials, and the CTA band —
+          all from one place. Changes are saved to Firestore <code>content/site-content</code> and
+          applied to the live homepage on next load.
+        </p>
+        <div id="siteContentForm"><!-- rendered by JS --></div>
       </section>
 
       <!-- ============ Text tab ============ -->

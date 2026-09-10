@@ -40,6 +40,7 @@ export const SITE_CONFIG = {
     { label: 'About', url: '/about.html', id: 'about' },
     { label: 'Services', url: '/services.html', id: 'services' },
     { label: 'Blog', url: '/blog.html', id: 'blog' },
+    { label: 'Downloads', url: '/downloads.html', id: 'downloads' },
     { label: 'Start a Project', url: '/start-a-project.html', id: 'start-a-project', cta: true }
   ],
 
@@ -49,13 +50,15 @@ export const SITE_CONFIG = {
     { label: 'Projects', url: '/projects.html' },
     { label: 'Services', url: '/services.html' },
     { label: 'Blog', url: '/blog.html' },
+    { label: 'Downloads', url: '/downloads.html' },
     { label: 'Start a Project', url: '/start-a-project.html' }
   ],
   footerConnectLinks: [
     { label: 'Home', url: '/home.html' },
     { label: 'Recent Work', url: '/projects.html' },
     { label: 'Pricing', url: '/services.html#pricing' },
-    { label: 'Project Inquiry', url: '/start-a-project.html' }
+    { label: 'Project Inquiry', url: '/start-a-project.html' },
+    { label: 'Downloads', url: '/downloads.html' }
   ],
 
   // Social platforms (used in header CTA row + footer).
@@ -181,7 +184,8 @@ export const TESTIMONIALS = [
 
 // ----- Featured projects (3 case-study slugs used on home.html) -------
 // These slugs must match the `slug` field on the matching Firestore project
-// (collection `content/projects`). The home page builds the 3 featured
+// (collection `content/projects`) or the `slug` field on the matching
+// entry in PROJECT_CASE_STUDIES below. The home page builds the 3 featured
 // cards by fetching these specific slugs.
 export const FEATURED_PROJECTS = [
   'scottish-essentials',
@@ -189,55 +193,101 @@ export const FEATURED_PROJECTS = [
   'victorian-bloom'
 ];
 
-// ----- Static featured card fallback (used when Firestore is offline) -
-// Mirrors the Firestore entries so the homepage never looks empty.
-export const FEATURED_FALLBACK = {
-  'scottish-essentials': {
+// ----- PROJECT CASE STUDIES ------------------------------------------
+// Full case-study data for the featured projects. Each entry is rendered
+// on /project-detail.html?slug=SLUG. The first 3 entries here are also
+// mirrored by FEATURED_FALLBACK so the homepage never looks empty when
+// Firestore is offline. The admin dashboard can add/edit/delete entries
+// (saved to Firestore `content/case-studies`); on load, project-detail
+// merges Firestore case studies on top of these static defaults.
+//
+// Shape:
+//   { slug, title, category, status, coverImage, challenge, solution,
+//     tools: [string], screenshots: [url], liveUrl, order }
+export const PROJECT_CASE_STUDIES = [
+  {
     slug: 'scottish-essentials',
     title: 'Scottish Essentials Beauty & Spa',
     category: 'Web · Spa Brand',
-    cover: 'https://cdn.kord.live/serve/ZoCtg7SPBWlc.jpg',
-    liveUrl: 'https://scottishessentialsbeautyspa.vercel.app',
     status: 'Active',
-    summary:
-      'Luxury dark aesthetic, gold accents, WhatsApp booking, skincare product grid & lightbox gallery.',
+    coverImage: 'https://cdn.kord.live/serve/ZoCtg7SPBWlc.jpg',
+    liveUrl: 'https://scottishessentialsbeautyspa.vercel.app',
+    order: 0,
     challenge:
-      'Scottish Essentials Beauty & Spa needed a digital home that matched the luxury feel of their physical spa — without paying agency prices. Their existing Instagram presence had no booking flow, and customers had to DM to schedule appointments.',
+      "Scottish Essentials Beauty & Spa needed a digital home that matched the luxury feel of their physical spa — without paying agency prices. Their existing Instagram presence had no booking flow, and customers had to DM to schedule appointments. They also wanted a way to sell skincare products online without the overhead of a full e-commerce platform, and the entire site needed to load fast on the 3G connections most of their customers use.",
     solution:
-      "I designed a dark, gold-accented website with a hero booking CTA, a product grid with lightbox gallery, and integrated WhatsApp ordering. Load time stayed under 2 seconds even on 3G, and bookings now flow straight to the owner's WhatsApp.",
-    tech: ['HTML5', 'CSS3', 'JavaScript', 'Firebase', 'Vercel', 'WhatsApp API']
+      "I designed a dark, gold-accented website with a hero booking CTA, a product grid with lightbox gallery, and integrated WhatsApp ordering. Load time stayed under 2 seconds even on 3G, and bookings now flow straight to the owner's WhatsApp. The product grid uses native lazy-loading + a CSS-only lightbox (no JS framework) so the page stays light. A custom dark-mode palette with subtle gold gradients mirrors the spa's physical interior.",
+    tools: ['HTML5', 'CSS3', 'JavaScript', 'Firebase', 'Vercel', 'WhatsApp API', 'Lightbox', 'Lazy Loading'],
+    screenshots: [
+      'https://cdn.kord.live/serve/ZoCtg7SPBWlc.jpg',
+      'https://cdn.kord.live/serve/4cG5RghDuw9w.jpg',
+      'https://cdn.kord.live/serve/NRlPY4VLxSVG.jpg'
+    ]
   },
-  'ajb-autos': {
+  {
     slug: 'ajb-autos',
     title: 'AJB Autos',
     category: 'Web · Automotive',
-    cover: 'https://cdn.kord.live/serve/4cG5RghDuw9w.jpg',
-    liveUrl: 'https://ajbautos.com.ng',
     status: 'Active',
-    summary:
-      'Premium car dealership website with inventory showcase and WhatsApp inquiry.',
+    coverImage: 'https://cdn.kord.live/serve/4cG5RghDuw9w.jpg',
+    liveUrl: 'https://ajbautos.com.ng',
+    order: 1,
     challenge:
-      'AJB Autos needed a sleek, professional website to showcase their premium vehicle inventory. The challenge was creating a dark, luxurious UI that conveyed trust while remaining easy to navigate on mobile — plus a seamless way for prospects to inquire about any vehicle directly.',
+      "AJB Autos needed a sleek, professional website to showcase their premium vehicle inventory. The challenge was creating a dark, luxurious UI that conveyed trust while remaining easy to navigate on mobile — plus a seamless way for prospects to inquire about any vehicle directly. The client also wanted each car listing to feel like a showroom card, not a classified ad, and the homepage hero had to communicate 'premium dealership' inside two seconds.",
     solution:
-      'I built a modern dark-themed website with smooth animations, a virtual showroom feel, and direct WhatsApp inquiry buttons on every vehicle listing. High-quality car imagery is front and center, with minimal distractions, so buyers can browse the full inventory and inquire in one tap.',
-    tech: ['HTML5', 'CSS3', 'JavaScript', 'Dark UI', 'Responsive', 'SEO']
+      "I built a modern dark-themed website with smooth animations, a virtual showroom feel, and direct WhatsApp inquiry buttons on every vehicle listing. High-quality car imagery is front and center, with minimal distractions, so buyers can browse the full inventory and inquire in one tap. A custom horizontal-scroll gallery on the inventory page lets buyers swipe through car photos without leaving the listing, and every CTA deep-links into WhatsApp with the vehicle name pre-filled.",
+    tools: ['HTML5', 'CSS3', 'JavaScript', 'Dark UI', 'Responsive Design', 'SEO', 'WhatsApp API', 'IntersectionObserver'],
+    screenshots: [
+      'https://cdn.kord.live/serve/4cG5RghDuw9w.jpg',
+      'https://cdn.kord.live/serve/ZoCtg7SPBWlc.jpg',
+      'https://cdn.kord.live/serve/KWXIC3QcBiFj.jpg'
+    ]
   },
-  'victorian-bloom': {
+  {
     slug: 'victorian-bloom',
     title: 'Victorian Bloom Florals',
     category: 'Branding · Print',
-    cover: 'https://cdn.kord.live/serve/NRlPY4VLxSVG.jpg',
-    liveUrl: '',
     status: 'Delivered',
-    summary:
-      'Full brand identity — logo, color system, business cards, packaging & social templates.',
+    coverImage: 'https://cdn.kord.live/serve/NRlPY4VLxSVG.jpg',
+    liveUrl: '',
+    order: 2,
     challenge:
-      'Victorian Bloom Florals was launching as a premium floral studio and needed a complete identity that felt both elegant and modern — strong enough to anchor signage, packaging, business cards, and Instagram templates.',
+      "Victorian Bloom Florals was launching as a premium floral studio and needed a complete identity that felt both elegant and modern — strong enough to anchor signage, packaging, business cards, and Instagram templates. The owner had a Pinterest board of inspiration but no formal brief, so the brand system had to be self-explanatory enough that she could extend it on her own without hiring a designer each time. The palette also had to translate cleanly from RGB screens to CMYK print without the muddy shifts you usually get.",
     solution:
-      'I built a complete brand kit from the ground up: a hand-drawn logomark, a rose-gold + deep-plum color system, serif/sans typography pairing, and CMYK print-ready files for cards and packaging. The system was handed off as a brand deck so the client can extend it on their own.',
-    tech: ['CorelDRAW', 'Photoshop', 'Print Production', 'Brand Strategy']
+      "I built a complete brand kit from the ground up: a hand-drawn logomark, a rose-gold + deep-plum color system, serif/sans typography pairing, and CMYK print-ready files for cards and packaging. The system was handed off as a brand deck so the client can extend it on her own — a one-page 'brand rules' card plus a folder of pre-sized Instagram templates and printable PDFs. The color system was tested against a Fogra 39 CMYK profile so the printed cards matched the on-screen palette within ΔE < 3.",
+    tools: ['CorelDRAW', 'Photoshop', 'Illustrator', 'Print Production', 'Brand Strategy', 'CMYK Pre-press', 'Typography'],
+    screenshots: [
+      'https://cdn.kord.live/serve/NRlPY4VLxSVG.jpg',
+      'https://cdn.kord.live/serve/KWXIC3QcBiFj.jpg',
+      'https://cdn.kord.live/serve/ZoCtg7SPBWlc.jpg'
+    ]
   }
-};
+];
+
+// ----- Static featured card fallback (used when Firestore is offline) -
+// Mirrors the first 3 PROJECT_CASE_STUDIES entries so the homepage never
+// looks empty. Kept as a slug-keyed object so the homepage can do a quick
+// O(1) lookup when Firestore is unavailable.
+export const FEATURED_FALLBACK = PROJECT_CASE_STUDIES.slice(0, 3).reduce((acc, cs) => {
+  acc[cs.slug] = {
+    slug: cs.slug,
+    title: cs.title,
+    category: cs.category,
+    cover: cs.coverImage,
+    liveUrl: cs.liveUrl,
+    status: cs.status,
+    summary:
+      cs.slug === 'scottish-essentials'
+        ? 'Luxury dark aesthetic, gold accents, WhatsApp booking, skincare product grid & lightbox gallery.'
+        : cs.slug === 'ajb-autos'
+        ? 'Premium car dealership website with inventory showcase and WhatsApp inquiry.'
+        : 'Full brand identity — logo, color system, business cards, packaging & social templates.',
+    challenge: cs.challenge,
+    solution: cs.solution,
+    tech: cs.tools
+  };
+  return acc;
+}, {});
 
 // ----- Career timeline entries (used on about.html) -------------------
 export const CAREER_TIMELINE = [
@@ -299,34 +349,152 @@ export const STATS = [
   { target: 25, label: 'Awards & Features' }
 ];
 
-// ----- Blog placeholder posts (used on blog.html) ---------------------
+// ----- Blog posts (used on blog.html + blog-post.html) ----------------
+// Each post has full HTML content rendered on /blog-post.html?slug=SLUG.
+// The admin dashboard can edit/add posts (saved to Firestore
+// `content/blog-posts`); on load, blog-post.html merges Firestore posts
+// on top of these static defaults.
+//
+// Shape: { slug, title, excerpt, date, author, category, coverImage,
+//         content (HTML string), tags: [string] }
 export const BLOG_POSTS = [
   {
     slug: '5-landing-page-mistakes',
     title: '5 Landing Page Mistakes That Kill Your Conversions (And How to Fix Them)',
     category: 'Web Design',
     date: 'Jun 2026',
+    author: 'Awwal Abdulhakeem',
+    coverImage: 'https://cdn.kord.live/serve/ZoCtg7SPBWlc.jpg',
     excerpt:
       'Most businesses lose potential customers before they even finish reading the page. Here are the top 5 mistakes I see on landing pages and exactly how to fix each one to turn more visitors into paying customers.',
-    image: 'https://cdn.kord.live/serve/ZoCtg7SPBWlc.jpg'
+    tags: ['Landing Pages', 'Conversion', 'UX', 'Web Design'],
+    content: `
+      <p>Most landing pages I audit lose 60–80% of their visitors before the first scroll. That's not a traffic problem — it's a design problem. After building 150+ landing pages for clients across Nigeria and beyond, the same five mistakes show up again and again. Here's exactly what they are and how to fix each one.</p>
+
+      <h2>1. Your headline talks about you, not the visitor</h2>
+      <p>The first thing a visitor sees is your H1. If it reads like "Welcome to Acme Corp — Providing Quality Solutions Since 2014," they're gone in two seconds. Nobody cares about your founding year. They care about whether you can solve their problem.</p>
+      <p><strong>Fix:</strong> Rewrite your H1 as a promise. "Get more paying customers from your website in 30 days" beats "We are a digital marketing agency." Lead with the outcome, not the company. Use the subhead to add specificity — who it's for, how fast, what makes it different.</p>
+
+      <h2>2. You buried the call-to-action</h2>
+      <p>If your only CTA is at the bottom of a 4,000-word page, you're losing the 70% of visitors who never scroll past the first screen. The fix isn't to add more CTAs everywhere — it's to add the <em>right</em> CTA in the right places.</p>
+      <p><strong>Fix:</strong> Place one primary CTA above the fold (in the hero section), one in the middle (after the strongest proof point), and one at the bottom. Make them visually distinct from everything else — bright button, plenty of whitespace, action-oriented copy ("Book a Free Call" beats "Submit").</p>
+
+      <h2>3. Your hero image is generic stock</h2>
+      <p>Stock photos of smiling strangers in business-casual outfits do not build trust. They signal "we couldn't be bothered to show our actual work." Visitors have seen the same handshake photo a thousand times; their brains auto-filter it out.</p>
+      <p><strong>Fix:</strong> Use real product screenshots, real team photos, or a custom illustration. If you can't afford a custom shoot, even a clean UI mockup of your product beats stock. The goal is for visitors to instantly see what they're getting — not to admire a stock photographer's composition.</p>
+
+      <h2>4. No social proof above the fold</h2>
+      <p>Trust is built in milliseconds. If a visitor lands on your page and sees nothing but marketing copy, they have no reason to believe any of it. The fastest way to build trust is to show that other people — real people — already trusted you and got results.</p>
+      <p><strong>Fix:</strong> Add a single line of social proof directly under your H1. "Trusted by 80+ businesses across Nigeria" or "★★★★★ — 4.9/5 from 47 client reviews." A logo strip works too, but only if the logos are recognizable to your target audience. Unknown logos add nothing.</p>
+
+      <h2>5. Your form asks for too much</h2>
+      <p>Every extra field on your contact form cuts conversions by roughly 10–25%. Asking for a phone number, company name, job title, and budget range when all you actually need is their email and a message is a guaranteed way to lose leads.</p>
+      <p><strong>Fix:</strong> Cut your form to the absolute minimum. For most service businesses, that's name, email, and a short message. If you need more info, ask for it later — in the discovery call, or in a follow-up email. The goal of the landing page form is to start the conversation, not to close the deal.</p>
+
+      <h2>The takeaway</h2>
+      <p>Landing pages aren't art projects — they're conversion tools. Every element on the page should either build trust or move the visitor toward the CTA. If it does neither, cut it. The fastest way to double your conversions isn't to drive more traffic — it's to stop losing the traffic you already have.</p>
+
+      <p>Need a landing page audit? <a href="/start-a-project.html">Start a project</a> and I'll send you a recorded walkthrough of exactly what to fix on your current page.</p>
+    `
   },
   {
-    slug: 'logo-is-not-a-brand',
-    title: "Why Your Logo Alone Isn't a Brand Identity — What Nigerian SMEs Are Missing",
+    slug: 'why-every-small-business-needs-a-brand-identity',
+    title: 'Why Every Small Business Needs a Brand Identity (Not Just a Logo)',
     category: 'Branding',
     date: 'May 2026',
+    author: 'Awwal Abdulhakeem',
+    coverImage: 'https://cdn.kord.live/serve/4cG5RghDuw9w.jpg',
     excerpt:
-      'A logo is just the tip of the iceberg. True brand identity includes your color system, typography, voice, and how people feel when they interact with your business. Here is a practical breakdown of what you actually need.',
-    image: 'https://cdn.kord.live/serve/4cG5RghDuw9w.jpg'
+      "A logo is just the tip of the iceberg. True brand identity includes your color system, typography, voice, and how people feel when they interact with your business. Here's a practical breakdown of what you actually need.",
+    tags: ['Branding', 'Logo Design', 'Small Business', 'Identity'],
+    content: `
+      <p>"I already have a logo — why do I need a brand identity?" I hear this every week from small business owners who paid ₦10,000 for a logo and assumed the branding box was ticked. Here's the truth: a logo is one piece of a much larger puzzle. Without the rest of the system, that logo is doing about 10% of the work it could be doing for your business.</p>
+
+      <h2>A logo is a face. A brand is a personality.</h2>
+      <p>Think of it this way: your logo is your face. It's how people recognize you in a crowd. But your face alone doesn't tell anyone whether you're trustworthy, funny, premium, or cheap. That comes from your personality — how you talk, how you dress, how you treat people. A brand identity is the visual + verbal equivalent of that personality.</p>
+
+      <h2>The 5 layers of a real brand identity</h2>
+      <p>A complete brand identity has five layers. Skip any one of them and your brand feels incomplete — even if customers can't articulate why.</p>
+
+      <h3>1. The logo system</h3>
+      <p>Not just one logo, but a small family: a primary mark, a simplified version for small spaces, a monogram for favicons and social avatars, and a clear-space + minimum-size rule so it never gets squished. Each variation should be tested at favicon size (16×16px) — if it's unreadable, you need a simpler version.</p>
+
+      <h3>2. The color system</h3>
+      <p>One primary color, one secondary, and 2–3 supporting neutrals. Each color needs both an RGB value (for screens) and a CMYK value (for print), because the same color shifts dramatically between the two. Document the hex codes, the CMYK breakdowns, and where each color should be used (e.g. "primary blue is for CTAs only, never for body text").</p>
+
+      <h3>3. Typography</h3>
+      <p>Pick two typefaces: one for headings, one for body. They should contrast — a heavy display face for headings and a clean sans-serif for body is a classic combo. Specify sizes (H1 = 48px, H2 = 32px, body = 16px), line-heights, and letter-spacing. This keeps every flyer, business card, and Instagram post looking like it came from the same business.</p>
+
+      <h3>4. Visual style</h3>
+      <p>What kind of imagery feels "on brand" for you? Bright and airy? Dark and moody? Illustrations or photos? Hand-drawn or geometric? Define this once and apply it everywhere — your Instagram grid, your website hero, your print ads. Inconsistent imagery is the #1 thing that makes a small business look amateur.</p>
+
+      <h3>5. Voice and tone</h3>
+      <p>How does your brand talk? Are you formal and professional, or warm and conversational? Funny or serious? This isn't about writing style — it's about personality. Write down three adjectives that describe your brand's voice (e.g. "confident, warm, no-nonsense") and use them as a filter for every piece of copy you write.</p>
+
+      <h2>Why this matters for small businesses specifically</h2>
+      <p>Big companies can afford to be inconsistent — they have multi-million-dollar ad budgets to compensate. Small businesses don't. Every touchpoint — your Instagram bio, your WhatsApp business card, the flyer you handed out at a conference — has to do double duty. A consistent brand identity makes each touchpoint work harder. A prospect who sees your flyer, then visits your website, then messages you on WhatsApp should feel like they're dealing with the same business at every step.</p>
+
+      <p>Without that consistency, you look like three different businesses. And three different businesses don't build trust.</p>
+
+      <h2>The good news: it doesn't have to cost a fortune</h2>
+      <p>A full agency brand identity can run ₦500,000+. But for most small businesses, a focused 1-week sprint is plenty: logo system, color palette, typography pairing, and a one-page brand rules document. That's enough to keep every piece of marketing consistent for the next 2–3 years.</p>
+
+      <p>Want a brand identity that actually does the work? <a href="/start-a-project.html">Start a project</a> — I'll send you a fixed-price quote within 24 hours.</p>
+    `
   },
   {
-    slug: 'why-i-still-use-vanilla-js-2026',
-    title: 'Why I Still Build Websites with Pure HTML, CSS & JS in 2026',
-    category: 'Web Dev',
+    slug: 'web-design-trends-2026',
+    title: 'Web Design Trends 2026: What Actually Converts (And What to Skip)',
+    category: 'Web Design',
     date: 'Apr 2026',
+    author: 'Awwal Abdulhakeem',
+    coverImage: 'https://cdn.kord.live/serve/KWXIC3QcBiFj.jpg',
     excerpt:
-      "With all the frameworks out there, why would a developer still choose vanilla code? In this article, I break down the real reasons: faster load times, better SEO, zero dependency headaches, and websites that just feel faster.",
-    image: 'https://cdn.kord.live/serve/KWXIC3QcBiFj.jpg'
+      "Not every trend is worth following. After 150+ client builds, here are the 2026 web design trends that genuinely move the needle on conversions — and the ones that just look pretty in a Dribbble shot.",
+    tags: ['Web Design', 'Trends', '2026', 'Conversion'],
+    content: `
+      <p>Every January, the design world publishes its annual "trends to watch" list. Most of them are recycled from last year, and the genuinely new ones are usually bad ideas that will look dated in 18 months. After building 150+ websites in the last 8 years, I've learned to filter trends into two piles: the ones that move the conversion needle, and the ones that just look good in a Dribbble shot. Here's the 2026 list, sorted accordingly.</p>
+
+      <h2>Trends worth adopting</h2>
+
+      <h3>1. Dark mode by default (with a toggle)</h3>
+      <p>Dark mode crossed from "trendy" to "expected" in 2025. In 2026, sites that don't offer it feel old. But — and this is the important part — dark mode done badly is worse than no dark mode at all. Pure black backgrounds with pure white text cause eye strain. Use a soft dark like #0a0a0a or #111, with off-white text (#f0f0f0) for body and pure white only for headings. And always include a manual toggle, even if you auto-detect the user's system preference.</p>
+
+      <h3>2. Variable fonts (finally mainstream)</h3>
+      <p>Variable fonts let a single font file act as hundreds of weights — bold, light, condensed, extended, all from one HTTP request. They've been technically possible since 2020, but browser support and foundry licensing finally caught up in 2025. In 2026, using variable fonts is the single biggest performance win available to most sites. Drop your font payload from 800KB to 80KB without losing any visual flexibility.</p>
+
+      <h3>3. Scroll-driven animations (used sparingly)</h3>
+      <p>The browser-native CSS scroll-driven animations spec finally landed in all major browsers in 2025. You can now do scroll-linked fades, parallax, and progress bars without a single line of JavaScript. The temptation is to use them everywhere. Resist. One tasteful scroll animation on the hero, one on a stat counter, done. Anything more and you're showing off, not communicating.</p>
+
+      <h3>4. Generous whitespace</h3>
+      <p>This isn't new, but it's finally reached mainstream adoption. The "every pixel must be filled" era is over. In 2026, the most premium-feeling sites use 30–50% more whitespace than they did three years ago. If your section looks crowded, double the padding. Then double it again.</p>
+
+      <h3>5. WhatsApp-native CTAs</h3>
+      <p>This is a Nigeria/Africa-specific trend, but it's huge. WhatsApp is the default communication channel here — email forms get ignored, WhatsApp buttons get clicks. In 2026, every service-business website should have a WhatsApp CTA above the fold, with the message pre-filled ("Hi, I'm interested in your web design service"). Conversion rates 3–5x higher than contact forms.</p>
+
+      <h2>Trends to skip</h2>
+
+      <h3>1. Aggressive 3D and WebGL</h3>
+      <p>Yes, the Three.js demos look amazing on a 16-core MacBook Pro with fiber internet. On a 4-year-old Android over 3G — which is what 60% of your visitors are using — they take 12 seconds to load and immediately bounce. Unless 3D is core to your product (you're selling 3D models, or you're a game studio), skip it.</p>
+
+      <h3>2. AI-generated everything</h3>
+      <p>The "let AI write all your copy and generate all your images" trend peaked in 2025 and is now actively hurting brands. Customers can smell AI copy from a mile away, and the moment they do, trust drops by half. Use AI for first drafts and ideation, then have a human edit. Never ship raw AI output as your final brand voice.</p>
+
+      <h3>3. Brutalist / anti-design</h3>
+      <p>It looks cool in a portfolio. It looks broken to your customers. Brutalist design works for design studios targeting other designers. For everyone else — service businesses, e-commerce, SaaS — it's conversion poison. Skip.</p>
+
+      <h3>4. Auto-playing video backgrounds</h3>
+      <p>Bandwidth hogs, accessibility nightmares, and almost always mute-able distractions. Use a static image with a subtle gradient overlay instead. Same visual impact, 1/100th the payload.</p>
+
+      <h2>The meta-trend: performance is the new design</h2>
+      <p>If there's one thing tying all the "worth adopting" trends together, it's this: every one of them makes your site faster. Variable fonts cut payload. CSS scroll animations replace JS libraries. Generous whitespace means less content to load. WhatsApp CTAs replace heavy form libraries.</p>
+
+      <p>In 2026, performance isn't a technical concern delegated to the dev team — it's a design decision. The fastest sites win. Not because Google says so (though they do, via Core Web Vitals), but because visitors simply don't wait. A site that loads in 1.2 seconds converts 3x better than the same site loading in 4 seconds.</p>
+
+      <p>Design for speed first. Everything else is decoration.</p>
+
+      <p>Want a site that follows the right trends and skips the rest? <a href="/start-a-project.html">Start a project</a> — I'll send you a mockup within 48 hours.</p>
+    `
   }
 ];
 
@@ -447,16 +615,81 @@ export const SERVICE_TIERS_DETAIL = [
   }
 ];
 
+// ----- Downloads (used on downloads.html + footer) --------------------
+// Three download slots surfaced on the public downloads.html page and
+// editable from the admin dashboard (saved to Firestore
+// `content/downloads`). The CV currently points at the placeholder
+// Akay-CV.jpg shipped with the site; the Corporate Profile and Brand
+// Deck slots show "Coming soon" until the admin uploads a real PDF.
+export const DOWNLOADS = [
+  {
+    id: 'cv',
+    name: 'Akay CV / Resume',
+    description:
+      "Awwal Abdulhakeem's full CV — 8+ years of web development, branding, and print production work across Nigeria and worldwide. PDF, 2 pages.",
+    fileUrl: './Akay-CV.jpg',
+    icon: 'cv',
+    available: true
+  },
+  {
+    id: 'corporate-profile',
+    name: 'Corporate Profile',
+    description:
+      'A formal corporate profile for Akay Mighty Concept — services, process, case studies, and pricing. Perfect for B2B procurement teams and partnership conversations.',
+    fileUrl: '',
+    icon: 'profile',
+    available: false
+  },
+  {
+    id: 'brand-deck',
+    name: 'Brand Deck',
+    description:
+      "The Akay Mighty Concept brand deck — logo system, color palette, typography, and visual style guidelines. Useful if you're collaborating on a co-branded project.",
+    fileUrl: '',
+    icon: 'brand',
+    available: false
+  }
+];
+
+// ----- Site content defaults (editable from admin Site Content tab) ---
+// These mirror the values used in home.html / services.html / about.html
+// so the admin dashboard can edit them without touching code. Stored in
+// Firestore `content/site-content`. The shape is intentionally flat so
+// the admin form can be a simple key/value grid.
+export const SITE_CONTENT_DEFAULTS = {
+  // Hero
+  heroBadge: 'Available for Work',
+  heroName: 'Hi, I\'m Awwal Abdulhakeem 👋',
+  heroTitleLead: "I'm a Website Developer &",
+  heroRotatingWords: 'Graphics Designer|Brand Strategist|UI/UX Designer|Digital Printer|Creative Director',
+  heroTagline:
+    "I design and build websites that turn visitors into customers — plus branding, flyers, and print that make your business unforgettable. 8+ years crafting bold visuals and converting websites.",
+
+  // Stats (numbers — must be numeric strings so the counter animation works)
+  statProjects: '150',
+  statClients: '80',
+  statYears: '8',
+  statAwards: '25',
+
+  // CTA band
+  ctaTitle: 'Ready to create something bold?',
+  ctaDesc:
+    "Let's turn your idea into a brand people remember. Whether it's a website, a logo, or a full print campaign — I'm ready to deliver magic."
+};
+
 export default {
   SITE_CONFIG,
   PRICING_TIERS,
   TESTIMONIALS,
   FEATURED_PROJECTS,
   FEATURED_FALLBACK,
+  PROJECT_CASE_STUDIES,
   CAREER_TIMELINE,
   SKILLS,
   STATS,
   BLOG_POSTS,
+  DOWNLOADS,
+  SITE_CONTENT_DEFAULTS,
   PROCESS_STEPS,
   SERVICE_TIERS_DETAIL
 };

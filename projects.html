@@ -32,6 +32,49 @@
     .skel-line.short { width: 60%; }
     .skel-line.long { width: 100%; }
     @keyframes skelShimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+    /* Status + live/demo flag pills on project cards */
+    .project-card-flags {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      right: 12px;
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      pointer-events: none;
+      z-index: 2;
+    }
+    .project-card-flag,
+    .project-card-status {
+      font: 700 9px/1 'Montserrat', sans-serif;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 5px 9px;
+      border-radius: 4px;
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+    }
+    .project-card-flag.live {
+      background: rgba(34, 197, 94, 0.85);
+      color: #fff;
+      border: 1px solid rgba(34, 197, 94, 0.5);
+    }
+    .project-card-flag.demo {
+      background: rgba(255, 255, 255, 0.12);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .project-card-status {
+      background: rgba(91, 91, 245, 0.85);
+      color: #fff;
+      border: 1px solid rgba(122, 122, 255, 0.6);
+    }
+    .project-card-status.delivered {
+      background: rgba(10, 10, 10, 0.7);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+    }
   </style>
 </head>
 <body>
@@ -99,23 +142,68 @@
   <script type="module">
     // Inject shared layout (header, footer, chrome, admin.js, projects-renderer.js, showcase-scroll.js)
     import { initLayout } from './layout.js';
-    initLayout('projects');
+    initLayout('projects', { skip: ['./projects-renderer.js'] });
 
-    // Fetch all projects from Firestore and render the grid
+    // Fetch all projects from Firestore + merge with static case studies
     import { db, doc, onSnapshot } from './firebase-config.js';
-    import { FEATURED_FALLBACK } from './site-config.js';
+    import { PROJECT_CASE_STUDIES, FEATURED_FALLBACK } from './site-config.js';
 
     const grid = document.getElementById('projectsGrid');
     const emptyState = document.getElementById('projectsEmpty');
     let allItems = [];
     let currentFilter = 'all';
 
+    function escapeAttr(s) {
+      return String(s || '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+    function escapeHtml(s) {
+      return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
     function categoryToFilter(cat) {
       const c = (cat || '').toLowerCase();
-      if (c.includes('web') || c.includes('app') || c.includes('saas') || c.includes('site')) return 'web';
+      if (c.includes('web') || c.includes('app') || c.includes('saas') || c.includes('site') || c.includes('automotive') || c.includes('spa')) return 'web';
       if (c.includes('brand') || c.includes('logo') || c.includes('identity')) return 'branding';
       if (c.includes('print') || c.includes('flyer') || c.includes('card') || c.includes('pack')) return 'print';
       return 'web'; // default to web
+    }
+
+    // Build a merged list: static case studies first (in declared order),
+    // then Firestore case studies (admin-curated), then Firestore projects
+    // (legacy showcase cards). Slug dedupes — the richer case-study shape
+    // always wins over the legacy project shape.
+    function buildMergedList(firestoreCaseStudies, firestoreProjects) {
+      const list = [];
+      const seen = new Set();
+
+      const push = (p) => {
+        if (!p) return;
+        const slug = p.slug || p.id;
+        if (!slug) return;
+        if (seen.has(slug)) return;
+        seen.add(slug);
+        list.push(p);
+      };
+
+      // 1. Static case studies
+      PROJECT_CASE_STUDIES.forEach(push);
+
+      // 2. Firestore case-studies (admin-curated)
+      if (Array.isArray(firestoreCaseStudies)) {
+        firestoreCaseStudies.forEach(push);
+      }
+
+      // 3. Legacy Firestore projects
+      if (Array.isArray(firestoreProjects)) {
+        firestoreProjects.forEach(push);
+      }
+
+      // Fallback to FEATURED_FALLBACK if nothing else exists (offline mode)
+      if (!list.length) {
+        Object.values(FEATURED_FALLBACK).forEach(push);
+      }
+
+      return list.sort((a, b) => (a.order || 0) - (b.order || 0));
     }
 
     function renderGrid() {
@@ -133,23 +221,32 @@
 
       grid.innerHTML = filtered.map(p => {
         const slug = p.slug || p.id || (p.title || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-        const url = p.imageUrl || '';
+        const url = p.cover || p.coverImage || p.imageUrl || p.thumbnail || '';
         const title = p.title || 'Untitled';
         const category = p.category || '';
-        const desc = p.description || '';
+        const desc = p.summary || p.description || '';
+        const status = p.status || (p.liveUrl ? 'Active' : 'Delivered');
+        const statusClass = status.toLowerCase() === 'delivered' ? 'project-card-status delivered' : 'project-card-status';
+        const liveTag = p.liveUrl
+          ? '<span class="project-card-flag live">Live Client Site</span>'
+          : '<span class="project-card-flag demo">Demo Build</span>';
         return `
           <a href="/project-detail.html?slug=${encodeURIComponent(slug)}" class="project-card">
             <div class="project-card-cover">
-              ${url ? `<img src="${url}" alt="${title}" loading="lazy" onerror="this.style.opacity='0.3';" />` : ''}
+              ${url ? `<img src="${escapeAttr(url)}" alt="${escapeAttr(title)}" loading="lazy" onerror="this.style.opacity='0.3';" />` : ''}
+              <div class="project-card-flags">${liveTag}<span class="${statusClass}">${escapeHtml(status)}</span></div>
             </div>
             <div class="project-card-body">
-              ${category ? `<span class="project-card-tag">${category}</span>` : ''}
-              <h3 class="project-card-name">${title}</h3>
-              ${desc ? `<p class="project-card-desc">${desc}</p>` : ''}
+              ${category ? `<span class="project-card-tag">${escapeHtml(category)}</span>` : ''}
+              <h3 class="project-card-name">${escapeHtml(title)}</h3>
+              ${desc ? `<p class="project-card-desc">${escapeHtml(desc)}</p>` : ''}
               <span class="project-card-cta">View Case Study →</span>
             </div>
           </a>`;
       }).join('');
+
+      // Reveal animations on freshly-rendered cards
+      grid.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
     }
 
     // Filter button handlers
@@ -162,34 +259,52 @@
       });
     });
 
-    // Subscribe to Firestore
-    function useFallback() {
-      allItems = Object.values(FEATURED_FALLBACK);
+    // Subscribe to Firestore (both case-studies and projects)
+    let firestoreCaseStudies = [];
+    let firestoreProjects = [];
+
+    function reconcile() {
+      allItems = buildMergedList(firestoreCaseStudies, firestoreProjects);
       renderGrid();
     }
 
+    // Render the static case studies immediately so the grid isn't empty
+    // while Firestore is loading.
+    reconcile();
+
     try {
-      const docRef = doc(db, 'content', 'projects');
-      onSnapshot(docRef, snap => {
-        if (!snap.exists()) { useFallback(); return; }
-        const data = snap.data();
-        const items = Array.isArray(data.items) ? data.items : [];
-        if (!items.length) { useFallback(); return; }
-        allItems = items.sort((a, b) => (a.order || 0) - (b.order || 0));
-        renderGrid();
+      onSnapshot(doc(db, 'content', 'case-studies'), snap => {
+        if (snap.exists()) {
+          const data = snap.data();
+          firestoreCaseStudies = Array.isArray(data.items) ? data.items : [];
+        } else {
+          firestoreCaseStudies = [];
+        }
+        reconcile();
       }, err => {
-        console.warn('[projects-page] Firestore error, using fallback:', err.message);
-        useFallback();
+        console.warn('[projects-page] case-studies sync error:', err && err.message);
+        reconcile();
       });
     } catch (e) {
-      console.warn('[projects-page] init error, using fallback:', e.message);
-      useFallback();
+      console.warn('[projects-page] case-studies init error:', e && e.message);
     }
 
-    // Hard fallback — if nothing has rendered in 7s, show static
-    setTimeout(() => {
-      if (!allItems.length) useFallback();
-    }, 7000);
+    try {
+      onSnapshot(doc(db, 'content', 'projects'), snap => {
+        if (snap.exists()) {
+          const data = snap.data();
+          firestoreProjects = Array.isArray(data.items) ? data.items : [];
+        } else {
+          firestoreProjects = [];
+        }
+        reconcile();
+      }, err => {
+        console.warn('[projects-page] projects sync error:', err && err.message);
+        reconcile();
+      });
+    } catch (e) {
+      console.warn('[projects-page] projects init error:', e && e.message);
+    }
   </script>
 </body>
 </html>
