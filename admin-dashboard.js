@@ -1097,19 +1097,18 @@ window.addEventListener('offline', () => {
 //  Each project: { id, title, category, description, imageUrl, liveUrl, order }
 // =====================================================================
 
+// These are Awwal's real, live projects — same 8 sites shown in "Websites I've Built".
+// imageUrl uses WordPress mshots (free live screenshot service) so each card shows an
+// actual homepage screenshot of the real site instead of a stock/placeholder photo.
 const PROJECTS_DEFAULTS = [
-  { title: 'Chardonic Oil & Gas',     category: 'Corporate',    description: 'Web design · UI/UX',    liveUrl: '' },
-  { title: 'Gochez Logistics',        category: 'Corporate',    description: 'Web design · Branding', liveUrl: '' },
-  { title: 'iLoad App',               category: 'Landing Page', description: 'Web · Motion',          liveUrl: '' },
-  { title: 'AfriMart Store',          category: 'E-commerce',   description: 'Shopify · UI/UX',       liveUrl: '' },
-  { title: 'Studio Maya',             category: 'Portfolio',    description: 'Web · Branding',        liveUrl: '' },
-  { title: 'PayFlow Dashboard',       category: 'SaaS',         description: 'Web app · UI/UX',       liveUrl: '' },
-  { title: 'Suya Republic',           category: 'Restaurant',   description: 'Web · Branding',        liveUrl: '' },
-  { title: 'LuxVilla Listings',       category: 'Real Estate',  description: 'Web · SEO',             liveUrl: '' },
-  { title: 'Grace Cathedral',         category: 'Ministry',     description: 'Web · Branding',        liveUrl: '' },
-  { title: 'HaulPro Fleet',           category: 'Logistics',    description: 'Web app · UI',          liveUrl: '' },
-  { title: 'LearnHub Academy',        category: 'Education',    description: 'Web · LMS',             liveUrl: '' },
-  { title: 'Nova Creatives',          category: 'Agency',       description: 'Web · Branding',        liveUrl: '' }
+  { title: 'Tawakkal TUFC',                   category: 'Food Brand',      description: 'Web · WhatsApp Ordering',  liveUrl: 'https://tawakkaltufc.com' },
+  { title: 'AJB Autos',                       category: 'Auto Dealership', description: 'Web · Dark UI',            liveUrl: 'https://ajbautos.com.ng' },
+  { title: 'Scottish Essentials Beauty & Spa',category: 'Spa Brand',       description: 'Web · Booking Flow',       liveUrl: 'https://scottishessentialsbeautyspa.vercel.app' },
+  { title: 'Akay Mighty Bank App',            category: 'Bank App',        description: 'Firebase · Admin Panel',   liveUrl: 'https://akay-online-bank-app.vercel.app' },
+  { title: 'Fresh Buzees Visuals',            category: 'Videography',     description: 'Web · Scroll Animations',  liveUrl: 'https://fresh-buzees-visuals.vercel.app' },
+  { title: "Reedah's Delight",                category: 'Cake Brand',      description: 'Web · Product Showcase',   liveUrl: 'https://reedah-s-delight.vercel.app' },
+  { title: 'Victorian Bloom Hotel & Resort',  category: 'Hotel & Resort',  description: 'Web · Booking Flow',       liveUrl: 'https://victoria-bloom-hotel-resort.onrender.com' },
+  { title: 'Abbas Galaxy',                    category: 'Real Estate',     description: 'Web · Location Maps',      liveUrl: 'https://abbasgalaxy.onrender.com' }
 ];
 
 // Track which projects are marked for deletion
@@ -1129,7 +1128,7 @@ function renderProjects() {
       <div class="dash-card dash-card--empty">
         <div class="dash-card__body">
           <p>No projects yet.</p>
-          <p style="margin-top:6px;font-size:12px;">Click <strong>+ Add New Project</strong> to create one, or <strong>Seed 12 defaults</strong> to start with the original showcase projects.</p>
+          <p style="margin-top:6px;font-size:12px;">Click <strong>+ Add New Project</strong> to create one, or <strong>Seed real projects</strong> to start with your 8 live sites.</p>
         </div>
       </div>
     `;
@@ -1442,12 +1441,12 @@ async function moveProject(id, direction) {
 async function seedDefaultProjects() {
   // Use a custom confirm instead of window.confirm (more reliable on mobile)
   const ok = await new Promise(resolve => {
-    showConfirm('Add 12 default projects to your showcase? You can edit or delete them afterwards.', resolve);
+    showConfirm('Add your 8 real projects to the showcase, with live homepage screenshots? You can edit or delete them afterwards.', resolve);
   });
   if (!ok) return;
 
-  toast('Adding 12 default projects…', 'info');
-  console.log('[projects] seeding 12 defaults...');
+  toast('Adding real projects…', 'info');
+  console.log('[projects] seeding real defaults...');
 
   const newProjects = PROJECTS_DEFAULTS.map((p, i) => ({
     id: `proj-seed-${Date.now()}-${i}`,
@@ -1455,7 +1454,8 @@ async function seedDefaultProjects() {
     section: 'web-showcase',
     category: p.category,
     description: p.description,
-    imageUrl: `https://picsum.photos/seed/akay-web-${i + 1}/800/600`,
+    // Live homepage screenshot of the real site (WordPress mshots, free, no API key)
+    imageUrl: p.liveUrl ? `https://s0.wp.com/mshots/v1/${encodeURIComponent(p.liveUrl)}?w=1200&h=900` : '',
     liveUrl: p.liveUrl || '',
     order: state.projects.length + i
   }));
@@ -1463,7 +1463,7 @@ async function seedDefaultProjects() {
   console.log('[projects] saving', updated.length, 'projects to Firestore');
   const saveOk = await saveProjects(updated);
   if (saveOk) {
-    toast('✓ 12 default projects added', 'success');
+    toast(`✓ ${newProjects.length} real projects added`, 'success');
     console.log('[projects] seed successful');
   } else {
     console.error('[projects] seed failed');
