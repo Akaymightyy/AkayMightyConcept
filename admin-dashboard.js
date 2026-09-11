@@ -220,7 +220,8 @@ function startSync() {
       renderRulesStatus();
       toast('Firestore rules not deployed — see Settings tab', 'error');
     } else {
-      toast('Image sync failed: ' + err.message, 'error');
+      // Silently log network errors — don't toast on every transient failure
+      console.warn('[dash] Image sync error:', err.message);
     }
   });
 

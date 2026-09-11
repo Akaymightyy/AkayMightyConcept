@@ -182,9 +182,11 @@ function buildFloatingChromeHTML() {
 function injectTripleClickFallback() {
   // Use document-level capture listener — works regardless of when the
   // header is injected, what ID the logo has, or whether admin.js loaded.
-  // This is the MOST reliable approach.
+  // CRITICAL: We preventDefault on EVERY click on the logo so the link
+  // doesn't navigate away before we can count 3 clicks. After 800ms with
+  // no triple-click, we manually navigate to the link's href.
   document.addEventListener('click', function(e) {
-    // Check if the click hit the nav logo (by ID, class, or closest anchor)
+    // Check if the click hit the nav logo
     var logo = e.target.closest && (
       e.target.closest('#navLogo') ||
       e.target.closest('.nav-logo') ||
@@ -192,8 +194,11 @@ function injectTripleClickFallback() {
     );
     if (!logo) return;
 
-    // Count clicks on the same target
-    if (!window._akayTc) window._akayTc = { count: 0, timer: null, target: null };
+    // ALWAYS prevent default — we'll handle navigation ourselves
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!window._akayTc) window._akayTc = { count: 0, timer: null, target: null, navTimer: null };
     var tc = window._akayTc;
 
     if (tc.target === logo) {
@@ -203,18 +208,25 @@ function injectTripleClickFallback() {
       tc.target = logo;
     }
     clearTimeout(tc.timer);
-    tc.timer = setTimeout(function() { tc.count = 0; tc.target = null; }, 800);
+    clearTimeout(tc.navTimer);
 
     if (tc.count >= 3) {
-      e.preventDefault();
-      e.stopPropagation();
+      // Triple-click — go to admin
       tc.count = 0;
       tc.target = null;
       if (!document.body.classList.contains('akay-edit-mode')) {
         window.location.href = './admin.html';
       }
+    } else {
+      // Not a triple-click yet — wait 800ms, then navigate to the link's href
+      // (so single/double clicks still work as normal navigation)
+      tc.timer = setTimeout(function() { tc.count = 0; tc.target = null; }, 800);
+      var href = logo.getAttribute('href') || '/home.html';
+      tc.navTimer = setTimeout(function() {
+        window.location.href = href;
+      }, 250);
     }
-  }, true); // capture phase — runs before any other handlers
+  }, true); // capture phase
 }
 
 // ---------------------------------------------------------------------

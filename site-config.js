@@ -210,7 +210,7 @@ export const PROJECT_CASE_STUDIES = [
     title: 'Scottish Essentials Beauty & Spa',
     category: 'Web · Spa Brand',
     status: 'Active',
-    coverImage: 'https://cdn.kord.live/serve/ZoCtg7SPBWlc.jpg',
+    coverImage: 'https://s0.wp.com/mshots/v1/https%3A%2F%2Fscottishessentialsbeautyspa.vercel.app?w=1200&h=900',
     liveUrl: 'https://scottishessentialsbeautyspa.vercel.app',
     order: 0,
     challenge:
@@ -229,7 +229,7 @@ export const PROJECT_CASE_STUDIES = [
     title: 'AJB Autos',
     category: 'Web · Automotive',
     status: 'Active',
-    coverImage: 'https://cdn.kord.live/serve/4cG5RghDuw9w.jpg',
+    coverImage: 'https://s0.wp.com/mshots/v1/https%3A%2F%2Fajbautos.com.ng?w=1200&h=900',
     liveUrl: 'https://ajbautos.com.ng',
     order: 1,
     challenge:
@@ -245,14 +245,14 @@ export const PROJECT_CASE_STUDIES = [
   },
   {
     slug: 'victorian-bloom',
-    title: 'Victorian Bloom Florals',
-    category: 'Branding · Print',
+    title: 'Victorian Bloom Hotel & Resort',
+    category: 'Web · Hotel',
     status: 'Delivered',
-    coverImage: 'https://cdn.kord.live/serve/NRlPY4VLxSVG.jpg',
-    liveUrl: '',
+    coverImage: 'https://s0.wp.com/mshots/v1/https%3A%2F%2Fvictoria-bloom-hotel-resort.onrender.com?w=1200&h=900',
+    liveUrl: 'https://victoria-bloom-hotel-resort.onrender.com',
     order: 2,
     challenge:
-      "Victorian Bloom Florals was launching as a premium floral studio and needed a complete identity that felt both elegant and modern — strong enough to anchor signage, packaging, business cards, and Instagram templates. The owner had a Pinterest board of inspiration but no formal brief, so the brand system had to be self-explanatory enough that she could extend it on her own without hiring a designer each time. The palette also had to translate cleanly from RGB screens to CMYK print without the muddy shifts you usually get.",
+      "Victorian Bloom Hotel & Resort in Asaba needed a luxury website that showcased their rooms, amenities, and booking flow and needed a complete identity that felt both elegant and modern — strong enough to anchor signage, packaging, business cards, and Instagram templates. The owner had a Pinterest board of inspiration but no formal brief, so the brand system had to be self-explanatory enough that she could extend it on her own without hiring a designer each time. The palette also had to translate cleanly from RGB screens to CMYK print without the muddy shifts you usually get.",
     solution:
       "I built a complete brand kit from the ground up: a hand-drawn logomark, a rose-gold + deep-plum color system, serif/sans typography pairing, and CMYK print-ready files for cards and packaging. The system was handed off as a brand deck so the client can extend it on her own — a one-page 'brand rules' card plus a folder of pre-sized Instagram templates and printable PDFs. The color system was tested against a Fogra 39 CMYK profile so the printed cards matched the on-screen palette within ΔE < 3.",
     tools: ['CorelDRAW', 'Photoshop', 'Illustrator', 'Print Production', 'Brand Strategy', 'CMYK Pre-press', 'Typography'],
@@ -364,7 +364,7 @@ export const BLOG_POSTS = [
     category: 'Web Design',
     date: 'Jun 2026',
     author: 'Awwal Abdulhakeem',
-    coverImage: 'https://cdn.kord.live/serve/ZoCtg7SPBWlc.jpg',
+    coverImage: 'https://s0.wp.com/mshots/v1/https%3A%2F%2Fscottishessentialsbeautyspa.vercel.app?w=1200&h=900',
     excerpt:
       'Most businesses lose potential customers before they even finish reading the page. Here are the top 5 mistakes I see on landing pages and exactly how to fix each one to turn more visitors into paying customers.',
     tags: ['Landing Pages', 'Conversion', 'UX', 'Web Design'],
@@ -403,7 +403,7 @@ export const BLOG_POSTS = [
     category: 'Branding',
     date: 'May 2026',
     author: 'Awwal Abdulhakeem',
-    coverImage: 'https://cdn.kord.live/serve/4cG5RghDuw9w.jpg',
+    coverImage: 'https://s0.wp.com/mshots/v1/https%3A%2F%2Fajbautos.com.ng?w=1200&h=900',
     excerpt:
       "A logo is just the tip of the iceberg. True brand identity includes your color system, typography, voice, and how people feel when they interact with your business. Here's a practical breakdown of what you actually need.",
     tags: ['Branding', 'Logo Design', 'Small Business', 'Identity'],
@@ -448,7 +448,7 @@ export const BLOG_POSTS = [
     category: 'Web Design',
     date: 'Apr 2026',
     author: 'Awwal Abdulhakeem',
-    coverImage: 'https://cdn.kord.live/serve/KWXIC3QcBiFj.jpg',
+    coverImage: 'https://s0.wp.com/mshots/v1/https%3A%2F%2Fvictoria-bloom-hotel-resort.onrender.com?w=1200&h=900',
     excerpt:
       "Not every trend is worth following. After 150+ client builds, here are the 2026 web design trends that genuinely move the needle on conversions — and the ones that just look pretty in a Dribbble shot.",
     tags: ['Web Design', 'Trends', '2026', 'Conversion'],
