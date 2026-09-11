@@ -206,6 +206,15 @@ function setNetworkHealth(healthy, reason) {
 }
 
 function updateNetworkBanner(healthy, reason) {
+  // Only show the banner if the user is in edit mode (admin).
+  // Public visitors should NEVER see Firebase error messages.
+  if (!document.body.classList.contains('akay-edit-mode')) {
+    // Not in edit mode — hide any existing banner and don't show errors
+    let banner = $('#akayNetBanner');
+    if (banner) banner.style.display = 'none';
+    return;
+  }
+
   let banner = $('#akayNetBanner');
   if (!banner) {
     banner = document.createElement('div');
