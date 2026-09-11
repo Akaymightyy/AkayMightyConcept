@@ -249,12 +249,14 @@ function startSync() {
     }
   }, err => {
     console.error('[admin] images sync error:', err);
+    // Don't show error toast on public pages for transient network failures
+    // — just log to console. The proxy will retry automatically.
     if (err.code === 'permission-denied') {
-      toast('READ FAILED — Firestore rules deny read. Deploy firestore.rules.', 'error');
-    } else if (err.code === 'unavailable' || /offline|network|unreachable|name-not-resolved/i.test(err.message)) {
+      console.warn('[admin] Firestore rules deny read');
+    } else if (err.code === 'unavailable' || /offline|network|unreachable|name-not-resolved|Failed to fetch/i.test(err.message)) {
       setNetworkHealth(false, err.message);
     } else {
-      toast('Image sync failed: ' + err.message, 'error');
+      console.warn('[admin] Image sync error:', err.message);
     }
   });
 
