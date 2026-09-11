@@ -158,76 +158,85 @@
   <!-- ============ PAGE-SPECIFIC SCRIPTS ============ -->
   <script type="module">
     import { initLayout } from './layout.js';
-    initLayout('services');
-
     import { SERVICE_TIERS_DETAIL, PRICING_TIERS, PROCESS_STEPS } from './site-config.js';
 
+    // Wrap initLayout in try/catch so layout failures don't kill pricing
+    try { initLayout('services'); } catch(e) { console.error('[layout] init failed:', e); }
+
     // ---- Render detailed tier cards ----
-    (function() {
+    try {
       const grid = document.getElementById('tierGrid');
-      if (!grid) return;
-      grid.innerHTML = SERVICE_TIERS_DETAIL.map(t => {
-        const featured = t.popular ? ' tier-card--featured' : '';
-        const badge = t.badge ? `<span class="tier-badge">${t.badge}</span>` : '';
-        const ctaClass = t.popular ? 'tier-cta tier-cta--filled' : 'tier-cta';
-        const deliverables = t.deliverables.map(d => `<li>${d}</li>`).join('');
-        const bestFor = t.bestFor.map(b => `<span class="tier-best-for-tag">${b}</span>`).join('');
-        return `
-          <div class="tier-card reveal${featured}">
-            ${badge}
-            <div class="tier-header">
-              <h3 class="tier-name">${t.name}</h3>
-              <div class="tier-price"><span class="currency">${t.symbol}</span><span>${t.price}</span></div>
-              <p class="tier-turnaround">${t.turnaround}</p>
-            </div>
-            <p class="tier-summary">${t.summary}</p>
-            <div class="tier-deliverables">
-              <div class="tier-section-label">What's Included</div>
-              <ul>${deliverables}</ul>
-            </div>
-            <div class="tier-best-for">
-              <div class="tier-section-label" style="margin-bottom:10px;">Best For</div>
-              <div class="tier-best-for-tags">${bestFor}</div>
-            </div>
-            <div class="tier-cta-wrap">
-              <a href="/start-a-project.html" class="${ctaClass}">Start This Project</a>
-            </div>
-          </div>`;
-      }).join('');
-    })();
+      if (grid && SERVICE_TIERS_DETAIL) {
+        grid.innerHTML = SERVICE_TIERS_DETAIL.map(t => {
+          const featured = t.popular ? ' tier-card--featured' : '';
+          const badge = t.badge ? `<span class="tier-badge">${t.badge}</span>` : '';
+          const ctaClass = t.popular ? 'tier-cta tier-cta--filled' : 'tier-cta';
+          const deliverables = (t.deliverables || []).map(d => `<li>${d}</li>`).join('');
+          const bestFor = (t.bestFor || []).map(b => `<span class="tier-best-for-tag">${b}</span>`).join('');
+          return `
+            <div class="tier-card reveal${featured}">
+              ${badge}
+              <div class="tier-header">
+                <h3 class="tier-name">${t.name}</h3>
+                <div class="tier-price"><span class="currency">${t.symbol || '₦'}</span><span>${t.price}</span></div>
+                <p class="tier-turnaround">${t.turnaround || ''}</p>
+              </div>
+              <p class="tier-summary">${t.summary || ''}</p>
+              <div class="tier-deliverables">
+                <div class="tier-section-label">What's Included</div>
+                <ul>${deliverables}</ul>
+              </div>
+              <div class="tier-best-for">
+                <div class="tier-section-label" style="margin-bottom:10px;">Best For</div>
+                <div class="tier-best-for-tags">${bestFor}</div>
+              </div>
+              <div class="tier-cta-wrap">
+                <a href="/start-a-project.html" class="${ctaClass}">Start This Project</a>
+              </div>
+            </div>`;
+        }).join('');
+        grid.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
+        console.log('[services] rendered', SERVICE_TIERS_DETAIL.length, 'tier cards');
+      }
+    } catch(e) { console.error('[services] tier cards failed:', e); }
 
     // ---- Render quick-reference pricing cards ----
-    (function() {
+    try {
       const grid = document.getElementById('quickPricingGrid');
-      if (!grid) return;
-      grid.innerHTML = PRICING_TIERS.map(t => {
-        const featured = t.popular ? ' pricing-card--featured' : '';
-        const badge = t.badge ? `<span class="pricing-badge">${t.badge}</span>` : '';
-        const ctaClass = t.popular ? 'pricing-cta pricing-cta--filled' : 'pricing-cta';
-        const features = t.features.map(f => `<li>${f}</li>`).join('');
-        return `
-          <div class="pricing-card reveal${featured}">
-            ${badge}
-            <span class="pricing-tag">${t.name}</span>
-            <div class="pricing-amount"><span class="pricing-currency">${t.symbol}</span><span>${t.price}</span></div>
-            <p class="pricing-turnaround">${t.turnaround}</p>
-            <ul class="pricing-features">${features}</ul>
-            <a href="/start-a-project.html" class="${ctaClass}">Start This Project</a>
-          </div>`;
-      }).join('');
-    })();
+      if (grid && PRICING_TIERS) {
+        grid.innerHTML = PRICING_TIERS.map(t => {
+          const featured = t.popular ? ' pricing-card--featured' : '';
+          const badge = t.badge ? `<span class="pricing-badge">${t.badge}</span>` : '';
+          const ctaClass = t.popular ? 'pricing-cta pricing-cta--filled' : 'pricing-cta';
+          const features = (t.features || []).map(f => `<li>${f}</li>`).join('');
+          return `
+            <div class="pricing-card reveal${featured}">
+              ${badge}
+              <span class="pricing-tag">${t.name}</span>
+              <div class="pricing-amount"><span class="pricing-currency">${t.symbol || '₦'}</span><span>${t.price}</span></div>
+              <p class="pricing-turnaround">${t.turnaround || ''}</p>
+              <ul class="pricing-features">${features}</ul>
+              <a href="/start-a-project.html" class="${ctaClass}">Start This Project</a>
+            </div>`;
+        }).join('');
+        grid.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
+        console.log('[services] rendered', PRICING_TIERS.length, 'pricing cards');
+      }
+    } catch(e) { console.error('[services] pricing cards failed:', e); }
 
     // ---- Render process steps ----
-    (function() {
+    try {
       const grid = document.getElementById('processGrid');
-      if (!grid) return;
-      grid.innerHTML = PROCESS_STEPS.map(p => `
-        <div class="process-step reveal">
-          <div class="process-step-num">${p.num}</div>
-          <h3 class="process-step-title">${p.title}</h3>
-          <p class="process-step-desc">${p.desc}</p>
-        </div>`).join('');
-    })();
+      if (grid && PROCESS_STEPS) {
+        grid.innerHTML = PROCESS_STEPS.map(p => `
+          <div class="process-step reveal">
+            <div class="process-step-num">${p.num}</div>
+            <h3 class="process-step-title">${p.title}</h3>
+            <p class="process-step-desc">${p.desc}</p>
+          </div>`).join('');
+        grid.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
+      }
+    } catch(e) { console.error('[services] process steps failed:', e); }
   </script>
 </body>
 </html>
