@@ -184,12 +184,30 @@ function renderWebShowcase(items) {
   // showcase-scroll.js marks each track as "already initialized" the
   // first time it runs — which happens on page load, BEFORE these real
   // cards exist (the strips are empty at that point, so it measures a
-  // width of 0 and never auto-plays). Clear that flag so it properly
+  // width of 0 and never auto-plays). Clear BOTH flags so it properly
   // re-measures and starts scrolling now that real content is here.
-  wraps.forEach(w => { delete w.dataset.akayShowcaseInit; });
+  wraps.forEach(w => {
+    delete w.dataset.akayShowcaseInit;
+    delete w.dataset.akayShowcaseListenersInit;
+    // Cancel any existing RAF loop
+    if (w._akayShowcaseRafId) {
+      cancelAnimationFrame(w._akayShowcaseRafId);
+      w._akayShowcaseRafId = null;
+    }
+    // Disconnect old IntersectionObserver
+    if (w._akayShowcaseIO) {
+      w._akayShowcaseIO.disconnect();
+      w._akayShowcaseIO = null;
+    }
+  });
 
   if (window.initShowcase) {
-    setTimeout(() => window.initShowcase(), 100);
+    // Use requestAnimationFrame to ensure DOM has settled before re-init
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        window.initShowcase();
+      });
+    });
   }
 }
 
@@ -312,25 +330,62 @@ function init() {
     }
   }, 8000);
 
+  // Merge projects from BOTH content/projects AND content/case-studies
+  // so editing in either tab reflects on the showcase.
+  let projectsData = [];
+  let caseStudiesData = [];
+
+  function tryRender() {
+    const merged = [...projectsData, ...caseStudiesData];
+    if (merged.length || gotData) {
+      renderProjects(merged);
+    }
+  }
+
   try {
+    // Subscribe to content/projects (the Projects tab)
     const docRef = doc(db, 'content', 'projects');
     onSnapshot(docRef, snap => {
       gotData = true;
       clearTimeout(timeoutId);
       console.log('[projects] onSnapshot fired, exists:', snap.exists());
       if (!snap.exists()) {
-        renderProjects([]);
-        return;
+        projectsData = [];
+      } else {
+        const data = snap.data();
+        projectsData = Array.isArray(data.items) ? data.items : [];
       }
-      const data = snap.data();
-      const items = Array.isArray(data.items) ? data.items : [];
-      console.log('[projects] received', items.length, 'projects');
-      renderProjects(items);
+      console.log('[projects] received', projectsData.length, 'projects');
+      tryRender();
     }, err => {
       console.error('[projects] onSnapshot error:', err.message);
       clearTimeout(timeoutId);
       renderTimeoutState(section);
     });
+
+    // Also subscribe to content/case-studies (the Case Studies tab)
+    // so changes there also update the showcase
+    const csRef = doc(db, 'content', 'case-studies');
+    onSnapshot(csRef, snap => {
+      console.log('[projects] case-studies onSnapshot fired, exists:', snap.exists());
+      if (!snap.exists()) {
+        caseStudiesData = [];
+      } else {
+        const data = snap.data();
+        caseStudiesData = Array.isArray(data.items) ? data.items : [];
+        // Mark them as web-showcase section so they render in the marquee
+        caseStudiesData = caseStudiesData.map(cs => ({
+          ...cs,
+          section: cs.section || 'web-showcase',
+          imageUrl: cs.coverImage || cs.imageUrl || ''
+        }));
+      }
+      console.log('[projects] received', caseStudiesData.length, 'case studies');
+      tryRender();
+    }, err => {
+      console.error('[projects] case-studies onSnapshot error:', err.message);
+    });
+
     console.log('[projects] onSnapshot subscribed');
   } catch (e) {
     console.error('[projects] init error:', e.message);
