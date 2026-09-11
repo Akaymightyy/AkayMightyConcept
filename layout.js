@@ -180,35 +180,41 @@ function buildFloatingChromeHTML() {
 //   admin module fails to load.
 // ---------------------------------------------------------------------
 function injectTripleClickFallback() {
-  // Inline script — runs in global scope, not module scope, so it can
-  // attach listeners immediately after the header is in the DOM.
-  const code = `
-  (function() {
-    var clicks = 0, timer = null;
-    function attach() {
-      var logo = document.getElementById('navLogo');
-      if (!logo) { setTimeout(attach, 100); return; }
-      logo.addEventListener('click', function(e) {
-        clicks++;
-        clearTimeout(timer);
-        timer = setTimeout(function() { clicks = 0; }, 800);
-        if (clicks >= 3) {
-          e.preventDefault();
-          clicks = 0;
-          // Only redirect if the user is NOT already in edit mode
-          // (admin.js handles the toggle when present).
-          if (!document.body.classList.contains('akay-edit-mode')) {
-            window.location.href = './admin.html';
-          }
-        }
-      });
+  // Use document-level capture listener — works regardless of when the
+  // header is injected, what ID the logo has, or whether admin.js loaded.
+  // This is the MOST reliable approach.
+  document.addEventListener('click', function(e) {
+    // Check if the click hit the nav logo (by ID, class, or closest anchor)
+    var logo = e.target.closest && (
+      e.target.closest('#navLogo') ||
+      e.target.closest('.nav-logo') ||
+      e.target.closest('[data-img-slot="img:logo"]')
+    );
+    if (!logo) return;
+
+    // Count clicks on the same target
+    if (!window._akayTc) window._akayTc = { count: 0, timer: null, target: null };
+    var tc = window._akayTc;
+
+    if (tc.target === logo) {
+      tc.count++;
+    } else {
+      tc.count = 1;
+      tc.target = logo;
     }
-    attach();
-  })();
-  `;
-  const s = document.createElement('script');
-  s.textContent = code;
-  document.body.appendChild(s);
+    clearTimeout(tc.timer);
+    tc.timer = setTimeout(function() { tc.count = 0; tc.target = null; }, 800);
+
+    if (tc.count >= 3) {
+      e.preventDefault();
+      e.stopPropagation();
+      tc.count = 0;
+      tc.target = null;
+      if (!document.body.classList.contains('akay-edit-mode')) {
+        window.location.href = './admin.html';
+      }
+    }
+  }, true); // capture phase — runs before any other handlers
 }
 
 // ---------------------------------------------------------------------
