@@ -108,7 +108,14 @@ function renderServiceCard(item) {
 function renderProjects(items) {
   console.log('[projects] renderProjects called with', items.length, 'items');
 
-  const webShowcase = items.filter(p => !p.section || p.section === 'web-showcase');
+  const webShowcase = items.filter(p => {
+    // Only show in showcase if:
+    // 1. Section is web-showcase (or not set), AND
+    // 2. showInShowcase is not explicitly false
+    const sectionOk = !p.section || p.section === 'web-showcase';
+    const showOk = p.showInShowcase !== false;
+    return sectionOk && showOk;
+  });
   const webPortfolio = items.filter(p => p.section === 'web-portfolio');
   const designServices = items.filter(p => p.section === 'design-services');
   const printServices = items.filter(p => p.section === 'print-services');

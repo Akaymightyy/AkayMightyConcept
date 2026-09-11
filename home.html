@@ -449,39 +449,77 @@
       }
 
       // Try Firestore first — if it fails or has nothing, use the static fallback
+      // Read from BOTH content/projects AND content/case-studies so edits in
+      // either tab reflect on the homepage featured section.
       import('./firebase-config.js').then(({ db, doc, onSnapshot }) => {
+        let projectsData = [];
+        let caseStudiesData = [];
+        let rendered = false;
+
+        function tryRenderFeatured() {
+          // Merge both sources
+          const allItems = [...projectsData, ...caseStudiesData];
+
+          // Find featured projects by slug
+          const featured = FEATURED_PROJECTS
+            .map(slug => allItems.find(it => it.slug === slug))
+            .filter(Boolean);
+
+          if (!featured.length) {
+            if (!rendered) { renderFallback(); rendered = true; }
+            return;
+          }
+
+          rendered = true;
+          grid.innerHTML = featured.map(p => {
+            const fakeP = {
+              status: p.status || (p.liveUrl ? 'Active' : 'Delivered'),
+              liveUrl: p.liveUrl || ''
+            };
+            const imgUrl = p.imageUrl || p.coverImage || '';
+            return `
+            <a href="/project-detail.html?slug=${p.slug}" class="project-card reveal">
+              <div class="project-card-cover">
+                ${imgUrl ? `<img src="${imgUrl}" alt="${p.title || ''}" loading="lazy" onerror="this.style.opacity='0.3';" />` : ''}
+                ${flagsHTML(fakeP)}
+              </div>
+              <div class="project-card-body">
+                ${p.category ? `<span class="project-card-tag">${p.category}</span>` : ''}
+                <h3 class="project-card-name">${p.title || 'Untitled'}</h3>
+                ${p.description ? `<p class="project-card-desc">${p.description}</p>` : ''}
+                <span class="project-card-cta">View Case Study →</span>
+              </div>
+            </a>`;
+          }).join('');
+          grid.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
+        }
+
         try {
-          const docRef = doc(db, 'content', 'projects');
-          onSnapshot(docRef, snap => {
-            if (!snap.exists()) { renderFallback(); return; }
-            const data = snap.data();
-            const items = Array.isArray(data.items) ? data.items : [];
-            const featured = FEATURED_PROJECTS
-              .map(slug => items.find(it => it.slug === slug))
-              .filter(Boolean);
-            if (!featured.length) { renderFallback(); return; }
-            grid.innerHTML = featured.map(p => {
-              const fakeP = {
-                status: p.status || (p.liveUrl ? 'Active' : 'Delivered'),
-                liveUrl: p.liveUrl || ''
-              };
-              return `
-              <a href="/project-detail.html?slug=${p.slug}" class="project-card reveal">
-                <div class="project-card-cover">
-                  ${p.imageUrl ? `<img src="${p.imageUrl}" alt="${p.title || ''}" loading="lazy" onerror="this.style.opacity='0.3';" />` : ''}
-                  ${flagsHTML(fakeP)}
-                </div>
-                <div class="project-card-body">
-                  ${p.category ? `<span class="project-card-tag">${p.category}</span>` : ''}
-                  <h3 class="project-card-name">${p.title || 'Untitled'}</h3>
-                  ${p.description ? `<p class="project-card-desc">${p.description}</p>` : ''}
-                  <span class="project-card-cta">View Case Study →</span>
-                </div>
-              </a>`;
-            }).join('');
-            grid.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
-          }, () => renderFallback());
-        } catch (e) { renderFallback(); }
+          // Subscribe to content/projects
+          onSnapshot(doc(db, 'content', 'projects'), snap => {
+            if (snap.exists()) {
+              const data = snap.data();
+              projectsData = Array.isArray(data.items) ? data.items : [];
+            } else {
+              projectsData = [];
+            }
+            tryRenderFeatured();
+          }, () => { if (!rendered) renderFallback(); });
+
+          // Also subscribe to content/case-studies
+          onSnapshot(doc(db, 'content', 'case-studies'), snap => {
+            if (snap.exists()) {
+              const data = snap.data();
+              caseStudiesData = (Array.isArray(data.items) ? data.items : []).map(cs => ({
+                ...cs,
+                imageUrl: cs.coverImage || cs.imageUrl || ''
+              }));
+            } else {
+              caseStudiesData = [];
+            }
+            tryRenderFeatured();
+          }, () => {});
+        } catch (e) { if (!rendered) renderFallback(); }
       }).catch(() => renderFallback());
 
       // Hard fallback — if Firestore hasn't resolved in 6s, show static

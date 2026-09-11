@@ -1398,7 +1398,12 @@ function showProjectForm(project) {
             <option value="web-portfolio" ${p.section === 'web-portfolio' ? 'selected' : ''}>Websites I've Built (clickable browser cards)</option>
             <option value="design-services" ${p.section === 'design-services' ? 'selected' : ''}>Design Services</option>
             <option value="print-services" ${p.section === 'print-services' ? 'selected' : ''}>Print Services</option>
+            <option value="none" ${p.section === 'none' ? 'selected' : ''}>Don't show in showcase (hidden)</option>
           </select>
+        </label>
+        <label class="dash-field" style="flex-direction:row;align-items:center;gap:10px;">
+          <input type="checkbox" id="pf-showInShowcase" ${p.showInShowcase !== false ? 'checked' : ''} style="width:auto;" />
+          <span style="font-size:13px;">Also show in Recent Web Work auto-scroll showcase</span>
         </label>
         <label class="dash-field">
           <span>Category / Tag</span>
@@ -1472,6 +1477,7 @@ function showProjectForm(project) {
     e.preventDefault();
     const title = modal.querySelector('#pf-title').value.trim();
     const section = modal.querySelector('#pf-section').value;
+    const showInShowcase = modal.querySelector('#pf-showInShowcase').checked;
     const category = modal.querySelector('#pf-category').value.trim();
     const description = modal.querySelector('#pf-description').value.trim();
     const liveUrl = modal.querySelector('#pf-liveurl').value.trim();
@@ -1494,7 +1500,7 @@ function showProjectForm(project) {
     if (isEdit) {
       const updated = state.projects.map(p =>
         p.id === project.id
-          ? { ...p, title, section, category, description, liveUrl, imageUrl }
+          ? { ...p, title, section, showInShowcase, category, description, liveUrl, imageUrl }
           : p
       );
       const ok = await saveProjects(updated);
@@ -1502,7 +1508,7 @@ function showProjectForm(project) {
     } else {
       const newItem = {
         id: `proj-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-        title, section: section || 'web-showcase', category, description, liveUrl, imageUrl,
+        title, section: section || 'web-showcase', showInShowcase, category, description, liveUrl, imageUrl,
         order: state.projects.length
       };
       const updated = [...state.projects, newItem];
