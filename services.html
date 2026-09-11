@@ -112,8 +112,23 @@
     </div>
   </section>
 
+  <!-- ============ ADD-ONS ============ -->
+  <section id="services-addons" style="padding: 100px 0; background: var(--bg2);">
+    <div class="container">
+      <div class="section-header">
+        <p class="section-label reveal" id="addons-label">Add-ons</p>
+        <h2 class="section-title reveal reveal-delay-1">Need just <span>one thing</span>?</h2>
+        <p class="section-desc reveal reveal-delay-2">Single-item pricing for when you don't need a full package. Mix and match — or start with one and upgrade later.</p>
+      </div>
+      <div class="addon-grid" id="addonGrid" style="margin-top: 48px;">
+        <!-- Injected by JS below -->
+      </div>
+      <p class="pricing-note reveal reveal-delay-3" style="margin-top: 36px;">Want a custom combination? <a href="/start-a-project.html" style="color:var(--red);font-weight:600;">Tell me what you need →</a></p>
+    </div>
+  </section>
+
   <!-- ============ PRICING (quick reference, links to tiers above) ============ -->
-  <section id="pricing" class="glow-bg" style="background: var(--bg2); padding: 100px 0;">
+  <section id="pricing" class="glow-bg" style="background: var(--bg); padding: 100px 0;">
     <div class="container">
       <div class="section-header">
         <p class="section-label reveal" id="brand">Quick Reference</p>
@@ -158,10 +173,25 @@
   <!-- ============ PAGE-SPECIFIC SCRIPTS ============ -->
   <script type="module">
     import { initLayout } from './layout.js';
-    import { SERVICE_TIERS_DETAIL, PRICING_TIERS, PROCESS_STEPS } from './site-config.js';
+    import { SERVICE_TIERS_DETAIL, PRICING_TIERS, PROCESS_STEPS, ADDONS } from './site-config.js';
 
     // Wrap initLayout in try/catch so layout failures don't kill pricing
     try { initLayout('services'); } catch(e) { console.error('[layout] init failed:', e); }
+
+    // Map a category name to a slug used on /projects.html?cat=
+    function categoryToSlug(cat) {
+      const c = String(cat || '').toLowerCase();
+      if (c.includes('web'))    return 'web';
+      if (c.includes('brand'))  return 'brand';
+      if (c.includes('print'))  return 'print';
+      return 'web';
+    }
+    function categoryPillClass(cat) {
+      const s = categoryToSlug(cat);
+      if (s === 'brand') return 'cat-pill cat-pill--brand';
+      if (s === 'print') return 'cat-pill cat-pill--print';
+      return 'cat-pill';
+    }
 
     // ---- Render detailed tier cards ----
     try {
@@ -173,10 +203,13 @@
           const ctaClass = t.popular ? 'tier-cta tier-cta--filled' : 'tier-cta';
           const deliverables = (t.deliverables || []).map(d => `<li>${d}</li>`).join('');
           const bestFor = (t.bestFor || []).map(b => `<span class="tier-best-for-tag">${b}</span>`).join('');
+          const catPill = t.category ? `<span class="${categoryPillClass(t.category)}">${t.category}</span>` : '';
+          const relatedSlug = categoryToSlug(t.category);
           return `
             <div class="tier-card reveal${featured}">
               ${badge}
               <div class="tier-header">
+                ${catPill}
                 <h3 class="tier-name">${t.name}</h3>
                 <div class="tier-price"><span class="currency">${t.symbol || '₦'}</span><span>${t.price}</span></div>
                 <p class="tier-turnaround">${t.turnaround || ''}</p>
@@ -192,6 +225,7 @@
               </div>
               <div class="tier-cta-wrap">
                 <a href="/start-a-project.html" class="${ctaClass}">Start This Project</a>
+                <a href="/projects.html?cat=${relatedSlug}" class="tier-related-link">See related projects →</a>
               </div>
             </div>`;
         }).join('');
@@ -209,20 +243,44 @@
           const badge = t.badge ? `<span class="pricing-badge">${t.badge}</span>` : '';
           const ctaClass = t.popular ? 'pricing-cta pricing-cta--filled' : 'pricing-cta';
           const features = (t.features || []).map(f => `<li>${f}</li>`).join('');
+          const catPill = t.category ? `<span class="${categoryPillClass(t.category)}">${t.category}</span>` : '';
+          const relatedSlug = categoryToSlug(t.category);
           return `
             <div class="pricing-card reveal${featured}">
               ${badge}
+              ${catPill}
               <span class="pricing-tag">${t.name}</span>
               <div class="pricing-amount"><span class="pricing-currency">${t.symbol || '₦'}</span><span>${t.price}</span></div>
               <p class="pricing-turnaround">${t.turnaround || ''}</p>
               <ul class="pricing-features">${features}</ul>
               <a href="/start-a-project.html" class="${ctaClass}">Start This Project</a>
+              <a href="/projects.html?cat=${relatedSlug}" class="tier-related-link">See related projects →</a>
             </div>`;
         }).join('');
         grid.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
         console.log('[services] rendered', PRICING_TIERS.length, 'pricing cards');
       }
     } catch(e) { console.error('[services] pricing cards failed:', e); }
+
+    // ---- Render add-on cards ----
+    try {
+      const grid = document.getElementById('addonGrid');
+      if (grid && ADDONS && ADDONS.length) {
+        grid.innerHTML = ADDONS.map(a => {
+          const catPill = a.category ? `<span class="${categoryPillClass(a.category)}">${a.category}</span>` : '';
+          return `
+            <div class="addon-card reveal">
+              ${catPill}
+              <h3 class="addon-card__name">${a.name}</h3>
+              <div class="addon-card__price"><span class="currency">${a.symbol || '₦'}</span><span>${a.price}</span></div>
+              <p class="addon-card__desc">${a.description || ''}</p>
+              <a href="/start-a-project.html" class="addon-card__cta">Start This Project →</a>
+            </div>`;
+        }).join('');
+        grid.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
+        console.log('[services] rendered', ADDONS.length, 'add-on cards');
+      }
+    } catch(e) { console.error('[services] add-on cards failed:', e); }
 
     // ---- Render process steps ----
     try {

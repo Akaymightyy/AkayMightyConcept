@@ -93,13 +93,18 @@
   <!-- ============ PROJECTS GRID ============ -->
   <section id="projects-page">
     <div class="container">
-      <!-- Filter bar -->
+      <!-- Filter bar (single-select: All / Web / Brand / Print) -->
       <div class="filter-bar reveal">
         <button class="filter-btn active" data-filter="all">All Work</button>
         <button class="filter-btn" data-filter="web">Web</button>
-        <button class="filter-btn" data-filter="branding">Branding</button>
+        <button class="filter-btn" data-filter="brand">Brand</button>
         <button class="filter-btn" data-filter="print">Print</button>
       </div>
+
+      <!-- Pricing link (updates with the active filter) -->
+      <p class="projects-pricing-link reveal" id="pricingLink">
+        <a href="/services.html">View pricing →</a>
+      </p>
 
       <!-- Grid (populated by Firestore subscription below) -->
       <div class="projects-grid" id="projectsGrid">
@@ -163,9 +168,35 @@
     function categoryToFilter(cat) {
       const c = (cat || '').toLowerCase();
       if (c.includes('web') || c.includes('app') || c.includes('saas') || c.includes('site') || c.includes('automotive') || c.includes('spa')) return 'web';
-      if (c.includes('brand') || c.includes('logo') || c.includes('identity')) return 'branding';
-      if (c.includes('print') || c.includes('flyer') || c.includes('card') || c.includes('pack')) return 'print';
+      if (c.includes('brand') || c.includes('logo') || c.includes('identity') || c.includes('design')) return 'brand';
+      if (c.includes('print') || c.includes('flyer') || c.includes('card') || c.includes('pack') || c.includes('banner') || c.includes('merch') || c.includes('bag')) return 'print';
       return 'web'; // default to web
+    }
+
+    // Map the admin "section" field (where on the site a project appears)
+    // to a public filter category (Web/Brand/Print) so the same project can
+    // be filtered on the public projects.html page.
+    function sectionToFilter(section) {
+      const s = String(section || '').toLowerCase();
+      if (s === 'design-services') return 'brand';
+      if (s === 'print-services')  return 'print';
+      // web-showcase, web-portfolio, or anything else → web
+      return 'web';
+    }
+
+    // Decide which filter a project belongs to. Admin-managed projects can
+    // set an explicit `category` (Web/Brand/Print) that takes precedence;
+    // otherwise we fall back to inferring from `section`, then from the
+    // human-readable `category` string (e.g. "Web · Spa Brand").
+    function projectFilter(p) {
+      const explicit = String(p.category || '').toLowerCase();
+      if (explicit === 'web' || explicit === 'brand' || explicit === 'print') {
+        return explicit;
+      }
+      if (p.section) {
+        return sectionToFilter(p.section);
+      }
+      return categoryToFilter(p.category);
     }
 
     // Build a merged list: static case studies first (in declared order),
@@ -209,7 +240,7 @@
     function renderGrid() {
       const filtered = currentFilter === 'all'
         ? allItems
-        : allItems.filter(p => categoryToFilter(p.category) === currentFilter);
+        : allItems.filter(p => projectFilter(p) === currentFilter);
 
       if (!filtered.length) {
         grid.style.display = 'none';
@@ -249,15 +280,48 @@
       grid.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
     }
 
-    // Filter button handlers
-    document.querySelectorAll('.filter-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        currentFilter = btn.dataset.filter;
-        renderGrid();
+    function updatePricingLink() {
+      const link = document.getElementById('pricingLink');
+      if (!link) return;
+      const labelMap = { all: 'all services', web: 'Web', brand: 'Brand', print: 'Print' };
+      const anchorMap = { all: '/services.html', web: '/services.html#web', brand: '/services.html#brand', print: '/services.html#print' };
+      const label = labelMap[currentFilter] || 'all services';
+      const href  = anchorMap[currentFilter]  || '/services.html';
+      link.innerHTML = `<a href="${href}">View pricing for ${label} →</a>`;
+    }
+
+    function setFilter(filter) {
+      const valid = ['all', 'web', 'brand', 'print'];
+      if (!valid.includes(filter)) filter = 'all';
+      currentFilter = filter;
+      document.querySelectorAll('.filter-btn').forEach(b => {
+        b.classList.toggle('active', b.dataset.filter === filter);
       });
+      renderGrid();
+      updatePricingLink();
+    }
+
+    // Filter button handlers (single-select)
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => setFilter(btn.dataset.filter));
     });
+
+    // Read ?cat= from URL and auto-select the matching filter on page load.
+    // Supports: ?cat=web, ?cat=brand, ?cat=print (case-insensitive).
+    (function applyCatFromUrl() {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const cat = (params.get('cat') || '').toLowerCase();
+        if (cat && ['web', 'brand', 'print'].includes(cat)) {
+          setFilter(cat);
+        } else {
+          updatePricingLink();
+        }
+      } catch (e) {
+        console.warn('[projects-page] ?cat= parse failed:', e && e.message);
+        updatePricingLink();
+      }
+    })();
 
     // Subscribe to Firestore (both case-studies and projects)
     let firestoreCaseStudies = [];

@@ -40,7 +40,8 @@ import {
   SITE_CONTENT_DEFAULTS,
   PRICING_TIERS,
   TESTIMONIALS,
-  STATS
+  STATS,
+  ADDONS
 } from "./site-config.js";
 
 // =====================================================================
@@ -99,10 +100,12 @@ const state = {
   unsubBlogPosts: null,
   unsubDownloads: null,
   unsubSiteContent: null,
+  unsubAddons: null,
   caseStudies: [],          // Firestore content/case-studies items only (admin-curated)
   blogPosts: [],            // Firestore content/blog-posts items only (admin-curated)
   downloads: [],            // Firestore content/downloads items only (admin-curated)
   siteContent: {},          // Firestore content/site-content overrides (flat key/value)
+  addons: [],               // Firestore content/addons items only (admin-curated)
   rulesOk: null
 };
 
@@ -315,6 +318,19 @@ function startSync() {
     console.error('[dash] site-content sync error:', err);
   });
 
+  state.unsubAddons = onSnapshot(doc(db, 'content', 'addons'), snap => {
+    if (snap.exists()) {
+      const data = snap.data();
+      state.addons = Array.isArray(data.items) ? data.items : [];
+    } else {
+      state.addons = [];
+    }
+    renderAddons();
+    renderStats();
+  }, err => {
+    console.error('[dash] addons sync error:', err);
+  });
+
   // Verify write permission by attempting a no-op merge
   verifyWritePermission();
 }
@@ -525,6 +541,7 @@ function renderStats() {
   setText('navCountCaseStudies', buildMergedListCaseStudies().length);
   setText('navCountBlogPosts', buildMergedListBlogPosts().length);
   setText('navCountDownloads', buildMergedListDownloads().length);
+  setText('navCountAddons', buildMergedListAddons().length);
 }
 
 // =====================================================================
@@ -984,6 +1001,7 @@ async function resetAll() {
 const VIEW_TITLES = {
   images:        { title: 'All Images',         sub: 'Manage every image on your site from one place' },
   projects:      { title: 'Web Projects',       sub: 'Add, edit, delete, and reorder projects in the Recent Web Work showcase' },
+  addons:        { title: 'Service Add-ons',    sub: 'À la carte pricing for single items — logo only, extra page, business card, etc.' },
   'case-studies':{ title: 'Project Case Studies', sub: 'Full case-study pages on /project-detail.html — challenge, solution, tools, screenshots' },
   'blog-posts':  { title: 'Blog Posts',         sub: 'Full blog articles on /blog-post.html — content, tags, author' },
   downloads:     { title: 'Downloads',           sub: 'Manage the CV, corporate profile, and brand deck PDFs on /downloads.html' },
@@ -1261,6 +1279,19 @@ function renderProjects() {
   list.innerHTML = filtered.map((p, i) => {
     const isMarked = markedForDeletion.has(p.id);
     const originalIndex = sorted.findIndex(s => s.id === p.id);
+    // Display label: prefer the explicit categoryLabel, fall back to the
+    // raw category string for legacy projects (which may store a richer
+    // label like "Spa Brand" in `category` instead of the clean
+    // Web/Brand/Print value).
+    const catLabel = p.categoryLabel
+      || (p.category && !['Web', 'Brand', 'Print'].includes(p.category) ? p.category : '');
+    // Clean category pill (Web/Brand/Print) — color-coded for scanning.
+    const catValue = ['Web', 'Brand', 'Print'].includes(p.category) ? p.category : '';
+    const catPillStyle = catValue === 'Brand'
+      ? 'color:#ff8a3d;background:rgba(255,138,61,0.10);border:1px solid rgba(255,138,61,0.30);'
+      : catValue === 'Print'
+      ? 'color:#2ecc71;background:rgba(46,204,113,0.10);border:1px solid rgba(46,204,113,0.30);'
+      : 'color:var(--akay-accent,#5b5bf5);background:rgba(91,91,245,0.10);border:1px solid rgba(91,91,245,0.30);';
     return `
     <div class="dash-project-card ${isMarked ? 'is-marked' : ''}" data-id="${p.id}">
       <div class="dash-project-card__preview">
@@ -1268,13 +1299,14 @@ function renderProjects() {
       </div>
       <div class="dash-project-card__body">
         <div class="dash-project-card__head">
-          <div style="display:flex;align-items:center;gap:8px;">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
             <label class="dash-project-card__mark" title="Mark for bulk delete">
               <input type="checkbox" data-act="mark" ${isMarked ? 'checked' : ''} />
               <span class="dash-project-card__mark-box"></span>
             </label>
             <span class="dash-project-card__order">#${originalIndex + 1}</span>
-            <span class="dash-project-card__tag">${escapeHtml(p.category || '')}</span>
+            ${catValue ? `<span class="dash-project-card__tag" style="${catPillStyle}">${escapeHtml(catValue)}</span>` : ''}
+            ${catLabel ? `<span class="dash-project-card__tag">${escapeHtml(catLabel)}</span>` : ''}
             <span class="dash-project-card__section">${escapeHtml(p.section === 'design-services' ? 'Design' : p.section === 'print-services' ? 'Print' : p.section === 'web-portfolio' ? 'Web Portfolio' : 'Web Showcase')}</span>
           </div>
           <div class="dash-project-card__btns">
@@ -1376,6 +1408,20 @@ function showProjectForm(project) {
   const isEdit = !!project;
   const p = project || { title: '', category: '', description: '', imageUrl: '', liveUrl: '', section: 'web-showcase' };
 
+  // Normalize the category field. Older projects may not have one — infer
+  // from the existing section so the dropdown shows a sensible default.
+  const inferCatFromSection = (sec) => {
+    const s = String(sec || '').toLowerCase();
+    if (s === 'design-services') return 'Brand';
+    if (s === 'print-services')  return 'Print';
+    return 'Web';
+  };
+  // Only accept a clean Web/Brand/Print value as explicit category;
+  // otherwise fall back to inferring from section.
+  const explicitCat = (p.category && ['Web', 'Brand', 'Print'].includes(p.category))
+    ? p.category
+    : inferCatFromSection(p.section);
+
   // Build modal — scrollable on mobile
   let modal = $('#projectFormModal');
   if (modal) modal.remove();
@@ -1402,13 +1448,25 @@ function showProjectForm(project) {
             <option value="none" ${p.section === 'none' ? 'selected' : ''}>Don't show in showcase (hidden)</option>
           </select>
         </label>
+        <label class="dash-field">
+          <span>Category (public filter on /projects.html) *</span>
+          <select id="pf-category-select" required>
+            <option value="Web"   ${explicitCat === 'Web'   ? 'selected' : ''}>Web — websites, landing pages, dashboards</option>
+            <option value="Brand" ${explicitCat === 'Brand' ? 'selected' : ''}>Brand — logos, identity kits, flyers, social graphics</option>
+            <option value="Print" ${explicitCat === 'Print' ? 'selected' : ''}>Print — business cards, banners, bags, merch</option>
+          </select>
+          <small style="display:block;margin-top:4px;font-size:11px;color:var(--akay-text-mute);">
+            This controls which filter the project appears under on the public Projects page.
+            It's separate from "Show in section" above (which controls where on the site it appears).
+          </small>
+        </label>
         <label class="dash-field" style="flex-direction:row;align-items:center;gap:10px;">
           <input type="checkbox" id="pf-showInShowcase" ${p.showInShowcase !== false ? 'checked' : ''} style="width:auto;" />
           <span style="font-size:13px;">Also show in Recent Web Work auto-scroll showcase</span>
         </label>
         <label class="dash-field">
-          <span>Category / Tag</span>
-          <input type="text" id="pf-category" value="${escapeAttr(p.category)}" placeholder="e.g. Corporate, E-commerce, SaaS" />
+          <span>Category tag (display label)</span>
+          <input type="text" id="pf-category" value="${escapeAttr(p.category && !['Web','Brand','Print'].includes(p.category) ? p.category : '')}" placeholder="e.g. Corporate, E-commerce, SaaS (optional — overrides the filter label on cards)" />
         </label>
         <label class="dash-field">
           <span>Description</span>
@@ -1438,6 +1496,13 @@ function showProjectForm(project) {
 
   modal.querySelector('#pfClose').addEventListener('click', () => modal.remove());
   modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+
+  // Auto-sync the category dropdown when the section changes — saves the
+  // admin a step on new projects. (They can still override afterwards.)
+  modal.querySelector('#pf-section').addEventListener('change', e => {
+    const inferred = inferCatFromSection(e.target.value);
+    modal.querySelector('#pf-category-select').value = inferred;
+  });
 
   // Upload button
   modal.querySelector('#pf-upload-btn').addEventListener('click', () => {
@@ -1478,8 +1543,9 @@ function showProjectForm(project) {
     e.preventDefault();
     const title = modal.querySelector('#pf-title').value.trim();
     const section = modal.querySelector('#pf-section').value;
+    const categoryFilter = modal.querySelector('#pf-category-select').value; // Web / Brand / Print
+    const categoryLabel = modal.querySelector('#pf-category').value.trim();  // optional display label
     const showInShowcase = modal.querySelector('#pf-showInShowcase').checked;
-    const category = modal.querySelector('#pf-category').value.trim();
     const description = modal.querySelector('#pf-description').value.trim();
     const liveUrl = modal.querySelector('#pf-liveurl').value.trim();
     const imageUrl = modal.querySelector('#pf-imageurl').value.trim();
@@ -1498,10 +1564,18 @@ function showProjectForm(project) {
 
     errEl.textContent = '';
 
+    // The explicit category filter (Web/Brand/Print) is always saved as
+    // `project.category`. If the admin also typed a display label, we
+    // store it under `project.categoryLabel` so the public page can show
+    // a richer label (e.g. "Corporate · E-commerce") while still using
+    // the clean Web/Brand/Print value for filtering.
+    const category = categoryFilter;
+    const categoryLabelFinal = categoryLabel || '';
+
     if (isEdit) {
       const updated = state.projects.map(p =>
         p.id === project.id
-          ? { ...p, title, section, showInShowcase, category, description, liveUrl, imageUrl }
+          ? { ...p, title, section, showInShowcase, category, categoryLabel: categoryLabelFinal, description, liveUrl, imageUrl }
           : p
       );
       const ok = await saveProjects(updated);
@@ -1509,7 +1583,7 @@ function showProjectForm(project) {
     } else {
       const newItem = {
         id: `proj-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-        title, section: section || 'web-showcase', showInShowcase, category, description, liveUrl, imageUrl,
+        title, section: section || 'web-showcase', showInShowcase, category, categoryLabel: categoryLabelFinal, description, liveUrl, imageUrl,
         order: state.projects.length
       };
       const updated = [...state.projects, newItem];
@@ -1609,7 +1683,7 @@ async function seedWebPortfolioDefaults() {
 // Seed design (branding) projects — these show in the Design filter
 async function seedDesignProjects() {
   const ok = await new Promise(resolve => {
-    showConfirm('Add 6 design/branding projects to the Projects page? These will show under the "Branding" filter. You can edit or delete them afterwards.', resolve);
+    showConfirm('Add 6 design/branding projects to the Projects page? These will show under the "Brand" filter. You can edit or delete them afterwards.', resolve);
   });
   if (!ok) return;
 
@@ -2641,6 +2715,282 @@ async function saveSiteContentKey(key, value) {
 }
 
 // =====================================================================
+//  STEP 11.10 — ADD-ONS CRUD
+//  ---------------------------------------------------------------------
+//  À la carte pricing for single items — logo only, extra page, business
+//  card, etc. Static defaults live in site-config.js ADDONS. Admin-
+//  curated add-ons live in Firestore `content/addons`. The public
+//  services.html page renders the merged list (static + Firestore, with
+//  Firestore overriding any static entry with the same id; new ids are
+//  appended after the static list).
+// =====================================================================
+
+// Merge static ADDONS with Firestore state.addons. Static entries come
+// first (in their declared order); Firestore entries override any static
+// entry with the same id, and new ids are appended at the end.
+function buildMergedListAddons() {
+  const byId = new Map();
+
+  ADDONS.forEach(a => { if (a && a.id) byId.set(a.id, a); });
+  (state.addons || []).forEach(a => { if (a && a.id) byId.set(a.id, a); });
+
+  const list = [];
+  const seen = new Set();
+  ADDONS.forEach(a => {
+    if (!a || !a.id) return;
+    if (byId.has(a.id)) { list.push(byId.get(a.id)); seen.add(a.id); }
+  });
+  (state.addons || []).forEach(a => {
+    if (!a || !a.id) return;
+    if (seen.has(a.id)) return;
+    list.push(byId.get(a.id));
+    seen.add(a.id);
+  });
+  return list;
+}
+
+function renderAddons() {
+  const list = $('#addonsList');
+  if (!list) return;
+  const merged = buildMergedListAddons();
+
+  if (!merged.length) {
+    list.innerHTML = `
+      <div class="dash-card dash-card--empty">
+        <div class="dash-card__body">
+          <p>No add-ons yet.</p>
+          <p style="margin-top:6px;font-size:12px;">Click <strong>+ Add Add-on</strong> to create one, or <strong>Seed default add-ons</strong> to start with the 6 built-in defaults.</p>
+        </div>
+      </div>`;
+    return;
+  }
+
+  list.innerHTML = merged.map(a => {
+    const isStatic = ADDONS.some(s => s.id === a.id) && !(state.addons || []).some(s => s.id === a.id);
+    const originTag = isStatic
+      ? '<span class="dash-project-card__section" style="color:#8a8a8a;background:rgba(255,255,255,0.04);border-color:var(--akay-border);">Static default</span>'
+      : '<span class="dash-project-card__section">Firestore</span>';
+    const cat = a.category || '';
+    const catPillStyle = cat === 'Brand'
+      ? 'color:#ff8a3d;background:rgba(255,138,61,0.10);border:1px solid rgba(255,138,61,0.30);'
+      : cat === 'Print'
+      ? 'color:#2ecc71;background:rgba(46,204,113,0.10);border:1px solid rgba(46,204,113,0.30);'
+      : 'color:var(--akay-accent,#5b5bf5);background:rgba(91,91,245,0.10);border:1px solid rgba(91,91,245,0.30);';
+    return `
+      <div class="dash-project-card" data-id="${escapeAttr(a.id)}" style="grid-template-columns:1fr;">
+        <div class="dash-project-card__body">
+          <div class="dash-project-card__head">
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+              ${cat ? `<span class="dash-project-card__tag" style="${catPillStyle}">${escapeHtml(cat)}</span>` : ''}
+              ${originTag}
+            </div>
+            <div class="dash-project-card__btns">
+              <button class="dash-btn dash-btn--primary dash-btn--mini" data-act="edit">Edit</button>
+              <button class="dash-btn dash-btn--danger dash-btn--mini" data-act="delete" ${isStatic ? 'disabled title="Static defaults can be overridden by editing — but not deleted from here."' : ''}>Delete</button>
+            </div>
+          </div>
+          <h4 class="dash-project-card__title">${escapeHtml(a.name || 'Untitled add-on')}</h4>
+          <p class="dash-project-card__desc">${escapeHtml(a.description || '')}</p>
+          <div style="display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--akay-text-mute);margin-top:4px;align-items:baseline;">
+            <span style="font:800 18px/1 'Montserrat',sans-serif;color:var(--text);">
+              <span style="color:var(--akay-accent,#5b5bf5);font-size:14px;">${escapeHtml(a.symbol || '₦')}</span>${escapeHtml(a.price || '')}
+            </span>
+            <span style="font-size:11px;">id: <code>${escapeHtml(a.id || '')}</code></span>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+
+  // Wire buttons
+  list.querySelectorAll('.dash-project-card').forEach(card => {
+    const id = card.getAttribute('data-id');
+    card.querySelectorAll('button[data-act]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const act = btn.getAttribute('data-act');
+        const addon = merged.find(a => a.id === id);
+        if (!addon) return;
+        if (act === 'edit') showAddonForm(addon);
+        if (act === 'delete') deleteAddon(addon);
+      });
+    });
+  });
+}
+
+function showAddonForm(addon) {
+  const isEdit = !!addon;
+  const base = addon || {
+    id: '', name: '', price: '', symbol: '₦', description: '', category: 'Web'
+  };
+
+  let modal = $('#addonFormModal');
+  if (modal) modal.remove();
+
+  modal = document.createElement('div');
+  modal.id = 'addonFormModal';
+  modal.className = 'akay-modal is-open';
+  modal.innerHTML = `
+    <div class="akay-modal__panel dash-project-form-modal" style="max-width:460px;max-height:90vh;overflow-y:auto;">
+      <button class="akay-modal__close" type="button" id="adClose">×</button>
+      <h2 class="akay-modal__title">${isEdit ? 'Edit Add-on' : 'Add New Add-on'}</h2>
+      <form id="addonForm" class="dash-form">
+        <label class="dash-field">
+          <span>Name *</span>
+          <input type="text" id="ad-name" required value="${escapeAttr(base.name)}" placeholder="e.g. Extra Page" />
+        </label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+          <label class="dash-field">
+            <span>Price *</span>
+            <input type="text" id="ad-price" required value="${escapeAttr(base.price)}" placeholder="10,000" />
+          </label>
+          <label class="dash-field">
+            <span>Currency symbol</span>
+            <input type="text" id="ad-symbol" value="${escapeAttr(base.symbol || '₦')}" placeholder="₦" maxlength="3" />
+          </label>
+        </div>
+        <label class="dash-field">
+          <span>Category *</span>
+          <select id="ad-category" required>
+            <option value="Web"   ${(base.category || 'Web')   === 'Web'   ? 'selected' : ''}>Web — websites, landing pages, dashboards</option>
+            <option value="Brand" ${base.category === 'Brand' ? 'selected' : ''}>Brand — logos, identity kits, flyers, social graphics</option>
+            <option value="Print" ${base.category === 'Print' ? 'selected' : ''}>Print — business cards, banners, bags, merch</option>
+          </select>
+        </label>
+        <label class="dash-field">
+          <span>Description *</span>
+          <textarea id="ad-description" rows="3" required placeholder="One-line description shown under the price">${escapeHtml(base.description || '')}</textarea>
+        </label>
+        <label class="dash-field">
+          <span>Slug / id ${isEdit ? '' : '*'}</span>
+          <input type="text" id="ad-id" value="${escapeAttr(base.id)}" placeholder="extra-page" ${isEdit ? 'readonly' : ''} />
+          <small style="display:block;margin-top:4px;font-size:11px;color:var(--akay-text-mute);">
+            Lowercase, hyphen-separated. Used as the unique key — must be unique across all add-ons.
+          </small>
+        </label>
+        <button type="submit" class="dash-btn dash-btn--primary dash-btn--block" style="margin-top:16px;">${isEdit ? 'Save Changes' : 'Add Add-on'}</button>
+        <p class="dash-form__err" id="ad-err"></p>
+      </form>
+    </div>`;
+  document.body.appendChild(modal);
+
+  modal.querySelector('#adClose').addEventListener('click', () => modal.remove());
+  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+
+  // Auto-slug from name (only on create, not edit)
+  if (!isEdit) {
+    modal.querySelector('#ad-name').addEventListener('input', e => {
+      const slug = e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+      modal.querySelector('#ad-id').value = slug;
+    });
+  }
+
+  // Submit
+  modal.querySelector('#addonForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const name = modal.querySelector('#ad-name').value.trim();
+    const price = modal.querySelector('#ad-price').value.trim();
+    const symbol = modal.querySelector('#ad-symbol').value.trim() || '₦';
+    const category = modal.querySelector('#ad-category').value;
+    const description = modal.querySelector('#ad-description').value.trim();
+    const id = modal.querySelector('#ad-id').value.trim().toLowerCase().replace(/[^a-z0-9-]/g, '');
+    const errEl = modal.querySelector('#ad-err');
+
+    if (!name) { errEl.textContent = 'Name is required'; return; }
+    if (!price) { errEl.textContent = 'Price is required'; return; }
+    if (!description) { errEl.textContent = 'Description is required'; return; }
+    if (!id) { errEl.textContent = 'Slug / id is required'; return; }
+    if (!['Web', 'Brand', 'Print'].includes(category)) {
+      errEl.textContent = 'Category must be Web, Brand, or Print';
+      return;
+    }
+
+    errEl.textContent = '';
+
+    const item = { id, name, price, symbol, category, description };
+
+    let updated;
+    if (isEdit) {
+      // If we're editing a static default, push it as a Firestore override
+      const existing = (state.addons || []).findIndex(a => a.id === id);
+      if (existing >= 0) {
+        updated = [...state.addons];
+        updated[existing] = item;
+      } else {
+        // Editing a static default — create a Firestore override
+        updated = [...(state.addons || []), item];
+      }
+    } else {
+      // New — check id uniqueness against both static and Firestore
+      const allIds = new Set([
+        ...ADDONS.map(a => a.id),
+        ...(state.addons || []).map(a => a.id)
+      ]);
+      if (allIds.has(id)) {
+        errEl.textContent = `Slug "${id}" already exists. Choose a different slug.`;
+        return;
+      }
+      updated = [...(state.addons || []), item];
+    }
+
+    const ok = await saveAddons(updated);
+    if (ok) { toast(isEdit ? 'Add-on updated' : 'Add-on added', 'success'); modal.remove(); }
+  });
+}
+
+async function deleteAddon(addon) {
+  if (!addon || !addon.id) return;
+  const ok = await new Promise(resolve => {
+    showConfirm(`Delete add-on "${addon.name}"?\n\nThis removes it from /services.html immediately. Static defaults can be re-added by editing site-config.js.`, resolve);
+  });
+  if (!ok) return;
+  const updated = (state.addons || []).filter(a => a.id !== addon.id);
+  const saveOk = await saveAddons(updated);
+  if (saveOk) toast('Add-on deleted', 'info');
+}
+
+async function saveAddons(arr) {
+  try {
+    await setDoc(doc(db, 'content', 'addons'),
+      { items: arr, _updatedAt: serverTimestamp() },
+      { merge: true });
+    toast(`✓ Add-ons saved (${arr.length})`, 'success');
+    return true;
+  } catch (e) {
+    console.error('[addons] save failed:', e);
+    if (e.code === 'permission-denied' || /permission|denied|rules/i.test(e.message)) {
+      toast('SAVE FAILED — Firestore rules rejected the write. See Settings tab.', 'error');
+      state.rulesOk = false;
+      renderRulesStatus();
+    } else if (/offline|network|timed out|unreachable/i.test(e.message)) {
+      toast('NETWORK — cannot reach Firestore. Try again.', 'error');
+    } else {
+      toast('Save failed: ' + e.message, 'error');
+    }
+    return false;
+  }
+}
+
+// Seed the 6 default add-ons into Firestore so they become editable from
+// the dashboard. Existing Firestore add-ons with the same id are
+// overridden; everything else is preserved.
+async function seedDefaultAddons() {
+  const ok = await new Promise(resolve => {
+    showConfirm('Copy the 6 default add-ons into Firestore so they become editable from the dashboard? Existing edits to those ids will be overwritten; any custom add-ons you added will be preserved.', resolve);
+  });
+  if (!ok) return;
+
+  toast('Seeding default add-ons…', 'info');
+  // Build a map of current Firestore items by id so we keep custom ones.
+  const byId = new Map();
+  (state.addons || []).forEach(a => { if (a && a.id) byId.set(a.id, a); });
+  // Overlay the static defaults — they win.
+  ADDONS.forEach(a => { byId.set(a.id, { ...a }); });
+  const updated = Array.from(byId.values());
+
+  const saveOk = await saveAddons(updated);
+  if (saveOk) toast(`✓ ${ADDONS.length} default add-ons are now editable`, 'success');
+}
+
+// =====================================================================
 //  STEP 12 — wire buttons + boot
 // =====================================================================
 function boot() {
@@ -2741,6 +3091,12 @@ function boot() {
     renderSiteContentEditor();
     toast('Refreshed', 'info');
   });
+
+  // Add-ons buttons
+  const btnAddAddon = $('#btnAddAddon');
+  if (btnAddAddon) btnAddAddon.addEventListener('click', () => showAddonForm(null));
+  const btnSeedAddons = $('#btnSeedAddons');
+  if (btnSeedAddons) btnSeedAddons.addEventListener('click', seedDefaultAddons);
 
   // Show the delete endpoint in Settings
   const ep = $('#settingsDeleteEndpoint');

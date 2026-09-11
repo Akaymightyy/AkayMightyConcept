@@ -108,6 +108,7 @@ export const PRICING_TIERS = [
     symbol: '₦',
     turnaround: 'Delivered in 3–5 days',
     popular: false,
+    category: 'Web',
     features: [
       'Single high-converting page',
       'Mobile-responsive design',
@@ -126,6 +127,7 @@ export const PRICING_TIERS = [
     turnaround: 'Delivered in 2–3 weeks',
     popular: true,
     badge: 'Most Popular',
+    category: 'Web',
     features: [
       'Up to 6 pages, fully custom',
       'SEO-optimized structure',
@@ -143,15 +145,31 @@ export const PRICING_TIERS = [
     symbol: '₦',
     turnaround: 'Delivered in 24–72 hrs',
     popular: false,
+    category: 'Brand',
     features: [
-      'Logo or flyer design',
-      'Print-ready files (CMYK)',
+      'Logo or flyer design (design + branding)',
+      'Print-ready files (CMYK) for cards & merch',
       'Social media formats',
       'Fast turnaround',
       '2 design variations',
       'Source files included'
     ]
   }
+];
+
+// ----- Add-ons (à la carte pricing for single items) ------------------
+// Each add-on is a single, fixed-price deliverable that a client can buy
+// without committing to a full package. Mix and match — or start with one
+// and upgrade later. Admin-managed (Firestore `content/addons`); the
+// static defaults here are merged with Firestore on the public
+// services.html page so the list always renders, even offline.
+export const ADDONS = [
+  { id: 'extra-page',      name: 'Extra Page',              price: '10,000', symbol: '₦', description: 'Additional page beyond the package scope',                                category: 'Web' },
+  { id: 'logo-only',       name: 'Logo Only',               price: '15,000', symbol: '₦', description: 'Single logo design with 3 concepts + source files',                      category: 'Brand' },
+  { id: 'business-card',   name: 'Business Card Design',    price: '8,000',  symbol: '₦', description: 'Double-sided design + print-ready CMYK file',                            category: 'Print' },
+  { id: 'maintenance',     name: '1 Month Maintenance',     price: '20,000', symbol: '₦', description: 'Content updates, bug fixes, and small changes for 30 days',              category: 'Web' },
+  { id: 'flyer-design',    name: 'Flyer Design',            price: '12,000', symbol: '₦', description: 'Single-sided flyer with custom graphics + 2 revisions',                  category: 'Brand' },
+  { id: 'banner-print',    name: 'Banner Printing',         price: '15,000', symbol: '₦', description: 'Large format banner design + print (up to 3ft x 6ft)',                   category: 'Print' }
 ];
 
 // ----- Testimonials (used by home.html) -------------------------------
@@ -536,6 +554,7 @@ export const SERVICE_TIERS_DETAIL = [
     symbol: '₦',
     turnaround: 'Delivered in 3–5 days',
     popular: false,
+    category: 'Web',
     summary:
       "A single high-converting page built to do one job — turn your traffic into leads, bookings, or sales. Perfect for product launches, event promos, lead-gen campaigns, and small businesses that need a sharp web presence without a 6-page site.",
     deliverables: [
@@ -565,6 +584,7 @@ export const SERVICE_TIERS_DETAIL = [
     turnaround: 'Delivered in 2–3 weeks',
     popular: true,
     badge: 'Most Popular',
+    category: 'Web',
     summary:
       "A complete, custom multi-page website built to grow with your business. Up to 6 fully designed pages, an admin dashboard so you can edit content yourself, SEO baked in from the start, and unlimited revisions until you're happy with every pixel.",
     deliverables: [
@@ -594,8 +614,9 @@ export const SERVICE_TIERS_DETAIL = [
     symbol: '₦',
     turnaround: 'Delivered in 24–72 hrs',
     popular: false,
+    category: 'Brand',
     summary:
-      "A focused brand & print package — perfect when you need a logo or flyer designed and print-ready fast. You get a custom design, source files, social formats, and CMYK print files ready for any print shop.",
+      "A focused brand & print package — design and branding first (logo or flyer), with print-ready files for business cards, banners, and merch. You get a custom design, source files, social formats, and CMYK print files ready for any print shop.",
     deliverables: [
       'Logo OR flyer design (your choice)',
       '3 unique design concepts',
@@ -680,6 +701,7 @@ export const SITE_CONTENT_DEFAULTS = {
 export default {
   SITE_CONFIG,
   PRICING_TIERS,
+  ADDONS,
   TESTIMONIALS,
   FEATURED_PROJECTS,
   FEATURED_FALLBACK,

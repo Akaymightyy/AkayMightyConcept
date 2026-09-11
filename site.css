@@ -521,3 +521,29 @@ footer { padding: 60px 0 30px; background: var(--bg2); border-top: 1px solid var
 .empty-state-icon svg { width: 32px; height: 32px; }
 .empty-state-title { font-family: var(--font-heading); font-size: 24px; font-weight: 800; margin-bottom: 10px; }
 .empty-state-text { font-size: 14px; color: var(--text-muted); line-height: 1.7; margin-bottom: 24px; }
+
+/* ============ ADD-ON CARDS (services.html) =========================== */
+.addon-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; display: flex; flex-direction: column; gap: 8px; transition: var(--transition); }
+.addon-card:hover { border-color: var(--border-red); transform: translateY(-3px); }
+.addon-card__category { font: 600 10px/1 'Montserrat', sans-serif; letter-spacing: 1px; text-transform: uppercase; color: var(--red-bright); }
+.addon-card__name { font: 700 16px/1.3 'Montserrat', sans-serif; color: var(--text); }
+.addon-card__price { font: 800 24px/1 'Montserrat', sans-serif; color: var(--text); }
+.addon-card__price .currency { font-size: 16px; color: var(--red-bright); }
+.addon-card__desc { font: 400 13px/1.5 'Poppins', sans-serif; color: var(--text-muted); flex-grow: 1; }
+.addon-card__cta { font: 600 13px/1 'Poppins', sans-serif; color: var(--red-bright); text-decoration: none; margin-top: 8px; }
+.addon-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+@media (max-width: 900px) { .addon-grid { grid-template-columns: 1fr; } }
+
+/* Category pill (shared by tier + add-on cards) */
+.cat-pill { display: inline-block; font: 600 10px/1 'Montserrat', sans-serif; letter-spacing: 1px; text-transform: uppercase; color: var(--red-bright); background: rgba(91,91,245,0.10); border: 1px solid var(--border-red); padding: 5px 10px; border-radius: 999px; margin-bottom: 8px; }
+.cat-pill--brand { color: #ff8a3d; background: rgba(255,138,61,0.10); border-color: rgba(255,138,61,0.35); }
+.cat-pill--print { color: #2ecc71; background: rgba(46,204,113,0.10); border-color: rgba(46,204,113,0.35); }
+
+/* "See related projects" link under tier CTA */
+.tier-related-link { display: block; text-align: center; margin-top: 12px; font-size: 12px; color: var(--text-muted); text-decoration: none; transition: color 0.2s; }
+.tier-related-link:hover { color: var(--red-bright); }
+
+/* Pricing link under filter pills (projects.html) */
+.projects-pricing-link { text-align: center; margin: -28px 0 36px; font-size: 13px; }
+.projects-pricing-link a { color: var(--red-bright); font-weight: 600; text-decoration: none; }
+.projects-pricing-link a:hover { text-decoration: underline; }
