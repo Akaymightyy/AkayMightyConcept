@@ -1,32 +1,9 @@
 /* =====================================================================
-   home-bento.css — Bento Modern theme for home.html only.
-   Loaded AFTER site.css. It re-points the shared colour variables to a
-   light bento palette (scoped to body.bento) and styles the hero tiles
-   and the spinning project ring. Other pages are untouched.
+   home-bento.css — homepage-only pieces of the Bento theme:
+   the hero tiles and the spinning project ring. The shared Bento
+   palette, cards and buttons now live in site.css for every page.
    ===================================================================== */
 
-body.bento {
-  --bg: #f2f1f7; --bg2: #ffffff; --bg3: #ffffff; --bg4: #ece8ff;
-  --text: #16151d; --text-muted: #55536a; --text-dim: #6b6985;
-  --border: #dcdae8; --border-red: rgba(91,61,245,0.35);
-  --red: #5b3df5; --red-dark: #4a2fe0; --red-bright: #7a63ff; --red-deep: #3a22b8;
-  --red-glow: rgba(91,61,245,0.10);
-  --gradient-red: linear-gradient(135deg, #5b3df5 0%, #7a63ff 100%);
-  --radius: 16px; --radius-lg: 28px;
-  --font-body: 'Plus Jakarta Sans', 'Poppins', sans-serif;
-  --font-heading: 'Plus Jakarta Sans', 'Montserrat', sans-serif;
-  --tint: #ece8ff;
-  --tile-dark: #16151d;
-  --shadow: 0 22px 44px -22px rgba(40,30,110,0.35);
-  background: var(--bg);
-  color: var(--text);
-}
-
-/* shared header on the light page */
-.bento #navbar { background: rgba(242,241,247,0.78); border-bottom: 1px solid var(--border); }
-.bento #navbar.scrolled { background: rgba(242,241,247,0.94); box-shadow: 0 6px 24px rgba(40,30,110,0.10); border-bottom-color: var(--border); }
-.bento .nav-pill { background: var(--tint); border-color: transparent; }
-.bento .glow-bg::before { display: none; }
 
 /* ---------- hero tiles ---------- */
 .bento #home-hero { min-height: 0; display: block; text-align: left; padding: 104px 0 24px; overflow: visible; }
@@ -72,27 +49,12 @@ body.bento {
 .sp span { position: absolute; left: 10px; bottom: 10px; max-width: calc(100% - 20px); background: var(--bg2); color: var(--text); font: 700 11px/1 var(--font-body); padding: 7px 11px; border-radius: 999px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .spin-name { margin: 6px 0 0; text-align: center; font-size: 14px; font-weight: 700; color: var(--text); min-height: 22px; }
 
-/* ---------- old showcase stays in the page for its data, but is not shown ---------- */
-.bento #web-showcase { display: none; }
 
-/* ---------- rest of the page as bento cards ---------- */
-.bento .stack-carousel { background: transparent; border: 0; padding: 28px 0; }
-.bento #featured-projects, .bento #home-pricing { background: transparent; padding: 72px 0; }
-.bento #services-overview, .bento #testimonials, .bento .stats-section, .bento #home-cta { padding-top: 56px; padding-bottom: 56px; }
-.bento .section-title { font-weight: 800; letter-spacing: -0.03em; }
-.bento .project-card, .bento .service-overview-card, .bento .pricing-card, .bento .ts-right, .bento .stat-item, .bento .cta-wrap {
-  background: var(--bg2); border: 0; border-radius: 28px; box-shadow: none; color: var(--text);
-}
-.bento .project-card { overflow: hidden; }
-.bento .project-card:hover, .bento .service-overview-card:hover { box-shadow: var(--shadow); border-color: transparent; }
-.bento .service-overview-icon { background: var(--tint); border: 0; }
-.bento .pricing-card--featured { background: var(--tile-dark); color: #fff; }
-.bento .pricing-card--featured .pricing-amount, .bento .pricing-card--featured .pricing-amount span, .bento .pricing-card--featured .pricing-tag { color: #fff; }
-.bento .pricing-card--featured .pricing-turnaround, .bento .pricing-card--featured .pricing-features li { color: #c7c5d9; }
-.bento .cta-wrap { background: var(--tile-dark); color: #fff; padding: 56px 32px; }
-.bento .cta-wrap .cta-desc { color: #c7c5d9; }
-.bento .cta-wrap .btn-outline { color: #fff; border-color: #c7c5d9; }
-.bento .stat-item { padding: 28px 16px; }
+/* ---------- home call-to-action as a dark tile ---------- */
+.bento .cta-wrap { background: var(--tile-dark); color: #fff; padding: 56px 32px; border-radius: 28px; }
+.bento .cta-wrap .cta-desc { color: var(--on-tile-muted); }
+.bento .cta-wrap .btn-outline { color: #fff; border-color: var(--on-tile-muted); }
+.bento #web-showcase { display: none; }
 
 /* ---------- phones ---------- */
 @media (max-width: 900px) {

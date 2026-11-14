@@ -1161,17 +1161,17 @@ function showConnBanner(msg, kind = 'warn') {
   banner.textContent = msg;
   banner.style.display = 'block';
   if (kind === 'warn') {
-    banner.style.background = 'rgba(255, 213, 79, .15)';
-    banner.style.color = '#ffd54f';
-    banner.style.borderBottom = '1px solid rgba(255, 213, 79, .3)';
+    banner.style.background = 'rgba(180, 83, 9, .15)';
+    banner.style.color = '#b45309';
+    banner.style.borderBottom = '1px solid rgba(180, 83, 9, .3)';
   } else if (kind === 'err') {
-    banner.style.background = 'rgba(255, 82, 82, .15)';
-    banner.style.color = '#ff5252';
-    banner.style.borderBottom = '1px solid rgba(255, 82, 82, .3)';
+    banner.style.background = 'rgba(217, 45, 32, .15)';
+    banner.style.color = '#d92d20';
+    banner.style.borderBottom = '1px solid rgba(217, 45, 32, .3)';
   } else if (kind === 'ok') {
-    banner.style.background = 'rgba(46, 204, 113, .15)';
-    banner.style.color = '#2ecc71';
-    banner.style.borderBottom = '1px solid rgba(46, 204, 113, .3)';
+    banner.style.background = 'rgba(21, 128, 61, .15)';
+    banner.style.color = '#15803d';
+    banner.style.borderBottom = '1px solid rgba(21, 128, 61, .3)';
     // Auto-hide success after 2.5s
     clearTimeout(banner._t);
     banner._t = setTimeout(() => { banner.style.display = 'none'; }, 2500);
@@ -1290,8 +1290,8 @@ function renderProjects() {
     const catPillStyle = catValue === 'Brand'
       ? 'color:#ff8a3d;background:rgba(255,138,61,0.10);border:1px solid rgba(255,138,61,0.30);'
       : catValue === 'Print'
-      ? 'color:#2ecc71;background:rgba(46,204,113,0.10);border:1px solid rgba(46,204,113,0.30);'
-      : 'color:var(--akay-accent,#5b5bf5);background:rgba(91,91,245,0.10);border:1px solid rgba(91,91,245,0.30);';
+      ? 'color:#15803d;background:rgba(21,128,61,0.10);border:1px solid rgba(21,128,61,0.30);'
+      : 'color:var(--akay-accent,#5b3df5);background:rgba(91,61,245,0.10);border:1px solid rgba(91,61,245,0.30);';
     return `
     <div class="dash-project-card ${isMarked ? 'is-marked' : ''}" data-id="${p.id}">
       <div class="dash-project-card__preview">
@@ -1738,7 +1738,7 @@ function showConfirm(message, callback) {
   modal.className = 'akay-modal is-open';
   modal.innerHTML = `
     <div class="akay-modal__panel" style="max-width:380px;text-align:center;">
-      <p style="font:500 14px/1.5 'Poppins',sans-serif;color:#fff;margin:0 0 20px;">${message}</p>
+      <p style="font:500 14px/1.5 'Plus Jakarta Sans',sans-serif;color:var(--akay-text);margin:0 0 20px;">${message}</p>
       <div style="display:flex;gap:10px;justify-content:center;">
         <button class="dash-btn dash-btn--ghost" id="cfCancel">Cancel</button>
         <button class="dash-btn dash-btn--primary" id="cfOk">Yes, continue</button>
@@ -1843,7 +1843,7 @@ function renderCaseStudies() {
   list.innerHTML = merged.map((cs, i) => {
     const isStatic = PROJECT_CASE_STUDIES.some(s => s.slug === cs.slug) && !(state.caseStudies || []).some(s => s.slug === cs.slug);
     const originTag = isStatic
-      ? '<span class="dash-project-card__section" style="color:#8a8a8a;background:rgba(255,255,255,0.04);border-color:var(--akay-border);">Static default</span>'
+      ? '<span class="dash-project-card__section" style="color:#6b6985;background:rgba(22,21,29,0.04);border-color:var(--akay-border);">Static default</span>'
       : '<span class="dash-project-card__section">Firestore</span>';
     const tools = Array.isArray(cs.tools) ? cs.tools : (Array.isArray(cs.tech) ? cs.tech : []);
     const screenshots = Array.isArray(cs.screenshots) ? cs.screenshots : [];
@@ -1858,7 +1858,7 @@ function renderCaseStudies() {
             <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
               <span class="dash-project-card__order">#${i + 1}</span>
               <span class="dash-project-card__tag">${escapeHtml(cs.category || '')}</span>
-              <span class="dash-project-card__tag" style="color:${(cs.status||'').toLowerCase()==='delivered'?'#8a8a8a':'#2ecc71'};background:${(cs.status||'').toLowerCase()==='delivered'?'rgba(255,255,255,0.04)':'rgba(46,204,113,0.1)'};border:1px solid ${(cs.status||'').toLowerCase()==='delivered'?'var(--akay-border)':'rgba(46,204,113,0.25)'};">${escapeHtml(cs.status || 'Active')}</span>
+              <span class="dash-project-card__tag" style="color:${(cs.status||'').toLowerCase()==='delivered'?'#6b6985':'#15803d'};background:${(cs.status||'').toLowerCase()==='delivered'?'rgba(22,21,29,0.04)':'rgba(21,128,61,0.1)'};border:1px solid ${(cs.status||'').toLowerCase()==='delivered'?'var(--akay-border)':'rgba(21,128,61,0.25)'};">${escapeHtml(cs.status || 'Active')}</span>
               ${originTag}
             </div>
             <div class="dash-project-card__btns">
@@ -2157,7 +2157,7 @@ function renderBlogPosts() {
   list.innerHTML = merged.map((p, i) => {
     const isStatic = BLOG_POSTS.some(s => s.slug === p.slug) && !(state.blogPosts || []).some(s => s.slug === p.slug);
     const originTag = isStatic
-      ? '<span class="dash-project-card__section" style="color:#8a8a8a;background:rgba(255,255,255,0.04);border-color:var(--akay-border);">Static default</span>'
+      ? '<span class="dash-project-card__section" style="color:#6b6985;background:rgba(22,21,29,0.04);border-color:var(--akay-border);">Static default</span>'
       : '<span class="dash-project-card__section">Firestore</span>';
     const cover = p.coverImage || p.image || '';
     const tags = Array.isArray(p.tags) ? p.tags : [];
@@ -2171,7 +2171,7 @@ function renderBlogPosts() {
             <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
               <span class="dash-project-card__order">#${i + 1}</span>
               <span class="dash-project-card__tag">${escapeHtml(p.category || '')}</span>
-              <span class="dash-project-card__tag" style="color:#ffd54f;background:rgba(255,213,79,0.08);border:1px solid rgba(255,213,79,0.2);">${escapeHtml(p.date || '')}</span>
+              <span class="dash-project-card__tag" style="color:#b45309;background:rgba(255,213,79,0.08);border:1px solid rgba(255,213,79,0.2);">${escapeHtml(p.date || '')}</span>
               ${originTag}
             </div>
             <div class="dash-project-card__btns">
@@ -2449,9 +2449,9 @@ function renderDownloadsEditor() {
         <div class="dash-download-card__head">
           <div>
             <h4 class="dash-download-card__title">${escapeHtml(d.name || '')}</h4>
-            <span class="dash-download-card__id">id: ${escapeHtml(d.id || '')} · ${format} · ${available ? '<span style="color:#2ecc71;">Available</span>' : '<span style="color:var(--akay-text-dim);">Coming soon</span>'}</span>
+            <span class="dash-download-card__id">id: ${escapeHtml(d.id || '')} · ${format} · ${available ? '<span style="color:#15803d;">Available</span>' : '<span style="color:var(--akay-text-dim);">Coming soon</span>'}</span>
           </div>
-          <span class="dash-project-card__section" style="${isStatic ? 'color:#8a8a8a;background:rgba(255,255,255,0.04);border-color:var(--akay-border);' : ''}">${isStatic ? 'Static default' : 'Firestore'}</span>
+          <span class="dash-project-card__section" style="${isStatic ? 'color:#6b6985;background:rgba(22,21,29,0.04);border-color:var(--akay-border);' : ''}">${isStatic ? 'Static default' : 'Firestore'}</span>
         </div>
         <label class="dash-field">
           <span>Display name</span>
@@ -2636,7 +2636,7 @@ function renderSiteContentEditor() {
   `).join('') + `
     <div class="dash-section">
       <div class="dash-section__head">
-        <div class="dash-section__bar" style="background:linear-gradient(180deg,#ff5252,#c41414);"></div>
+        <div class="dash-section__bar" style="background:linear-gradient(180deg,#7a63ff,#4a2fe0);"></div>
         <h4 class="dash-section__title">Reset all site content</h4>
       </div>
       <p class="dash-panel__hint" style="margin:0 0 12px;">
@@ -2768,14 +2768,14 @@ function renderAddons() {
   list.innerHTML = merged.map(a => {
     const isStatic = ADDONS.some(s => s.id === a.id) && !(state.addons || []).some(s => s.id === a.id);
     const originTag = isStatic
-      ? '<span class="dash-project-card__section" style="color:#8a8a8a;background:rgba(255,255,255,0.04);border-color:var(--akay-border);">Static default</span>'
+      ? '<span class="dash-project-card__section" style="color:#6b6985;background:rgba(22,21,29,0.04);border-color:var(--akay-border);">Static default</span>'
       : '<span class="dash-project-card__section">Firestore</span>';
     const cat = a.category || '';
     const catPillStyle = cat === 'Brand'
       ? 'color:#ff8a3d;background:rgba(255,138,61,0.10);border:1px solid rgba(255,138,61,0.30);'
       : cat === 'Print'
-      ? 'color:#2ecc71;background:rgba(46,204,113,0.10);border:1px solid rgba(46,204,113,0.30);'
-      : 'color:var(--akay-accent,#5b5bf5);background:rgba(91,91,245,0.10);border:1px solid rgba(91,91,245,0.30);';
+      ? 'color:#15803d;background:rgba(21,128,61,0.10);border:1px solid rgba(21,128,61,0.30);'
+      : 'color:var(--akay-accent,#5b3df5);background:rgba(91,61,245,0.10);border:1px solid rgba(91,61,245,0.30);';
     return `
       <div class="dash-project-card" data-id="${escapeAttr(a.id)}" style="grid-template-columns:1fr;">
         <div class="dash-project-card__body">
@@ -2793,7 +2793,7 @@ function renderAddons() {
           <p class="dash-project-card__desc">${escapeHtml(a.description || '')}</p>
           <div style="display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--akay-text-mute);margin-top:4px;align-items:baseline;">
             <span style="font:800 18px/1 'Montserrat',sans-serif;color:var(--text);">
-              <span style="color:var(--akay-accent,#5b5bf5);font-size:14px;">${escapeHtml(a.symbol || '₦')}</span>${escapeHtml(a.price || '')}
+              <span style="color:var(--akay-accent,#5b3df5);font-size:14px;">${escapeHtml(a.symbol || '₦')}</span>${escapeHtml(a.price || '')}
             </span>
             <span style="font-size:11px;">id: <code>${escapeHtml(a.id || '')}</code></span>
           </div>

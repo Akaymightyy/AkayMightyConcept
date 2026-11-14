@@ -226,7 +226,7 @@ function updateNetworkBanner(healthy, reason) {
     banner.style.display = 'none';
   } else {
     banner.style.display = 'block';
-    banner.style.background = 'rgba(255, 82, 82, .95)';
+    banner.style.background = 'rgba(217, 45, 32, .95)';
     banner.style.color = '#fff';
     banner.innerHTML = `<strong>⚠ Cannot reach Firebase.</strong> ${reason || 'Network/DNS issue.'} Edits will save locally and sync when connection returns. <a href="./debug.html" style="color:#fff;text-decoration:underline;">Open debug</a>`;
   }

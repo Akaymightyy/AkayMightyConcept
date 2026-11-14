@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
   <title>Services &amp; Pricing — Akay Mighty Concept</title>
   <meta name="description" content="Three transparent service packages: Landing Page (₦50k), Full Website (₦150k), and Brand + Print (₦35k). Plus the 4-step process I follow on every project." />
-  <meta name="theme-color" content="#0a0a0a" />
+  <meta name="theme-color" content="#f2f1f7" />
 
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Services &amp; Pricing — Akay Mighty Concept" />
@@ -13,20 +13,20 @@
 
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%230a0a0a'/%3E%3Ctext x='50' y='68' font-family='Montserrat,Arial,sans-serif' font-size='52' font-weight='900' fill='%23ff1a1a' text-anchor='middle'%3EA%3C/text%3E%3C/svg%3E" />
 
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;900&family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;900&family=Montserrat:wght@400;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="./site.css" />
   <link rel="stylesheet" href="./admin.css" />
 
   <style>
     /* Services-page specific styles */
     #services-banner { padding: 140px 0 60px; position: relative; overflow: hidden; }
-    .services-banner-bg { position: absolute; inset: 0; background: radial-gradient(ellipse at 70% 30%, rgba(91,91,245,0.22) 0%, transparent 55%), var(--bg); z-index: -3; }
+    .services-banner-bg { position: absolute; inset: 0; background: radial-gradient(ellipse at 70% 30%, rgba(91,61,245,0.22) 0%, transparent 55%), var(--bg); z-index: -3; }
 
     /* Service tier detail cards */
     #services-tiers { padding: 100px 0; }
     .tier-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 0; overflow: hidden; transition: all 0.3s; display: flex; flex-direction: column; position: relative; }
-    .tier-card:hover { border-color: var(--border-red); transform: translateY(-6px); box-shadow: 0 20px 50px rgba(0,0,0,0.4); }
-    .tier-card--featured { background: var(--bg3); border: 1px solid var(--red); box-shadow: 0 0 60px rgba(91,91,245,0.25); }
+    .tier-card:hover { border-color: var(--border-red); transform: translateY(-6px); box-shadow: 0 20px 50px rgba(40,30,110,0.16); }
+    .tier-card--featured { background: var(--bg3); border: 1px solid var(--red); box-shadow: var(--shadow); }
     .tier-badge { position: absolute; top: -14px; left: 50%; transform: translateX(-50%); background: var(--gradient-red); color: #fff; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; padding: 6px 16px; border-radius: 999px; white-space: nowrap; z-index: 2; }
     .tier-header { padding: 36px 28px 28px; border-bottom: 1px solid var(--border); }
     .tier-name { font-family: var(--font-heading); font-size: 22px; font-weight: 800; margin-bottom: 14px; }
@@ -49,7 +49,7 @@
     .tier-cta--filled:hover { opacity: 0.9; transform: translateY(-2px); }
 
     /* Process section */
-    #services-process { padding: 100px 0; background: var(--bg2); }
+    #services-process { padding: 100px 0; background: transparent; }
     .process-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
     @media (max-width: 900px) { .process-grid { grid-template-columns: 1fr 1fr; } }
     @media (max-width: 600px) { .process-grid { grid-template-columns: 1fr; } }
