@@ -1,0 +1,111 @@
+/* =====================================================================
+   home-bento.css — Bento Modern theme for home.html only.
+   Loaded AFTER site.css. It re-points the shared colour variables to a
+   light bento palette (scoped to body.bento) and styles the hero tiles
+   and the spinning project ring. Other pages are untouched.
+   ===================================================================== */
+
+body.bento {
+  --bg: #f2f1f7; --bg2: #ffffff; --bg3: #ffffff; --bg4: #ece8ff;
+  --text: #16151d; --text-muted: #55536a; --text-dim: #6b6985;
+  --border: #dcdae8; --border-red: rgba(91,61,245,0.35);
+  --red: #5b3df5; --red-dark: #4a2fe0; --red-bright: #7a63ff; --red-deep: #3a22b8;
+  --red-glow: rgba(91,61,245,0.10);
+  --gradient-red: linear-gradient(135deg, #5b3df5 0%, #7a63ff 100%);
+  --radius: 16px; --radius-lg: 28px;
+  --font-body: 'Plus Jakarta Sans', 'Poppins', sans-serif;
+  --font-heading: 'Plus Jakarta Sans', 'Montserrat', sans-serif;
+  --tint: #ece8ff;
+  --tile-dark: #16151d;
+  --shadow: 0 22px 44px -22px rgba(40,30,110,0.35);
+  background: var(--bg);
+  color: var(--text);
+}
+
+/* shared header on the light page */
+.bento #navbar { background: rgba(242,241,247,0.78); border-bottom: 1px solid var(--border); }
+.bento #navbar.scrolled { background: rgba(242,241,247,0.94); box-shadow: 0 6px 24px rgba(40,30,110,0.10); border-bottom-color: var(--border); }
+.bento .nav-pill { background: var(--tint); border-color: transparent; }
+.bento .glow-bg::before { display: none; }
+
+/* ---------- hero tiles ---------- */
+.bento #home-hero { min-height: 0; display: block; text-align: left; padding: 104px 0 24px; overflow: visible; }
+.bento-grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 16px; }
+.bt { position: relative; min-width: 0; overflow: hidden; background: var(--bg2); border-radius: 28px; padding: 32px; }
+.bt-intro { grid-column: span 8; padding: 44px; }
+.bt-photo { grid-column: span 4; grid-row: span 2; padding: 0; background: var(--bg4); min-height: 360px; }
+.bt-photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.bt-photo .chip { position: absolute; left: 16px; bottom: 16px; background: var(--bg2); color: var(--text); font-size: 13px; font-weight: 700; padding: 8px 14px; border-radius: 999px; }
+.bt-spin { grid-column: span 8; padding: 24px 24px 20px; }
+.bt-cv, .bt-years, .bt-acc { grid-column: span 4; display: flex; flex-direction: column; justify-content: space-between; gap: 18px; min-height: 150px; }
+.bt-years { background: var(--tile-dark); color: #fff; }
+.bt-years .bn { font-size: clamp(44px, 5vw, 64px); font-weight: 800; letter-spacing: -0.04em; line-height: 1; }
+.bt-years span, .bt-acc span, .bt-cv span { font-size: 14px; opacity: 0.8; }
+.bt-acc { background: var(--red); color: #fff; }
+.bt-acc strong, .bt-cv strong { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.15; }
+.bt-cv { color: var(--text); transition: transform .25s; }
+.bt-acc { transition: transform .25s; }
+.bt-cv:hover, .bt-acc:hover { transform: translateY(-3px); }
+
+.pill { display: inline-flex; align-items: center; gap: 8px; background: var(--tint); color: var(--red-dark); font-size: 13px; font-weight: 700; padding: 8px 14px; border-radius: 999px; margin-bottom: 22px; }
+.pill i { width: 7px; height: 7px; border-radius: 50%; background: var(--red); }
+.bento .hero-name { font-size: 15px; color: var(--text-muted); font-weight: 600; margin-bottom: 10px; }
+.bento .hero-name span { color: var(--red); font-weight: 800; }
+.bento .hero-title { font-size: clamp(34px, 5vw, 62px); font-weight: 800; line-height: 1.05; letter-spacing: -0.035em; margin-bottom: 20px; }
+.bento .hero-title .dev { display: block; color: var(--red); background: none; -webkit-text-fill-color: currentColor; }
+.bento .hero-title .amp { color: var(--text-dim); font-weight: 500; font-size: 0.55em; font-style: normal; margin: 0 6px; }
+.rotating-words { display: inline-block; position: relative; color: var(--text); vertical-align: baseline; }
+.rotating-words .word { display: inline-block; opacity: 0; transform: translateY(14px); filter: none; transition: opacity .25s ease, transform .35s cubic-bezier(.4,0,.2,1); position: absolute; left: 0; top: 0; white-space: nowrap; }
+.rotating-words .word.active { opacity: 1; transform: none; position: relative; }
+.bento .hero-tagline { font-size: 16px; color: var(--text-muted); line-height: 1.7; max-width: 560px; margin: 0 0 26px; }
+.bento .hero-btns { display: flex; flex-wrap: wrap; gap: 12px; justify-content: flex-start; }
+
+/* ---------- the spinner ---------- */
+.bt-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 4px; }
+.bt-head .section-label { margin: 0; }
+.bt-link { font-size: 13px; font-weight: 700; color: var(--red); }
+.spin { position: relative; perspective: 1100px; overflow: hidden; height: 300px; cursor: grab; touch-action: pan-y; user-select: none; -webkit-user-select: none; }
+.spin.drag { cursor: grabbing; }
+.spin-ring { position: absolute; inset: 0; transform-style: preserve-3d; }
+.sp { position: absolute; left: 50%; top: 50%; width: var(--pw, 260px); height: var(--ph, 166px); margin: calc(var(--ph, 166px) / -2) 0 0 calc(var(--pw, 260px) / -2); border-radius: 18px; overflow: hidden; backface-visibility: hidden; background: var(--bg4); box-shadow: var(--shadow); display: block; will-change: opacity; }
+.sp img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; -webkit-user-drag: none; }
+.sp span { position: absolute; left: 10px; bottom: 10px; max-width: calc(100% - 20px); background: var(--bg2); color: var(--text); font: 700 11px/1 var(--font-body); padding: 7px 11px; border-radius: 999px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.spin-name { margin: 6px 0 0; text-align: center; font-size: 14px; font-weight: 700; color: var(--text); min-height: 22px; }
+
+/* ---------- old showcase stays in the page for its data, but is not shown ---------- */
+.bento #web-showcase { display: none; }
+
+/* ---------- rest of the page as bento cards ---------- */
+.bento .stack-carousel { background: transparent; border: 0; padding: 28px 0; }
+.bento #featured-projects, .bento #home-pricing { background: transparent; padding: 72px 0; }
+.bento #services-overview, .bento #testimonials, .bento .stats-section, .bento #home-cta { padding-top: 56px; padding-bottom: 56px; }
+.bento .section-title { font-weight: 800; letter-spacing: -0.03em; }
+.bento .project-card, .bento .service-overview-card, .bento .pricing-card, .bento .ts-right, .bento .stat-item, .bento .cta-wrap {
+  background: var(--bg2); border: 0; border-radius: 28px; box-shadow: none; color: var(--text);
+}
+.bento .project-card { overflow: hidden; }
+.bento .project-card:hover, .bento .service-overview-card:hover { box-shadow: var(--shadow); border-color: transparent; }
+.bento .service-overview-icon { background: var(--tint); border: 0; }
+.bento .pricing-card--featured { background: var(--tile-dark); color: #fff; }
+.bento .pricing-card--featured .pricing-amount, .bento .pricing-card--featured .pricing-amount span, .bento .pricing-card--featured .pricing-tag { color: #fff; }
+.bento .pricing-card--featured .pricing-turnaround, .bento .pricing-card--featured .pricing-features li { color: #c7c5d9; }
+.bento .cta-wrap { background: var(--tile-dark); color: #fff; padding: 56px 32px; }
+.bento .cta-wrap .cta-desc { color: #c7c5d9; }
+.bento .cta-wrap .btn-outline { color: #fff; border-color: #c7c5d9; }
+.bento .stat-item { padding: 28px 16px; }
+
+/* ---------- phones ---------- */
+@media (max-width: 900px) {
+  .bento #home-hero { padding: 88px 0 16px; }
+  .bento-grid { grid-template-columns: minmax(0, 1fr); }
+  .bt-intro, .bt-photo, .bt-spin, .bt-cv, .bt-years, .bt-acc { grid-column: auto; grid-row: auto; }
+  .bt-intro { padding: 28px; }
+  .bt-photo { min-height: 320px; }
+  .bt-cv, .bt-years, .bt-acc { min-height: 120px; }
+  .bt { padding: 24px; }
+  .bt-spin { padding: 18px 12px 16px; }
+  .spin { height: 250px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rotating-words .word { transition: none; }
+}
