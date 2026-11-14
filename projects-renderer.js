@@ -26,9 +26,9 @@ function escapeAttr(s) {
 // Broken image placeholder — shows when image URL fails to load
 const BROKEN_IMG_SVG = `data:image/svg+xml,${encodeURIComponent(`
   <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 250'>
-    <rect width='400' height='250' fill='#1a1a1a'/>
-    <text x='200' y='120' font-family='Montserrat,Arial,sans-serif' font-size='14' fill='#5a5a5a' text-anchor='middle'>Image failed to load</text>
-    <text x='200' y='145' font-family='monospace' font-size='10' fill='#3a3a3a' text-anchor='middle'>Check the image URL</text>
+    <rect width='400' height='250' fill='#ece8ff'/>
+    <text x='200' y='120' font-family='Montserrat,Arial,sans-serif' font-size='14' fill='#6b6985' text-anchor='middle'>Image failed to load</text>
+    <text x='200' y='145' font-family='monospace' font-size='10' fill='#8a88a0' text-anchor='middle'>Check the image URL</text>
   </svg>
 `)}`;
 

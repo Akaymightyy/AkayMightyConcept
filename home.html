@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
   <title>Akay Mighty Concept — Website Developer &amp; Graphics Designer</title>
   <meta name="description" content="I'm Awwal Abdulhakeem — a Website Developer & Graphics Designer with 8+ years building converting websites, brand identities, flyers, and print. Based in Kaduna, working worldwide." />
-  <meta name="theme-color" content="#0a0a0a" />
+  <meta name="theme-color" content="#f2f1f7" />
   <meta name="author" content="Awwal Abdulhakeem" />
 
   <meta property="og:type" content="website" />
@@ -16,66 +16,12 @@
 
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%230a0a0a'/%3E%3Ctext x='50' y='68' font-family='Montserrat,Arial,sans-serif' font-size='52' font-weight='900' fill='%23ff1a1a' text-anchor='middle'%3EA%3C/text%3E%3C/svg%3E" />
 
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;900&family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;900&family=Montserrat:wght@400;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="./site.css" />
   <link rel="stylesheet" href="./admin.css" />
+  <link rel="stylesheet" href="./home-bento.css" />
 
   <style>
-    /* ============ Hero (homepage specific) ============ */
-    #home-hero { position: relative; min-height: 100vh; display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 120px 0 80px; text-align: center; }
-    .home-hero-bg { position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 30%, rgba(91,91,245,0.22) 0%, transparent 55%), radial-gradient(ellipse at 20% 80%, rgba(22,22,110,0.18) 0%, transparent 45%), var(--bg); z-index: -3; }
-    .home-hero-overlay { position: absolute; inset: 0; background: linear-gradient(180deg, transparent 0%, rgba(10,10,10,0.3) 60%, var(--bg) 100%); z-index: -2; }
-    .home-hero-glow { position: absolute; top: 45%; left: 50%; transform: translate(-50%, -50%); width: 700px; height: 700px; max-width: 100vw; background: radial-gradient(circle, rgba(91,91,245,0.28) 0%, transparent 70%); z-index: -2; animation: glowPulse 6s ease-in-out infinite; filter: blur(50px); pointer-events: none; }
-    .hero-container { display: flex; flex-direction: column; align-items: center; gap: 40px; width: 100%; max-width: 900px; position: relative; z-index: 1; }
-    .hero-content { max-width: 720px; text-align: center; }
-    .hero-name { font-family: var(--font-heading); font-size: clamp(15px, 2vw, 18px); color: var(--text-muted); margin-bottom: 14px; font-weight: 500; }
-    .hero-name span { color: var(--red); font-weight: 700; }
-    .hero-title { font-size: clamp(38px, 7vw, 76px); font-weight: 900; line-height: 1.05; margin-bottom: 22px; letter-spacing: -2px; }
-    .hero-title .dev { display: block; color: var(--red); background: var(--gradient-red); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-    .hero-title .amp { color: var(--text-muted); font-weight: 400; font-size: 0.6em; font-style: italic; display: inline-block; margin: 0 8px; vertical-align: middle; }
-    .rotating-words { display: inline-block; position: relative; color: var(--text); min-width: 1ch; vertical-align: baseline; }
-    .rotating-words .word { display: inline-block; opacity: 0; transform: translateY(20px) scale(0.9); filter: blur(8px); transition: all 0.5s cubic-bezier(0.4,0,0.2,1); position: absolute; left: 0; top: 0; white-space: nowrap; }
-    .rotating-words .word.active { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); position: relative; }
-    .hero-tagline { font-size: clamp(14px, 1.6vw, 17px); color: var(--text-muted); line-height: 1.7; margin: 0 auto 32px; max-width: 580px; }
-    .hero-btns { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
-
-    /* Hero photo + props */
-    .hero-visual { position: relative; display: flex; align-items: center; justify-content: center; perspective: 1200px; width: 100%; max-width: 500px; min-height: 420px; }
-    .hero-avatar { position: relative; width: min(340px, 72vw); aspect-ratio: 1; border-radius: 50%; z-index: 3; }
-    .hero-avatar::before { content: ''; position: absolute; inset: -8px; border-radius: 50%; background: conic-gradient(from var(--border-angle), transparent 0%, transparent 30%, var(--red) 50%, var(--red-bright) 60%, transparent 80%, transparent 100%); animation: drawBorder 3s linear infinite; filter: blur(1px); z-index: -1; }
-    .hero-avatar::after { content: ''; position: absolute; inset: -2px; border-radius: 50%; background: conic-gradient(from var(--border-angle), var(--red) 0%, transparent 25%, transparent 50%, var(--red) 75%, transparent 100%); animation: drawBorder 4s linear infinite reverse; opacity: 0.6; z-index: -1; }
-    @keyframes drawBorder { to { --border-angle: 360deg; } }
-    .hero-avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 4px solid var(--bg); box-shadow: 0 0 80px rgba(91,91,245,0.4), inset 0 0 40px rgba(0,0,0,0.5); }
-    .hero-prop { position: absolute; width: 130px; height: 170px; border-radius: 14px; background: var(--bg3); border: 1px solid var(--border-red); box-shadow: 0 20px 50px rgba(0,0,0,0.6), 0 0 30px rgba(91,91,245,0.2); z-index: 4; transform-style: preserve-3d; transition: transform 0.4s cubic-bezier(0.4,0,0.2,1); overflow: hidden; }
-    .hero-prop.left { left: -10px; top: 40px; transform: rotate(-12deg); }
-    .hero-prop.right { right: -10px; bottom: 40px; transform: rotate(12deg); }
-    .hero-prop-inner { position: absolute; inset: 0; padding: 14px; display: flex; flex-direction: column; gap: 8px; background: linear-gradient(135deg, var(--bg3), var(--bg4)); }
-    .hero-prop-label { font-size: 9px; font-weight: 700; letter-spacing: 2px; color: var(--red); text-transform: uppercase; }
-    .hero-prop-title { font-family: var(--font-heading); font-weight: 800; font-size: 14px; color: var(--text); line-height: 1.2; }
-    .hero-prop-art { flex: 1; border-radius: 8px; background: var(--gradient-red); position: relative; overflow: hidden; min-height: 60px; }
-    .hero-prop-art svg { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0.85; }
-    .hero-prop-art::after { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.25), transparent 60%); }
-    .hero-scroll { position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 10px; font-size: 10px; letter-spacing: 3px; color: var(--text-dim); text-transform: uppercase; pointer-events: none; }
-    .scroll-line { width: 1px; height: 50px; background: var(--border); position: relative; overflow: hidden; }
-    .scroll-line::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 30%; background: var(--red); animation: scrollAnim 2s ease-in-out infinite; }
-    @keyframes scrollAnim { 0% { top: -30%; } 100% { top: 100%; } }
-
-    @media (max-width: 900px) {
-      #home-hero { padding: 100px 0 60px; }
-      .hero-container { gap: 30px; }
-      .hero-title { font-size: clamp(32px, 9vw, 52px); }
-      .hero-visual { max-width: 360px; min-height: 360px; }
-      .hero-avatar { width: min(260px, 68vw); }
-      .hero-prop { width: 95px; height: 125px; }
-      .hero-prop.left { left: 0; top: 20px; }
-      .hero-prop.right { right: 0; bottom: 20px; }
-    }
-    @media (max-width: 480px) {
-      .hero-prop { width: 80px; height: 105px; }
-      .hero-prop.left { left: -5px; top: 30px; }
-      .hero-prop.right { right: -5px; bottom: 30px; }
-      .hero-avatar { width: min(220px, 65vw); }
-    }
 
     .showcase-track-wrap + .showcase-track-wrap { margin-top: 24px; }
 
@@ -92,7 +38,7 @@
     }
 
     /* ============ Featured Projects strip ============ */
-    #featured-projects { padding: 100px 0; background: var(--bg2); }
+    #featured-projects { padding: 100px 0; background: transparent; }
     .featured-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
     @media (max-width: 900px) { .featured-grid { grid-template-columns: 1fr; max-width: 500px; margin: 0 auto; } }
 
@@ -111,7 +57,7 @@
     }
     .project-card-flag,
     .project-card-status {
-      font: 700 9px/1 'Montserrat', sans-serif;
+      font: 700 9px/1 var(--font-heading);
       letter-spacing: 1px;
       text-transform: uppercase;
       padding: 5px 9px;
@@ -130,13 +76,13 @@
       border: 1px solid rgba(255, 255, 255, 0.2);
     }
     .project-card-status {
-      background: rgba(91, 91, 245, 0.85);
+      background: rgba(91, 61, 245, 0.85);
       color: #fff;
-      border: 1px solid rgba(122, 122, 255, 0.6);
+      border: 1px solid rgba(122, 99, 255, 0.6);
     }
     .project-card-status.delivered {
       background: rgba(10, 10, 10, 0.7);
-      color: var(--text-muted);
+      color: #e5e4ee;
       border: 1px solid var(--border);
     }
 
@@ -145,8 +91,8 @@
     .services-overview-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
     @media (max-width: 900px) { .services-overview-grid { grid-template-columns: 1fr; } }
     .service-overview-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 32px 28px; transition: all 0.3s; }
-    .service-overview-card:hover { border-color: var(--border-red); transform: translateY(-4px); box-shadow: 0 16px 40px rgba(0,0,0,0.4); }
-    .service-overview-icon { width: 56px; height: 56px; border-radius: 14px; background: rgba(91,91,245,0.1); border: 1px solid var(--border-red); display: flex; align-items: center; justify-content: center; color: var(--red); margin-bottom: 18px; }
+    .service-overview-card:hover { border-color: var(--border-red); transform: translateY(-4px); box-shadow: 0 16px 40px rgba(40,30,110,0.16); }
+    .service-overview-icon { width: 56px; height: 56px; border-radius: 14px; background: rgba(91,61,245,0.1); border: 1px solid var(--border-red); display: flex; align-items: center; justify-content: center; color: var(--red); margin-bottom: 18px; }
     .service-overview-icon svg { width: 26px; height: 26px; }
     .service-overview-title { font-family: var(--font-heading); font-size: 20px; font-weight: 800; margin-bottom: 8px; }
     .service-overview-desc { font-size: 14px; color: var(--text-muted); line-height: 1.7; margin-bottom: 16px; }
@@ -154,76 +100,65 @@
     .service-overview-card:hover .service-overview-link { gap: 10px; }
 
     /* ============ Pricing wrapper on home ============ */
-    #home-pricing { padding: 100px 0; background: var(--bg2); }
+    #home-pricing { padding: 100px 0; background: transparent; }
 
     /* ============ CTA band on home ============ */
     #home-cta { padding: 100px 0; }
   </style>
 </head>
-<body>
+<body class="bento">
 
-  <!-- ============ HERO ============ -->
+  <!-- ============ HERO (bento) ============ -->
   <section id="home-hero">
-    <div class="home-hero-bg"></div>
-    <div class="home-hero-overlay"></div>
-    <div class="home-hero-glow"></div>
-    <div class="container hero-container">
-      <div class="hero-content">
-        <p class="hero-name">Hi, I'm <span>Awwal Abdulhakeem</span></p>
-        <h1 class="hero-title">
-          I'm a <span class="dev">Website Developer</span>
-          <span class="amp">&amp;</span>
-          <span class="rotating-words" id="rotatingWords"><span class="word active">Graphics Designer</span><span class="word">Brand Strategist</span><span class="word">UI/UX Designer</span><span class="word">Digital Printer</span><span class="word">Creative Director</span></span>
-        </h1>
-        <p class="hero-tagline">I design and build websites that turn visitors into customers — plus branding, flyers, and print that make your business unforgettable. 8+ years crafting bold visuals and converting websites.</p>
-        <div class="hero-btns">
-          <a href="/start-a-project.html" class="btn btn-primary">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-            Start a Project
-          </a>
-          <a href="/projects.html" class="btn btn-outline">View My Work</a>
-          <a href="/Akay-CV.jpg" download class="btn btn-ghost">
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            Download CV
-          </a>
-        </div>
-      </div>
-      <div class="hero-visual" id="heroVisual">
-        <div class="hero-prop left" data-depth="0.4">
-          <div class="hero-prop-inner">
-            <div class="hero-prop-label">Web</div>
-            <div class="hero-prop-title">Website Dev</div>
-            <div class="hero-prop-art">
-              <svg viewBox="0 0 100 100" preserveAspectRatio="none">
-                <rect x="15" y="20" width="70" height="50" rx="4" fill="rgba(255,255,255,0.25)" />
-                <circle cx="22" cy="28" r="2" fill="rgba(255,255,255,0.5)" />
-                <circle cx="30" cy="28" r="2" fill="rgba(255,255,255,0.5)" />
-                <rect x="20" y="38" width="40" height="3" rx="1.5" fill="rgba(255,255,255,0.4)" />
-                <rect x="20" y="46" width="55" height="3" rx="1.5" fill="rgba(255,255,255,0.25)" />
-                <rect x="20" y="54" width="30" height="3" rx="1.5" fill="rgba(255,255,255,0.25)" />
-              </svg>
-            </div>
+    <div class="container">
+      <div class="bento-grid">
+
+        <div class="bt bt-intro">
+          <span class="pill"><i></i>Available for work &middot; Kaduna, working worldwide</span>
+          <p class="hero-name">Hi, I'm <span>Awwal Abdulhakeem</span></p>
+          <h1 class="hero-title">
+            I'm a <span class="dev">Website Developer</span>
+            <span class="amp">&amp;</span>
+            <span class="rotating-words" id="rotatingWords"><span class="word active">Graphics Designer</span><span class="word">Brand Strategist</span><span class="word">UI/UX Designer</span><span class="word">Digital Printer</span><span class="word">Creative Director</span></span>
+          </h1>
+          <p class="hero-tagline">I design and build websites that turn visitors into customers &mdash; plus branding, flyers, and print that make your business unforgettable.</p>
+          <div class="hero-btns">
+            <a href="/start-a-project.html" class="btn btn-primary">Start a Project</a>
+            <a href="/projects.html" class="btn btn-outline">View My Work</a>
           </div>
         </div>
-        <div class="hero-avatar">
-          <img src="./akay-headshot.png" alt="Awwal Abdulhakeem — Website Developer & Graphics Designer" data-img-slot="img:headshot">
+
+        <div class="bt bt-photo">
+          <img src="./akay-headshot.png" alt="Awwal Abdulhakeem &mdash; Website Developer &amp; Graphics Designer" data-img-slot="img:headshot">
+          <span class="chip">8+ years experience</span>
         </div>
-        <div class="hero-prop right" data-depth="0.6">
-          <div class="hero-prop-inner">
-            <div class="hero-prop-label">Design</div>
-            <div class="hero-prop-title">Brand &amp; Print</div>
-            <div class="hero-prop-art" style="background: linear-gradient(135deg, #3b3bd5, #5b5bf5);">
-              <svg viewBox="0 0 100 100" preserveAspectRatio="none">
-                <circle cx="50" cy="38" r="16" fill="rgba(255,255,255,0.3)" />
-                <rect x="22" y="60" width="56" height="4" rx="2" fill="rgba(255,255,255,0.4)" />
-                <rect x="32" y="70" width="36" height="3" rx="1.5" fill="rgba(255,255,255,0.25)" />
-              </svg>
-            </div>
+
+        <div class="bt bt-spin">
+          <div class="bt-head">
+            <p class="section-label">Recent web work</p>
+            <a class="bt-link" href="/projects.html">View all &rarr;</a>
           </div>
+          <div class="spin" id="spin" aria-label="Recent web projects. Drag to spin.">
+            <div class="spin-ring" id="spinRing"></div>
+          </div>
+          <p class="spin-name" id="spinName" aria-live="off"></p>
         </div>
+
+        <a class="bt bt-cv" href="/Akay-CV.jpg" download>
+          <strong>Download my CV</strong>
+          <span>Experience, skills and timeline</span>
+        </a>
+        <div class="bt bt-years">
+          <div class="bn">150+</div>
+          <span>Projects delivered</span>
+        </div>
+        <a class="bt bt-acc" href="/start-a-project.html">
+          <strong>Free consultation</strong>
+          <span>Revisions until you're happy &rarr;</span>
+        </a>
+
       </div>
     </div>
-    <div class="hero-scroll"><div class="scroll-line"></div><span>Scroll</span></div>
   </section>
 
   <!-- ============ TECH STACK MARQUEE ============ -->
@@ -535,7 +470,7 @@
         { name: 'Firebase', color: '#ffca28', svg: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M3.89 15.673L6.255.461A.542.542 0 017.27.287l2.543 4.771zm16.794 3.692l-2.25-13.951a.543.543 0 00-.919-.295L3.316 19.365l7.856 4.414a1.62 1.62 0 001.588 0zM14.3 7.148L12.634 3.847a.543.543 0 00-.96 0L3.53 17.984z"/></svg>' },
         { name: 'Vercel', color: '#ffffff', svg: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M24 22.521H0L12 1.5l12 21.021z"/></svg>' },
         { name: 'Figma', color: '#f24e1e', svg: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8.5 24c2.5 0 4.5-2 4.5-4.5V15H8.5C6 15 4 17 4 19.5S6 24 8.5 24zM4 12c0-2.5 2-4.5 4.5-4.5H13v9H8.5C6 16.5 4 14.5 4 12zM4 4.5C4 2 6 0 8.5 0H13v9H8.5C6 9 4 7 4 4.5zM13 0h4.5C20 0 22 2 22 4.5S20 9 17.5 9H13V0zm9 7.5c0-2.5 2-4.5 4.5-4.5S31 5 31 7.5 29 12 26.5 12H22V7.5z"/></svg>' },
-        { name: 'CorelDRAW', color: '#5b5bf5', svg: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>' },
+        { name: 'CorelDRAW', color: '#5b3df5', svg: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>' },
         { name: 'Photoshop', color: '#31a8ff', svg: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 3h18v18H3V3zm9.5 5.5h-3v7h1.5v-2h1.5c1.38 0 2.5-1.12 2.5-2.5s-1.12-2.5-2.5-2.5zm-1.5 3.5V10h1.5c.55 0 1 .45 1 1s-.45 1-1 1H11z"/></svg>' }
       ];
       const track = document.getElementById('stackTrack');
@@ -570,34 +505,145 @@
       }, 2500);
     })();
 
-    // ---- Hero 3D parallax (desktop only) ----
+    // ---- Spinning project ring (reads the same cards the admin dashboard feeds) ----
     (function() {
-      if (window.matchMedia('(max-width: 900px)').matches) return;
-      const visual = document.getElementById('heroVisual');
-      if (!visual) return;
-      const avatar = visual.querySelector('.hero-avatar');
-      const props = visual.querySelectorAll('.hero-prop');
-      let tx = 0, ty = 0, cx = 0, cy = 0;
-      visual.addEventListener('mousemove', e => {
-        const r = visual.getBoundingClientRect();
-        tx = ((e.clientX - r.left) / r.width - 0.5) * 2;
-        ty = ((e.clientY - r.top) / r.height - 0.5) * 2;
-      });
-      visual.addEventListener('mouseleave', () => { tx = 0; ty = 0; });
-      function tick() {
-        cx += (tx - cx) * 0.08;
-        cy += (ty - cy) * 0.08;
-        if (avatar) avatar.style.transform = `rotateY(${cx * 8}deg) rotateX(${-cy * 8}deg)`;
-        props.forEach((p, idx) => {
-          const depth = parseFloat(p.dataset.depth || '0.5');
-          const dir = idx === 0 ? -1 : 1;
-          const baseRot = dir * 12;
-          p.style.transform = `rotateY(${cx * 15 * depth}deg) rotateX(${-cy * 10 * depth}deg) rotate(${baseRot + cx * 5}deg) translateX(${cx * 20 * depth * dir}px) translateY(${-cy * 15 * depth}px) translateZ(${depth * 40}px)`;
+      const box = document.getElementById('spin');
+      const ring = document.getElementById('spinRing');
+      const nameEl = document.getElementById('spinName');
+      if (!box || !ring) return;
+
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      let items = [], sig = '', N = 0, step = 0, angle = 0, vel = 0, R = 0;
+      let dragging = false, moved = false, lastX = 0, visible = true, shown = -1;
+      const panels = [];
+
+      function collect() {
+        const seen = new Set(), out = [];
+        document.querySelectorAll('#web-showcase .showcase-card').forEach(c => {
+          const img = c.querySelector('img');
+          const src = img ? img.getAttribute('src') : '';
+          const t = c.querySelector('.showcase-card-title');
+          const name = t ? t.textContent.trim() : '';
+          if (!src) return;
+          const key = name + '|' + src;
+          if (seen.has(key)) return;
+          seen.add(key);
+          out.push({ name, src, url: c.dataset.url || '' });
         });
+        return out;
+      }
+
+      function fallbackItems() {
+        return Object.values(FEATURED_FALLBACK || {}).map(p => ({
+          name: p.title, src: p.cover, url: '', slug: p.slug
+        }));
+      }
+
+      function layout() {
+        const w = box.clientWidth || 600;
+        const pw = Math.round(Math.min(340, Math.max(180, w * 0.42)));
+        const ph = Math.round(pw * 0.64);
+        box.style.setProperty('--pw', pw + 'px');
+        box.style.setProperty('--ph', ph + 'px');
+        box.style.height = Math.round(ph * 1.55) + 'px';
+        R = (pw / 2) / Math.tan(Math.PI / Math.max(N, 3)) * 1.06;
+        panels.forEach((el, i) => {
+          el.style.transform = 'rotateY(' + (i * step) + 'deg) translateZ(' + R.toFixed(1) + 'px)';
+        });
+        paint();
+      }
+
+      function build(list) {
+        ring.innerHTML = '';
+        panels.length = 0;
+        if (!list.length) { nameEl.textContent = ''; return; }
+        let all = list.slice();
+        while (all.length < 6) all = all.concat(list);
+        N = all.length; step = 360 / N;
+        all.forEach(p => {
+          const a = document.createElement('a');
+          a.className = 'sp';
+          a.tabIndex = -1;
+          a.draggable = false;
+          if (p.url) { a.href = p.url; a.target = '_blank'; a.rel = 'noopener'; }
+          else if (p.slug) { a.href = '/project-detail.html?slug=' + encodeURIComponent(p.slug); }
+          else { a.href = '/projects.html'; }
+          const img = document.createElement('img');
+          img.src = p.src; img.alt = p.name || 'Project'; img.draggable = false;
+          img.onerror = () => { img.style.display = 'none'; };
+          const label = document.createElement('span');
+          label.textContent = p.name || 'Project';
+          a.appendChild(img); a.appendChild(label);
+          a.dataset.name = p.name || '';
+          ring.appendChild(a);
+          panels.push(a);
+        });
+        shown = -1;
+        layout();
+      }
+
+      function paint() {
+        ring.style.transform = 'translateZ(' + (-R).toFixed(1) + 'px) rotateX(-8deg) rotateY(' + angle.toFixed(2) + 'deg)';
+        let best = 0, bestC = -2;
+        panels.forEach((el, i) => {
+          const c = Math.cos((i * step + angle) * Math.PI / 180);
+          el.style.opacity = c > 0 ? (0.3 + 0.7 * c).toFixed(3) : 0;
+          if (c > bestC) { bestC = c; best = i; }
+        });
+        if (best !== shown && panels[best]) { shown = best; nameEl.textContent = panels[best].dataset.name; }
+      }
+
+      let last = performance.now();
+      function tick(now) {
+        const dt = Math.min(64, now - last); last = now;
+        if (!dragging) {
+          vel *= 0.94;
+          const auto = reduce || !visible ? 0 : 7; // degrees per second
+          angle += (auto * dt / 1000) + vel;
+        }
+        if (panels.length) paint();
         requestAnimationFrame(tick);
       }
-      tick();
+      requestAnimationFrame(tick);
+
+      box.addEventListener('pointerdown', e => {
+        dragging = true; moved = false; lastX = e.clientX; vel = 0;
+        box.classList.add('drag');
+        try { box.setPointerCapture(e.pointerId); } catch (_) {}
+      });
+      box.addEventListener('pointermove', e => {
+        if (!dragging) return;
+        const dx = e.clientX - lastX; lastX = e.clientX;
+        if (Math.abs(dx) > 1) moved = true;
+        angle += dx * 0.35; vel = dx * 0.35;
+      });
+      function end() { dragging = false; box.classList.remove('drag'); }
+      box.addEventListener('pointerup', end);
+      box.addEventListener('pointercancel', end);
+      ring.addEventListener('click', e => { if (moved) { e.preventDefault(); moved = false; } });
+
+      if ('IntersectionObserver' in window) {
+        new IntersectionObserver(es => { visible = es[0].isIntersecting; }).observe(box);
+      }
+      window.addEventListener('resize', layout);
+
+      function refresh() {
+        const next = collect();
+        const s = next.map(p => p.name + '|' + p.src).join('~');
+        if (s === sig) return;
+        sig = s; items = next; build(items);
+      }
+      let t = 0;
+      const section = document.getElementById('web-showcase');
+      if (section) {
+        new MutationObserver(() => { clearTimeout(t); t = setTimeout(refresh, 150); })
+          .observe(section, { childList: true, subtree: true });
+      }
+      refresh();
+      // If nothing arrives from the dashboard data, show the featured case studies instead.
+      setTimeout(() => { if (!items.length) build(fallbackItems()); }, 5000);
     })();
+
   </script>
 </body>
 </html>

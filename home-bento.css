@@ -1,0 +1,73 @@
+/* =====================================================================
+   home-bento.css — homepage-only pieces of the Bento theme:
+   the hero tiles and the spinning project ring. The shared Bento
+   palette, cards and buttons now live in site.css for every page.
+   ===================================================================== */
+
+
+/* ---------- hero tiles ---------- */
+.bento #home-hero { min-height: 0; display: block; text-align: left; padding: 104px 0 24px; overflow: visible; }
+.bento-grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 16px; }
+.bt { position: relative; min-width: 0; overflow: hidden; background: var(--bg2); border-radius: 28px; padding: 32px; }
+.bt-intro { grid-column: span 8; padding: 44px; }
+.bt-photo { grid-column: span 4; grid-row: span 2; padding: 0; background: var(--bg4); min-height: 360px; }
+.bt-photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.bt-photo .chip { position: absolute; left: 16px; bottom: 16px; background: var(--bg2); color: var(--text); font-size: 13px; font-weight: 700; padding: 8px 14px; border-radius: 999px; }
+.bt-spin { grid-column: span 8; padding: 24px 24px 20px; }
+.bt-cv, .bt-years, .bt-acc { grid-column: span 4; display: flex; flex-direction: column; justify-content: space-between; gap: 18px; min-height: 150px; }
+.bt-years { background: var(--tile-dark); color: #fff; }
+.bt-years .bn { font-size: clamp(44px, 5vw, 64px); font-weight: 800; letter-spacing: -0.04em; line-height: 1; }
+.bt-years span, .bt-acc span, .bt-cv span { font-size: 14px; opacity: 0.8; }
+.bt-acc { background: var(--red); color: #fff; }
+.bt-acc strong, .bt-cv strong { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.15; }
+.bt-cv { color: var(--text); transition: transform .25s; }
+.bt-acc { transition: transform .25s; }
+.bt-cv:hover, .bt-acc:hover { transform: translateY(-3px); }
+
+.pill { display: inline-flex; align-items: center; gap: 8px; background: var(--tint); color: var(--red-dark); font-size: 13px; font-weight: 700; padding: 8px 14px; border-radius: 999px; margin-bottom: 22px; }
+.pill i { width: 7px; height: 7px; border-radius: 50%; background: var(--red); }
+.bento .hero-name { font-size: 15px; color: var(--text-muted); font-weight: 600; margin-bottom: 10px; }
+.bento .hero-name span { color: var(--red); font-weight: 800; }
+.bento .hero-title { font-size: clamp(34px, 5vw, 62px); font-weight: 800; line-height: 1.05; letter-spacing: -0.035em; margin-bottom: 20px; }
+.bento .hero-title .dev { display: block; color: var(--red); background: none; -webkit-text-fill-color: currentColor; }
+.bento .hero-title .amp { color: var(--text-dim); font-weight: 500; font-size: 0.55em; font-style: normal; margin: 0 6px; }
+.rotating-words { display: inline-block; position: relative; color: var(--text); vertical-align: baseline; }
+.rotating-words .word { display: inline-block; opacity: 0; transform: translateY(14px); filter: none; transition: opacity .25s ease, transform .35s cubic-bezier(.4,0,.2,1); position: absolute; left: 0; top: 0; white-space: nowrap; }
+.rotating-words .word.active { opacity: 1; transform: none; position: relative; }
+.bento .hero-tagline { font-size: 16px; color: var(--text-muted); line-height: 1.7; max-width: 560px; margin: 0 0 26px; }
+.bento .hero-btns { display: flex; flex-wrap: wrap; gap: 12px; justify-content: flex-start; }
+
+/* ---------- the spinner ---------- */
+.bt-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 4px; }
+.bt-head .section-label { margin: 0; }
+.bt-link { font-size: 13px; font-weight: 700; color: var(--red); }
+.spin { position: relative; perspective: 1100px; overflow: hidden; height: 300px; cursor: grab; touch-action: pan-y; user-select: none; -webkit-user-select: none; }
+.spin.drag { cursor: grabbing; }
+.spin-ring { position: absolute; inset: 0; transform-style: preserve-3d; }
+.sp { position: absolute; left: 50%; top: 50%; width: var(--pw, 260px); height: var(--ph, 166px); margin: calc(var(--ph, 166px) / -2) 0 0 calc(var(--pw, 260px) / -2); border-radius: 18px; overflow: hidden; backface-visibility: hidden; background: var(--bg4); box-shadow: var(--shadow); display: block; will-change: opacity; }
+.sp img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; -webkit-user-drag: none; }
+.sp span { position: absolute; left: 10px; bottom: 10px; max-width: calc(100% - 20px); background: var(--bg2); color: var(--text); font: 700 11px/1 var(--font-body); padding: 7px 11px; border-radius: 999px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.spin-name { margin: 6px 0 0; text-align: center; font-size: 14px; font-weight: 700; color: var(--text); min-height: 22px; }
+
+
+/* ---------- home call-to-action as a dark tile ---------- */
+.bento .cta-wrap { background: var(--tile-dark); color: #fff; padding: 56px 32px; border-radius: 28px; }
+.bento .cta-wrap .cta-desc { color: var(--on-tile-muted); }
+.bento .cta-wrap .btn-outline { color: #fff; border-color: var(--on-tile-muted); }
+.bento #web-showcase { display: none; }
+
+/* ---------- phones ---------- */
+@media (max-width: 900px) {
+  .bento #home-hero { padding: 88px 0 16px; }
+  .bento-grid { grid-template-columns: minmax(0, 1fr); }
+  .bt-intro, .bt-photo, .bt-spin, .bt-cv, .bt-years, .bt-acc { grid-column: auto; grid-row: auto; }
+  .bt-intro { padding: 28px; }
+  .bt-photo { min-height: 320px; }
+  .bt-cv, .bt-years, .bt-acc { min-height: 120px; }
+  .bt { padding: 24px; }
+  .bt-spin { padding: 18px 12px 16px; }
+  .spin { height: 250px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rotating-words .word { transition: none; }
+}
