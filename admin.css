@@ -8,24 +8,24 @@
    ===================================================================== */
 
 :root {
-  --akay-red:        #5b3df5;
-  --akay-red-dark:   #4a2fe0;
-  --akay-red-glow:   rgba(91, 61, 245, .15);
-  --akay-bg:         #f2f1f7;
+  --akay-red:        #0a2a6e;
+  --akay-red-dark:   #071d52;
+  --akay-red-glow:   rgba(10, 42, 110, .15);
+  --akay-bg:         #f4f6fb;
   --akay-bg-1:       #ffffff;
   --akay-bg-2:       #ffffff;
-  --akay-bg-3:       #f6f5fb;
-  --akay-bg-4:       #ece8ff;
-  --akay-text:       #16151d;
-  --akay-text-mute:  #55536a;
-  --akay-text-dim:   #6b6985;
-  --akay-border:     #dcdae8;
-  --akay-border-2:   #c9c6dc;
+  --akay-bg-3:       #f6f8fd;
+  --akay-bg-4:       #e7eefb;
+  --akay-text:       #06080f;
+  --akay-text-mute:  #3d4558;
+  --akay-text-dim:   #59617a;
+  --akay-border:     #d9e0ee;
+  --akay-border-2:   #c3cde2;
   --akay-ok:         #15803d;
   --akay-warn:       #b45309;
   --akay-err:        #d92d20;
   --akay-radius:     16px;
-  --akay-shadow:     0 22px 44px -22px rgba(40,30,110,.35);
+  --akay-shadow:     0 22px 44px -22px rgba(5,15,50,.35);
   --akay-font:       'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
 }
 
@@ -164,7 +164,7 @@ body.akay-edit-mode #akayToolbar {
 
 /* ===== edit-mode text slots ========================================= */
 body.akay-edit-mode [data-text-slot] {
-  outline: 1px dashed rgba(91, 61, 245, .35);
+  outline: 1px dashed rgba(10, 42, 110, .35);
   outline-offset: 3px;
   cursor: text;
   border-radius: 2px;
@@ -172,16 +172,16 @@ body.akay-edit-mode [data-text-slot] {
 }
 body.akay-edit-mode [data-text-slot]:hover {
   outline-color: var(--akay-red);
-  background: rgba(91, 61, 245, .04);
+  background: rgba(10, 42, 110, .04);
 }
 body.akay-edit-mode [data-text-slot]:focus {
   outline: 2px solid var(--akay-red);
-  background: rgba(91, 61, 245, .08);
+  background: rgba(10, 42, 110, .08);
 }
 
 /* ===== edit-mode image overlays ===================================== */
 body.akay-edit-mode [data-img-slot] {
-  outline: 2px dashed rgba(91, 61, 245, .45);
+  outline: 2px dashed rgba(10, 42, 110, .45);
   outline-offset: 2px;
 }
 
@@ -227,7 +227,7 @@ body.akay-edit-mode [data-img-slot]:hover ~ .akay-img-overlay,
   bottom: 28px;
   left: 50%;
   transform: translateX(-50%) translateY(20px);
-  background: #16151d;
+  background: #06080f;
   color: #fff;
   font: 500 13px/1.3 var(--akay-font);
   padding: 11px 18px;

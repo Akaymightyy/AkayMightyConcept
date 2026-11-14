@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
   <title>Article — Akay Mighty Concept</title>
   <meta name="description" content="A full article from Awwal Abdulhakeem — practical insights on web design, branding, and print from 8+ years of client work." />
-  <meta name="theme-color" content="#f2f1f7" />
+  <meta name="theme-color" content="#f4f6fb" />
 
   <meta property="og:type" content="article" />
   <meta property="og:title" content="Article — Akay Mighty Concept" />
@@ -20,7 +20,7 @@
   <style>
     /* Page-specific styles for a blog article */
     .blog-article { padding: 140px 0 80px; }
-    .bp-back { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-muted); margin-bottom: 24px; transition: color 0.2s; }
+    .bp-back { display: inline-flex; align-items: center; gap: 8px; font-size:15px; color: var(--text-muted); margin-bottom: 24px; transition: color 0.2s; }
     .bp-back:hover { color: var(--red); }
 
     .bp-loading { padding: 200px 0; text-align: center; color: var(--text-muted); }
@@ -30,19 +30,19 @@
     .bp-container { max-width: 760px; margin: 0 auto; }
     .bp-cover { width: 100%; aspect-ratio: 21/9; object-fit: cover; border-radius: var(--radius-lg); margin-bottom: 36px; border: 1px solid var(--border); }
     .bp-meta { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; }
-    .bp-cat { padding: 5px 12px; border-radius: 50px; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; background: rgba(91,61,245,0.15); border: 1px solid var(--border-red); color: var(--red); }
-    .bp-date { font-size: 13px; color: var(--text-muted); }
-    .bp-author { font-size: 13px; color: var(--text); }
+    .bp-cat { padding: 5px 12px; border-radius: 50px; font-size:12px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; background: rgba(10,42,110,0.15); border: 1px solid var(--border-red); color: var(--red); }
+    .bp-date { font-size:15px; color: var(--text-muted); }
+    .bp-author { font-size:15px; color: var(--text); }
     .bp-author span { color: var(--text-muted); }
     .bp-title { font-family: var(--font-heading); font-size: clamp(28px, 4.5vw, 44px); font-weight: 900; line-height: 1.15; margin-bottom: 18px; letter-spacing: -1px; }
-    .bp-excerpt { font-size: 18px; color: var(--text-muted); line-height: 1.6; margin-bottom: 40px; padding-bottom: 32px; border-bottom: 1px solid var(--border); font-style: italic; }
+    .bp-excerpt { font-size:18px; color: var(--text-muted); line-height: 1.6; margin-bottom: 40px; padding-bottom: 32px; border-bottom: 1px solid var(--border); font-style: italic; }
 
     /* Article content typography */
-    .bp-content { font-family: var(--font-body); font-size: 16px; line-height: 1.85; color: var(--text); }
+    .bp-content { font-family: var(--font-body); font-size:18px; line-height: 1.85; color: var(--text); }
     .bp-content > *:first-child { margin-top: 0; }
     .bp-content p { margin: 0 0 22px; color: var(--text); }
-    .bp-content h2 { font-family: var(--font-heading); font-size: 26px; font-weight: 800; margin: 36px 0 16px; letter-spacing: -0.5px; color: var(--text); }
-    .bp-content h3 { font-family: var(--font-heading); font-size: 19px; font-weight: 700; margin: 28px 0 12px; color: var(--text); }
+    .bp-content h2 { font-family: var(--font-heading); font-size:26px; font-weight: 800; margin: 36px 0 16px; letter-spacing: -0.5px; color: var(--text); }
+    .bp-content h3 { font-family: var(--font-heading); font-size:19px; font-weight: 700; margin: 28px 0 12px; color: var(--text); }
     .bp-content a { color: var(--red); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; transition: color 0.2s; }
     .bp-content a:hover { color: var(--red-bright); }
     .bp-content strong { color: var(--text); font-weight: 700; }
@@ -50,22 +50,22 @@
     .bp-content ul, .bp-content ol { margin: 0 0 22px; padding-left: 24px; }
     .bp-content li { margin-bottom: 8px; }
     .bp-content blockquote { border-left: 3px solid var(--red); padding: 8px 0 8px 20px; margin: 0 0 22px; color: var(--text-muted); font-style: italic; }
-    .bp-content code { background: var(--bg3); border: 1px solid var(--border); border-radius: 4px; padding: 2px 6px; font-family: 'SFMono-Regular', Menlo, monospace; font-size: 13px; color: var(--red-bright); }
+    .bp-content code { background: var(--bg3); border: 1px solid var(--border); border-radius: 4px; padding: 2px 6px; font-family: 'SFMono-Regular', Menlo, monospace; font-size:15px; color: var(--red-bright); }
 
     .bp-tags { display: flex; flex-wrap: wrap; gap: 8px; margin: 40px 0; padding-top: 28px; border-top: 1px solid var(--border); }
-    .bp-tag { padding: 6px 14px; border-radius: 50px; background: var(--bg3); border: 1px solid var(--border); font-size: 12px; font-weight: 600; color: var(--text-muted); }
+    .bp-tag { padding: 6px 14px; border-radius: 50px; background: var(--bg3); border: 1px solid var(--border); font-size:14px; font-weight: 600; color: var(--text-muted); }
 
     .bp-next { padding: 28px; background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-lg); display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap; margin-top: 40px; }
-    .bp-next-label { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px; }
-    .bp-next-title { font-family: var(--font-heading); font-size: 18px; font-weight: 800; color: var(--text); }
-    .bp-next a { color: var(--red); font-weight: 600; font-size: 14px; display: inline-flex; align-items: center; gap: 8px; transition: gap 0.2s; }
+    .bp-next-label { font-size:13px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px; }
+    .bp-next-title { font-family: var(--font-heading); font-size:18px; font-weight: 800; color: var(--text); }
+    .bp-next a { color: var(--red); font-weight: 600; font-size:16px; display: inline-flex; align-items: center; gap: 8px; transition: gap 0.2s; }
     .bp-next a:hover { gap: 12px; }
 
     @media (max-width: 640px) {
       .blog-article { padding: 110px 0 60px; }
       .bp-cover { aspect-ratio: 16/9; }
-      .bp-content { font-size: 15px; }
-      .bp-content h2 { font-size: 22px; }
+      .bp-content { font-size:17px; }
+      .bp-content h2 { font-size:22px; }
     }
   </style>
 </head>
