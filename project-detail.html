@@ -77,7 +77,9 @@
     initLayout('projects', { skip: ['./projects-renderer.js'] });
 
     import { db, doc, onSnapshot } from './firebase-config.js';
-    import { FEATURED_FALLBACK } from './site-config.js';
+    import { PROJECT_CASE_STUDIES } from './site-config.js';
+    // every static case study, keyed by slug, so all 18 open even without Firestore
+    const FEATURED_FALLBACK = (PROJECT_CASE_STUDIES || []).reduce((a, p) => { a[p.slug] = p; return a; }, {});
 
     function getSlug() {
       const params = new URLSearchParams(window.location.search);
