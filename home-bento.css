@@ -105,3 +105,24 @@
   #home-spin { padding-bottom: 32px; }
 }
 .bento .cta-wrap .cta-title span { color: #8fb0f5; }
+
+
+/* ---------- yuyu-style centered hero, white edition ---------- */
+.bento #home-hero.yh { padding: 96px 0 0; min-height: 0; display: block; text-align: center; overflow: hidden;
+  background: radial-gradient(ellipse 60% 45% at 50% 62%, rgba(10,42,110,.16), transparent 70%), #fff; }
+.yh-in { max-width: 920px; margin: 0 auto; padding: 0 20px; display: flex; flex-direction: column; align-items: center; }
+.yh-pill { display: inline-block; font: 600 18px/1 'Poppins',sans-serif; color: var(--text); padding: 16px 28px; border: 2px solid var(--red); border-radius: 22px; background: #fff; margin-bottom: 28px; box-shadow: 0 10px 30px -14px rgba(10,42,110,.5); }
+.yh-title { font-family: 'Poppins',sans-serif; font-weight: 800; font-size: clamp(46px, 11.5vw, 104px); line-height: 1.05; letter-spacing: -0.035em; color: var(--text); margin: 0; }
+.yh-title > span { display: block; }
+.yh-title .rotating-words { display: block; position: relative; height: 1.12em; color: transparent; }
+.yh-title .rotating-words .word { position: absolute; left: 0; right: 0; top: 0; text-align: center; background: linear-gradient(90deg, #0a2a6e, #2b6cff); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; opacity: 0; transform: translateY(16px); transition: opacity .3s ease, transform .4s cubic-bezier(.4,0,.2,1); }
+.yh-title .rotating-words .word.active { opacity: 1; transform: none; position: absolute; }
+.yh-photo { width: min(100%, 520px); height: clamp(340px, 62vw, 520px); margin-top: 8px; overflow: hidden; position: relative; }
+.yh-photo img { width: 100%; height: 100%; object-fit: cover; object-position: top center; display: block; filter: drop-shadow(0 18px 34px rgba(10,42,110,.35)); }
+.yh-cta { position: relative; z-index: 2; margin-top: -36px; width: min(100%, 760px); display: flex; align-items: center; justify-content: center; gap: 14px; padding: 26px 24px; border-radius: 999px; font: 700 clamp(18px,2.6vw,24px)/1 'Poppins',sans-serif; letter-spacing: .12em; color: #fff; background: linear-gradient(90deg, #04133a, #0a2a6e 55%, #1d4fc4); box-shadow: 0 24px 50px -16px rgba(10,42,110,.7); transition: transform .2s; }
+.yh-cta:hover { transform: translateY(-3px); }
+.yh-cta i { font-style: normal; }
+.yh-tag { max-width: 700px; margin: 36px 0 18px; font-size: 20px; line-height: 1.7; color: var(--text-muted); }
+.yh-links { display: flex; gap: 22px; flex-wrap: wrap; justify-content: center; padding-bottom: 36px; }
+.yh-links a { font: 700 17px/1 'Poppins',sans-serif; color: var(--red); }
+@media (prefers-reduced-motion: reduce) { .yh-title .rotating-words .word { transition: none; } }

@@ -108,34 +108,27 @@
 </head>
 <body class="bento">
 
-  <!-- ============ HERO (bento) ============ -->
-  <section id="home-hero">
-    <div class="container">
-      <div class="bento-grid">
-
-        <div class="bt bt-intro">
-          <p class="hero-name">Hi, I'm <span>Awwal Abdulhakeem</span></p>
-          <h1 class="hero-title">
-            I'm a <span class="dev">Website Developer</span>
-            <span class="amp">&amp;</span>
-            <span class="rotating-words" id="rotatingWords"><span class="word active">Graphics Designer</span><span class="word">Brand Strategist</span><span class="word">UI/UX Designer</span><span class="word">Digital Printer</span><span class="word">Creative Director</span></span>
-          </h1>
-          <p class="hero-tagline">I design and build websites that turn visitors into customers &mdash; plus branding, flyers, and print that make your business unforgettable.</p>
-          <div class="hero-btns">
-            <a href="/start-a-project.html" class="btn btn-primary">Start a Project</a>
-            <a href="/projects.html" class="btn btn-outline">View My Work</a>
-          </div>
-        </div>
-
-        <div class="bt bt-photo">
-          <img src="./akay-headshot.png" alt="Awwal Abdulhakeem &mdash; Website Developer &amp; Graphics Designer" data-img-slot="img:headshot">
-          <span class="chip">8+ years experience</span>
-        </div>
-
-
-
+  <!-- ============ HERO (centered, white) ============ -->
+  <section id="home-hero" class="yh">
+    <div class="yh-in">
+      <span class="yh-pill">Hey! I'm Awwal &#128075;&#127999;</span>
+      <h1 class="yh-title">
+        <span>Let's create</span>
+        <span class="rotating-words" id="rotatingWords"><span class="word active">Websites</span></span>
+        <span>together</span>
+      </h1>
+      <div class="yh-photo">
+        <img src="./akay-headshot.png" alt="Awwal Abdulhakeem &mdash; Website Developer &amp; Graphics Designer" data-img-slot="img:headshot">
       </div>
+      <a href="/start-a-project.html" class="yh-cta">LET'S WORK <i>&rarr;</i></a>
+      <p class="yh-tag">Website developer &amp; graphics designer in Kaduna, using design, code and print to turn visitors into customers for businesses across Nigeria and beyond.</p>
+      <div class="yh-links"><a href="/projects.html">View my work &rarr;</a><a href="/Akay-CV.jpg" download>Download CV</a></div>
     </div>
+  </section>
+
+  <!-- ============ TECH STACK MARQUEE ============ -->
+  <section class="stack-carousel" aria-label="Tools I use">
+    <div class="stack-track" id="stackTrack"></div>
   </section>
 
   <!-- ============ MY PROJECTS (spinner) ============ -->
@@ -155,11 +148,6 @@
         </div>
       </div>
     </div>
-  </section>
-
-  <!-- ============ TECH STACK MARQUEE ============ -->
-  <section class="stack-carousel" aria-label="Tools I use">
-    <div class="stack-track" id="stackTrack"></div>
   </section>
 
   <!-- ============ RECENT WEB WORK — AUTO-SCROLL SHOWCASE ============ -->
@@ -525,7 +513,7 @@
 
     // ---- Rotating words in the hero ----
     (function() {
-      const words = ['Graphics Designer', 'UI/UX Designer', 'Brand Designer', 'Digital Printer', 'Web Designer'];
+      const words = ['Websites', 'Brands', 'Flyers', 'Web Apps', 'Logos'];
       const container = document.getElementById('rotatingWords');
       if (!container) return;
       let i = 0;
